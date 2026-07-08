@@ -1,0 +1,45 @@
+{
+  "sourceKey": "PAYCHEX",
+  "reports": ["ELECTIONS", "LOAN_HEADER", "LOAN_SOURCE"],
+  "grouped": {
+    "ELECTIONS": [["111-22-3333", "AA", "E", "6", "2024-01-01"]],
+    "LOAN_HEADER": [["111-22-3333", "1", "001", "1000", "750", "2023-01-01", "6.25", "BIWEEKLY", "ACTIVE", "50", "2024-02-01", "2024-01-15"]],
+    "LOAN_SOURCE": [["111-22-3333", "E", "750", "-50", "2024-01-01"]]
+  },
+  "layoutsByReport": {
+    "ELECTIONS": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Fund Code", "type": "text" },
+      { "header": "Source Code", "type": "text" },
+      { "header": "Percent", "type": "decimal" },
+      { "header": "As Of Date", "type": "date" }
+    ],
+    "LOAN_HEADER": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Loan Number", "type": "text" },
+      { "header": "Loan Payroll Number Code", "type": "text" },
+      { "header": "Loan Amount", "type": "decimal" },
+      { "header": "Loan Balance", "type": "decimal" },
+      { "header": "Issuance Date", "type": "date" },
+      { "header": "Interest Rate", "type": "decimal" },
+      { "header": "Payment Frequency", "type": "text" },
+      { "header": "Loan Status", "type": "text" },
+      { "header": "Next Payment Amount", "type": "decimal" },
+      { "header": "Next Payment Date", "type": "date" },
+      { "header": "Last Payment Date", "type": "date" }
+    ],
+    "LOAN_SOURCE": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Source Code", "type": "text" },
+      { "header": "Current Balance", "type": "decimal" },
+      { "header": "Loans Activity", "type": "decimal" },
+      { "header": "As Of Date", "type": "date" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Loan Header", "Loan Source"],
+  "unexpectedTabs": ["Roth Basis"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["Source Code", "Percent"] },
+    { "sheetNumber": 4, "tab": "Loan Source", "includes": ["Current Balance", "Loans Activity"], "excludes": ["Loan ID"] }
+  ]
+}

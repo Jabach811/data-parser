@@ -1,0 +1,52 @@
+{
+  "sourceKey": "NEWPORT",
+  "reports": ["PR", "PT", "LN", "LD"],
+  "grouped": {
+    "PR": [["111223333", "5.5", "0", "100", "0", "6", "125"]],
+    "PT": [["111223333", "2023-01-01", "200", "2023-12-31", "180"]],
+    "LN": [["111223333", "L0001", "950", "2023-02-01", "1000", "50", "5.25", "M", "N", "2024-01-01"]],
+    "LD": [["111223333", "L0001", "ER", "600"], ["111223333", "L0001", "EE", "350"]]
+  },
+  "layoutsByReport": {
+    "PR": [
+      { "header": "PART-TAX-ID", "type": "text" },
+      { "header": "INI-PRE-TAX-ERL", "type": "decimal" },
+      { "header": "INI-PST-TAX-ERL", "type": "decimal" },
+      { "header": "INI-PRE-TAX-AT", "type": "decimal" },
+      { "header": "INI-PST-TAX-AT", "type": "decimal" },
+      { "header": "ROTH-EDFR-ERL-RT", "type": "decimal" },
+      { "header": "ROTH-EDFR-ERL-AT", "type": "decimal" }
+    ],
+    "PT": [
+      { "header": "PART-TAX-ID", "type": "text" },
+      { "header": "PLN-MT-FIR-CNB-DT", "type": "date" },
+      { "header": "PYTD-ROTH-ELECTIVE-DEFERRAL-AT", "type": "decimal" },
+      { "header": "PYTD-ROTH-EDFR-DT", "type": "date" },
+      { "header": "ROTH-BASIS-AT", "type": "decimal" }
+    ],
+    "LN": [
+      { "header": "PART-TAX-ID", "type": "text" },
+      { "header": "PART-LOAN-EXTL-ID", "type": "text" },
+      { "header": "LOAN-OUTSTAND-AMT", "type": "decimal" },
+      { "header": "LOAN-START-DTE", "type": "date" },
+      { "header": "ORIGINAL-LOAN-AMT", "type": "decimal" },
+      { "header": "SKED-LN-RPYMNT-AMT", "type": "decimal" },
+      { "header": "LOAN-ANNL-INT-RTE", "type": "decimal" },
+      { "header": "LOAN-PYMT-FREQ-CDE", "type": "text" },
+      { "header": "LOAN-DEEM-STAT-CDE", "type": "text" },
+      { "header": "LST-LOAN-PYMNT-DTE", "type": "date" }
+    ],
+    "LD": [
+      { "header": "PART-TAX-ID", "type": "text" },
+      { "header": "PART-LOAN-EXTL-ID", "type": "text" },
+      { "header": "CONTR-MONEY-TY-CDE", "type": "text" },
+      { "header": "LOAN-OUTSTAND-AMT", "type": "decimal" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Roth Basis", "Loan Header", "Loan Source"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["INI-PRE-TAX-ERL", "ROTH-EDFR-ERL-AT"] },
+    { "sheetNumber": 3, "tab": "Roth Basis", "includes": ["PLN-MT-FIR-CNB-DT", "ROTH-BASIS-AT"] },
+    { "sheetNumber": 5, "tab": "Loan Source", "includes": ["CONTR-MONEY-TY-CDE", "LOAN-OUTSTAND-AMT"], "excludes": ["Loan ID"], "indexValue": 1, "indexCount": 2 }
+  ]
+}

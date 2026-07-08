@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock 02 — Framer Canvas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mona+Sans:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ---------- Framer tokens ---------- */
+  --primary:#ffffff;
+  --on-primary:#000000;
+  --accent-blue:#0099ff;
+  --ink:#ffffff;
+  --ink-muted:#999999;
+  --canvas:#090909;
+  --surface-1:#141414;
+  --surface-2:#1c1c1c;
+  --hairline:#262626;
+  --hairline-soft:#1a1a1a;
+  --gradient-magenta:#d44df0;
+  --gradient-violet:#6a4cf5;
+  --gradient-orange:#ff7a3d;
+  --gradient-coral:#ff5577;
+  --success:#22c55e;
+  --warn:#ff5577;
+
+  /* radii */
+  --r-xs:4px; --r-sm:6px; --r-md:10px; --r-lg:15px;
+  --r-xl:20px; --r-xxl:30px; --r-pill:100px;
+
+  /* spacing */
+  --s-xxs:4px; --s-xs:8px; --s-sm:12px; --s-md:15px;
+  --s-lg:20px; --s-xl:30px; --s-xxl:40px; --s-section:96px;
+
+  --font-display:"Mona Sans","GT Walsheim","Inter Variable",sans-serif;
+  --font-body:"Inter","Inter Variable","Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--canvas);color:var(--ink);
+  font-family:var(--font-body);
+  font-size:17px;line-height:1.4;letter-spacing:-0.15px;
+  font-feature-settings:"cv01","cv05","cv09","cv11","ss03","ss07","dlig";
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+::selection{background:rgba(0,153,255,.35);color:#fff}
+a{color:var(--accent-blue);text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+
+/* ============ TOP NAV ============ */
+.topnav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(9,9,9,.78);backdrop-filter:blur(14px) saturate(160%);
+  border-bottom:1px solid var(--hairline-soft);
+  height:64px;display:flex;align-items:center;
+}
+.nav-inner{
+  width:100%;max-width:1280px;margin:0 auto;padding:0 var(--s-xl);
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s-xl);
+}
+.wordmark{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:-0.6px;
+}
+.mark{
+  width:28px;height:28px;border-radius:var(--r-sm);
+  background:var(--ink);color:var(--on-primary);
+  display:grid;place-items:center;font:600 13px/1 var(--font-display);letter-spacing:-0.4px;
+}
+.nav-steps{
+  display:flex;justify-content:center;gap:6px;
+  font-size:15px;font-weight:500;letter-spacing:-0.14px;
+}
+.nav-steps .pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:var(--r-pill);
+  color:var(--ink-muted);transition:background .15s,color .15s;
+}
+.nav-steps .pill.active{background:var(--surface-2);color:var(--ink)}
+.nav-steps .pill .num{font-variant-numeric:tabular-nums;color:var(--ink-muted);font-size:13px}
+.nav-steps .pill.active .num{color:var(--ink)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.status{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 14px;border-radius:var(--r-pill);
+  background:var(--surface-1);color:var(--ink-muted);
+  font-size:15px;font-weight:500;letter-spacing:-0.14px;
+}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-muted)}
+.status.ready .dot{background:var(--success);box-shadow:0 0 0 0 rgba(34,197,94,.4);animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.btn-primary{
+  background:var(--primary);color:var(--on-primary);
+  padding:11px 18px;border-radius:var(--r-pill);
+  font-size:15px;font-weight:500;letter-spacing:-0.14px;
+  transition:transform .12s ease, opacity .15s;
+}
+.btn-primary:hover{transform:scale(.97)}
+.btn-primary[disabled]{opacity:.4;cursor:not-allowed}
+.btn-primary[disabled]:hover{transform:none}
+
+/* ============ PAGE ============ */
+.page{max-width:1280px;margin:0 auto;padding:60px var(--s-xl) 120px}
+
+/* ============ HERO BAND ============ */
+.hero{
+  display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:center;
+  margin-bottom:32px;
+}
+.eyebrow{
+  font-size:14px;font-weight:500;letter-spacing:-0.13px;
+  color:var(--accent-blue);margin-bottom:8px;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:18px;height:1px;background:var(--accent-blue)}
+.hero h1{
+  font-family:var(--font-display);font-weight:500;
+  font-size:clamp(22px,2.2vw,30px);line-height:1.02;
+  letter-spacing:-0.04em;white-space:nowrap;
+  margin:0;color:var(--ink);
+}
+.hero h1 em{font-style:normal;color:var(--ink-muted)}
+.hero-side{padding:0}
+.hero-side p{
+  font-size:17px;line-height:1.4;letter-spacing:-0.16px;
+  color:var(--ink-muted);max-width:54ch;margin:0 0 12px;
+}
+.hero-meta{
+  display:flex;gap:24px;font-size:14px;color:var(--ink-muted);
+  letter-spacing:-0.13px;font-weight:500;
+  padding-top:12px;border-top:1px solid var(--hairline);
+}
+.hero-meta strong{color:var(--ink);font-weight:500;display:inline;font-size:14px;margin-right:6px}
+
+/* ============ SECTION HEAD ============ */
+.section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+  margin-bottom:24px;
+}
+.section-num{
+  font-size:15px;font-weight:500;letter-spacing:-0.14px;
+  color:var(--ink-muted);font-variant-numeric:tabular-nums;
+  display:flex;align-items:center;gap:10px;
+}
+.section-num::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent-blue)}
+.section-head h2{
+  font-family:var(--font-display);font-weight:500;
+  font-size:48px;line-height:1.0;letter-spacing:-2.2px;
+  margin:0;color:var(--ink);
+}
+.section-sub{
+  font-size:17px;color:var(--ink-muted);letter-spacing:-0.17px;line-height:1.4;
+  max-width:40ch;text-align:right;margin:0;
+}
+
+/* ============ STEP 1 CARD ============ */
+.step{margin-bottom:80px}
+
+.setup-card{
+  background:var(--surface-1);border-radius:var(--r-xl);
+  padding:36px 36px 32px;border:1px solid var(--hairline-soft);
+}
+.setup-grid{
+  display:grid;grid-template-columns: 1.4fr 1fr 1.3fr; gap:24px;
+}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{
+  font-size:14px;font-weight:500;letter-spacing:-0.13px;color:var(--ink-muted);
+  text-transform:none;
+}
+.field input, .field select{
+  background:var(--surface-2);color:var(--ink);
+  border:1px solid transparent;border-radius:var(--r-md);
+  padding:13px 16px;font:inherit;font-size:16px;
+  letter-spacing:-0.15px;
+  transition:box-shadow .15s, border-color .15s;
+}
+.field input::placeholder{color:#5a5a5a}
+.field input:focus, .field select:focus{
+  outline:none;
+  box-shadow:0 0 0 1px rgba(0,153,255,.4), 0 0 0 4px rgba(0,153,255,.12);
+}
+.field select{appearance:none;background-image:
+  linear-gradient(45deg,transparent 50%,var(--ink-muted) 50%),
+  linear-gradient(135deg,var(--ink-muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 18px, calc(100% - 13px) 18px;
+  background-size:5px 5px, 5px 5px;background-repeat:no-repeat;
+  padding-right:36px;
+}
+
+.file-row{
+  margin-top:28px;padding-top:28px;border-top:1px solid var(--hairline);
+  display:grid;grid-template-columns: 1fr auto; gap:24px;align-items:center;
+}
+.file-pick{
+  display:flex;align-items:center;gap:16px;
+}
+.file-icon{
+  width:46px;height:46px;border-radius:var(--r-md);
+  background:var(--surface-2);display:grid;place-items:center;color:var(--ink-muted);
+  flex:0 0 auto;
+}
+.file-meta{display:flex;flex-direction:column;gap:2px}
+.file-meta strong{font-size:17px;font-weight:500;letter-spacing:-0.16px;color:var(--ink)}
+.file-meta span{font-size:15px;color:var(--ink-muted);letter-spacing:-0.14px}
+
+.load-actions{display:flex;align-items:center;gap:12px}
+.btn-secondary{
+  background:var(--surface-2);color:var(--ink);
+  padding:11px 18px;border-radius:var(--r-pill);
+  font-size:15px;font-weight:500;letter-spacing:-0.14px;
+  transition:background .15s;
+}
+.btn-secondary:hover{background:#222}
+
+.progress-row{
+  margin-top:24px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+}
+.progress-label{font-size:14px;font-weight:500;color:var(--ink-muted);letter-spacing:-0.13px}
+.progress-track{height:4px;background:var(--surface-2);border-radius:var(--r-pill);overflow:hidden}
+.progress-fill{height:100%;width:0%;background:var(--ink);border-radius:var(--r-pill);transition:width .4s}
+.progress-pct{font-size:14px;font-weight:500;color:var(--ink-muted);letter-spacing:-0.13px;min-width:42px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ============ STEP 2 — KPI + SPOTLIGHT ============ */
+.kpi-grid{
+  display:grid;
+  grid-template-columns: 1.45fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "spotlight participants total"
+    "spotlight accepted    discarded";
+  gap:16px;
+  margin-bottom:24px;
+}
+.kpi{
+  background:var(--surface-1);border-radius:var(--r-xl);
+  padding:24px;display:flex;flex-direction:column;justify-content:space-between;
+  min-height:140px;border:1px solid var(--hairline-soft);
+}
+.kpi .k-label{
+  font-size:14px;font-weight:500;color:var(--ink-muted);letter-spacing:-0.13px;
+}
+.kpi .k-value{
+  font-family:var(--font-display);font-weight:500;
+  font-size:46px;line-height:1.0;letter-spacing:-2.0px;color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.kpi .k-sub{font-size:14px;color:var(--ink-muted);letter-spacing:-0.13px;margin-top:6px}
+.kpi.warn .k-value{color:var(--warn)}
+
+.kpi.spotlight{
+  grid-area:spotlight;border-radius:var(--r-xxl);
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(212,77,240,.55), transparent 55%),
+    radial-gradient(110% 90% at 0% 100%, rgba(255,122,61,.45), transparent 60%),
+    linear-gradient(135deg, var(--gradient-violet) 0%, #4a2bd6 60%, #2a1a8a 100%);
+  border:0;padding:32px;
+  position:relative;overflow:hidden;
+  min-height:auto;
+}
+.kpi.spotlight::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(80% 60% at 50% 120%, rgba(0,0,0,.4), transparent 60%);
+  pointer-events:none;
+}
+.kpi.spotlight .k-label{color:rgba(255,255,255,.78)}
+.kpi.spotlight .k-sub{color:rgba(255,255,255,.7)}
+.kpi.spotlight .k-value{
+  font-size:96px;line-height:.9;letter-spacing:-4.6px;color:#fff;
+}
+.spotlight-head{
+  position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;
+}
+.spotlight-tag{
+  font-size:13px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;
+  padding:7px 12px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(6px);
+}
+.spotlight-foot{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.spotlight-foot .k-sub{max-width:24ch}
+
+.kpi.participants{grid-area:participants}
+.kpi.total{grid-area:total}
+.kpi.accepted{grid-area:accepted}
+.kpi.discarded{grid-area:discarded}
+
+.breakdowns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.breakdown{
+  background:var(--surface-1);border:1px solid var(--hairline-soft);
+  border-radius:var(--r-xl);padding:22px 24px;
+}
+.bd-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--hairline);
+}
+.bd-title{font-size:17px;font-weight:500;color:var(--ink);letter-spacing:-0.16px}
+.bd-count{font-size:14px;color:var(--ink-muted);letter-spacing:-0.13px;font-variant-numeric:tabular-nums}
+.bd-empty{
+  font-size:16px;color:var(--ink-muted);letter-spacing:-0.15px;
+  padding:18px 0;display:flex;align-items:center;gap:10px;
+}
+.bd-empty::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:#3a3a3a;
+}
+
+/* ============ STEP 3 — EXPORT ============ */
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.export-card{
+  background:var(--surface-1);border:1px solid var(--hairline-soft);
+  border-radius:var(--r-xl);padding:26px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.ec-tag{
+  font-size:13px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;
+  color:var(--ink-muted);
+}
+.ec-title{
+  font-family:var(--font-display);font-weight:500;
+  font-size:28px;line-height:1.1;letter-spacing:-1.0px;color:var(--ink);
+}
+.ec-desc{font-size:16px;color:var(--ink-muted);letter-spacing:-0.15px;max-width:40ch;line-height:1.4}
+.ec-actions{display:flex;gap:10px;margin-top:6px}
+
+.export-spotlight{
+  background:
+    radial-gradient(110% 80% at 0% 0%, rgba(255,122,61,.55), transparent 55%),
+    radial-gradient(120% 90% at 100% 100%, rgba(255,85,119,.45), transparent 60%),
+    linear-gradient(135deg, var(--gradient-orange) 0%, #c84a1c 70%, #6b2008 100%);
+  border-radius:var(--r-xxl);border:0;
+  padding:36px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:24px;
+  min-height:200px;position:relative;overflow:hidden;cursor:pointer;
+  transition:transform .15s;
+}
+.export-spotlight:hover{transform:scale(.995)}
+.export-spotlight::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(80% 60% at 50% 120%, rgba(0,0,0,.35), transparent 60%);
+  pointer-events:none;
+}
+.export-spotlight .ec-tag{color:rgba(255,255,255,.85)}
+.export-spotlight .ec-title{
+  color:#fff;font-size:42px;letter-spacing:-1.8px;line-height:1;
+  position:relative;z-index:1;
+}
+.export-spotlight .ec-desc{color:rgba(255,255,255,.88);position:relative;z-index:1;max-width:32ch;font-size:16px}
+.export-spotlight .btn-primary{align-self:flex-start;position:relative;z-index:1}
+.export-spotlight[disabled]{opacity:.55;cursor:not-allowed}
+.export-spotlight[disabled]:hover{transform:none}
+
+.export-status{
+  background:var(--surface-1);border:1px solid var(--hairline-soft);
+  border-radius:var(--r-md);padding:16px 20px;
+  font-size:16px;color:var(--ink-muted);letter-spacing:-0.15px;
+  display:flex;align-items:center;gap:12px;
+}
+.export-status::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--ink-muted);
+}
+
+/* ============ REPORTS PAIR ============ */
+.reports{display:grid;grid-template-columns: 380px 1fr;gap:16px;margin-top:32px}
+@media (max-width:1100px){.reports{grid-template-columns:1fr}}
+.reports-list, .reports-out{
+  background:var(--surface-1);border:1px solid var(--hairline-soft);
+  border-radius:var(--r-xl);padding:24px;min-height:220px;
+}
+.reports-list h3, .reports-out h3{
+  font-family:var(--font-display);font-weight:500;
+  font-size:22px;letter-spacing:-0.8px;margin:0 0 4px;color:var(--ink);
+}
+.reports-list .sub, .reports-out .sub{
+  font-size:15px;color:var(--ink-muted);letter-spacing:-0.14px;
+  margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--hairline);
+}
+.reports-empty{display:flex;flex-direction:column;gap:10px;padding:24px 0}
+.reports-empty strong{font-size:17px;font-weight:500;color:var(--ink);letter-spacing:-0.16px}
+.reports-empty span{font-size:16px;color:var(--ink-muted);letter-spacing:-0.15px;max-width:44ch;line-height:1.4}
+
+/* ============ FOOTER ============ */
+.foot{
+  max-width:1280px;margin:60px auto 0;padding:32px var(--s-xl);
+  border-top:1px solid var(--hairline-soft);
+  display:flex;justify-content:space-between;align-items:center;gap:18px;
+  font-size:14px;color:var(--ink-muted);letter-spacing:-0.13px;
+}
+.foot a{color:var(--ink-muted)}
+.foot a:hover{color:var(--ink)}
+
+/* ============ MOCK BANNER ============ */
+.mock-banner{
+  background:#0d0d0d;border-bottom:1px solid var(--hairline);
+  padding:8px 32px;text-align:center;
+  font-size:11px;letter-spacing:-0.05px;color:var(--ink-muted);
+}
+.mock-banner strong{color:var(--ink);font-weight:500}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1100px){
+  .hero{grid-template-columns:1fr;gap:36px}
+  .setup-grid{grid-template-columns:1fr 1fr;gap:18px}
+  .kpi-grid{
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "spotlight spotlight"
+      "participants total"
+      "accepted discarded";
+  }
+  .breakdowns{grid-template-columns:1fr}
+  .export-grid{grid-template-columns:1fr}
+  .section-head{flex-direction:column;align-items:flex-start;gap:12px}
+  .section-sub{text-align:left}
+}
+@media (max-width:720px){
+  .nav-steps{display:none}
+  .setup-grid{grid-template-columns:1fr}
+  .file-row{grid-template-columns:1fr;gap:16px}
+  .hero h1{font-size:20px;letter-spacing:-0.8px;white-space:normal}
+  .section-head h2{font-size:32px;letter-spacing:-1.4px}
+  .kpi.spotlight .k-value{font-size:64px;letter-spacing:-3.2px}
+}
+
+/* hidden native file inputs */
+.native-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="mock-banner"><strong>Mock 02 · Framer Canvas</strong> &nbsp;·&nbsp; dark, white display type, one gradient spotlight tile per step</div>
+
+<header class="topnav">
+  <div class="nav-inner">
+    <div class="wordmark">
+      <div class="mark">W</div>
+      <span>Workbook</span>
+    </div>
+    <nav class="nav-steps" aria-label="Progress">
+      <span class="pill active"><span class="num">01</span> Configure</span>
+      <span class="pill"><span class="num">02</span> Review</span>
+      <span class="pill"><span class="num">03</span> Export</span>
+    </nav>
+    <div class="nav-right">
+      <span class="status ready"><span class="dot"></span> Ready</span>
+      <button class="btn-primary" disabled>Export Workbook</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Fixed-Width &amp; Workbook Ingestion</div>
+      <h1>Parse, reconcile, <em>export.</em></h1>
+    </div>
+    <aside class="hero-side">
+      <p>Configure the job, upload your text file, then map and export — three steps from raw fixed-width to a finished workbook.</p>
+      <div class="hero-meta">
+        <div><strong>4 providers</strong>Fidelity · Vanguard · Empower · Principal</div>
+        <div><strong>v2.0</strong>Build cursor-principal</div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- STEP 1 -->
+  <section class="step">
+    <div class="section-head">
+      <div>
+        <div class="section-num">01 / Setup</div>
+        <h2>Configure &amp; Load.</h2>
+      </div>
+      <p class="section-sub">Pick a data source, record plan details, then load your file.</p>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-grid">
+        <div class="field">
+          <label for="src">Data Source</label>
+          <select id="src">
+            <option>Select a data source…</option>
+            <option>Fidelity</option>
+            <option>Vanguard</option>
+            <option>Empower</option>
+            <option>Principal</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="case">Case Number</label>
+          <input id="case" type="text" placeholder="e.g. 348771">
+        </div>
+        <div class="field">
+          <label for="plan">Plan Name</label>
+          <input id="plan" type="text" placeholder="Enter plan name">
+        </div>
+      </div>
+
+      <div class="file-row">
+        <div class="file-pick">
+          <div class="file-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="file-meta">
+            <strong>No file chosen</strong>
+            <span>.txt files only</span>
+          </div>
+        </div>
+        <div class="load-actions">
+          <label for="file" class="btn-secondary">Choose File</label>
+          <input id="file" class="native-file" type="file" accept=".txt">
+          <button class="btn-primary">Load &amp; Parse</button>
+        </div>
+      </div>
+
+      <div class="progress-row">
+        <span class="progress-label">Parse progress</span>
+        <div class="progress-track"><div class="progress-fill" style="width:0%"></div></div>
+        <span class="progress-pct">0%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step">
+    <div class="section-head">
+      <div>
+        <div class="section-num">02 / Results</div>
+        <h2>Parse Summary.</h2>
+      </div>
+      <p class="section-sub">Totals and counters from the current parse. Source and fund breakdowns update live.</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi spotlight">
+        <div class="spotlight-head">
+          <span class="k-label">Grand Total</span>
+          <span class="spotlight-tag">All sources</span>
+        </div>
+        <div class="spotlight-foot">
+          <span class="k-value">$0.00</span>
+          <span class="k-sub">USD — updates live as records validate.</span>
+        </div>
+      </div>
+      <div class="kpi participants">
+        <span class="k-label">Participants</span>
+        <div>
+          <div class="k-value">0</div>
+          <div class="k-sub">unique records</div>
+        </div>
+      </div>
+      <div class="kpi total">
+        <span class="k-label">Total Lines</span>
+        <div>
+          <div class="k-value">0</div>
+          <div class="k-sub">parsed input</div>
+        </div>
+      </div>
+      <div class="kpi accepted">
+        <span class="k-label">Accepted</span>
+        <div>
+          <div class="k-value">0</div>
+          <div class="k-sub">validated</div>
+        </div>
+      </div>
+      <div class="kpi warn discarded">
+        <span class="k-label">Discarded</span>
+        <div>
+          <div class="k-value">0</div>
+          <div class="k-sub">review log</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdowns">
+      <div class="breakdown">
+        <div class="bd-head">
+          <span class="bd-title">Source Totals</span>
+          <span class="bd-count">0 sources</span>
+        </div>
+        <div class="bd-empty">No data yet — load a file to populate.</div>
+      </div>
+      <div class="breakdown">
+        <div class="bd-head">
+          <span class="bd-title">Fund Totals</span>
+          <span class="bd-count">0 funds</span>
+        </div>
+        <div class="bd-empty">No data yet — load a file to populate.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step">
+    <div class="section-head">
+      <div>
+        <div class="section-num">03 / Output</div>
+        <h2>Map &amp; Export.</h2>
+      </div>
+      <p class="section-sub">Validate the mapping workbook, reconcile totals, then generate the output file.</p>
+    </div>
+
+    <div class="export-grid">
+      <div class="export-card">
+        <span class="ec-tag">Import</span>
+        <div class="ec-title">Upload Mapping File</div>
+        <div class="ec-desc">Load and validate a Source / Fund Mapping workbook before enabling Conv File export.</div>
+        <div class="ec-actions">
+          <label for="mapping" class="btn-secondary">Choose .xlsx</label>
+          <input id="mapping" class="native-file" type="file" accept=".xlsx">
+        </div>
+      </div>
+      <button class="export-spotlight" disabled type="button">
+        <span class="ec-tag">Primary</span>
+        <div class="ec-title">Export Workbook</div>
+        <div class="ec-desc">Generate the full parsed workbook with title page and report tabs.</div>
+        <span class="btn-primary">Generate workbook →</span>
+      </button>
+    </div>
+
+    <div class="export-status">Upload a parsed input file and a valid mapping workbook to compare source and fund codes.</div>
+  </section>
+
+  <!-- REPORTS -->
+  <section class="reports">
+    <div class="reports-list">
+      <h3>Report List</h3>
+      <div class="sub">Available reports for the selected source.</div>
+      <div class="reports-empty">
+        <strong>No source selected</strong>
+        <span>Pick a data source in Step 01 to see available report types.</span>
+      </div>
+    </div>
+    <div class="reports-out">
+      <h3>Parsed Reports</h3>
+      <div class="sub">Reports render here after parsing.</div>
+      <div class="reports-empty">
+        <strong>No parsed reports</strong>
+        <span>Load and parse a file to view structured report output.</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>Workbook Ingestion Console · v2.0</span>
+  <span><a href="#">Docs</a> &nbsp;·&nbsp; <a href="#">Changelog</a> &nbsp;·&nbsp; <a href="#">Support</a></span>
+</footer>
+
+<script>
+document.querySelectorAll('input[type=file]').forEach(inp=>{
+  inp.addEventListener('change', e=>{
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const card = e.target.closest('.setup-card, .export-card');
+    if (card) {
+      const meta = card.querySelector('.file-meta strong, .ec-desc');
+      if (meta) meta.textContent = f.name;
+    }
+  });
+});
+</script>
+</body>
+</html>

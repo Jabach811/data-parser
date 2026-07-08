@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Source icon style explorations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Mona+Sans:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#090909;
+  --surface-1:#141414;
+  --surface-2:#1c1c1c;
+  --ink:#fff;
+  --muted:#999;
+  --hairline:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--canvas);color:var(--ink);
+  font-family:"Inter",sans-serif;
+  font-size:15px;line-height:1.4;letter-spacing:-0.13px;
+  font-feature-settings:"cv01","cv05","cv09","cv11","ss03","ss07","dlig";
+  min-height:100vh;padding:40px 32px 80px;
+}
+.wrap{max-width:1320px;margin:0 auto}
+h1{
+  font-family:"Mona Sans","Inter",sans-serif;font-weight:500;
+  font-size:42px;line-height:1;letter-spacing:-1.8px;margin:0 0 6px;
+}
+.lede{color:var(--muted);font-size:16px;letter-spacing:-0.15px;margin:0 0 48px;max-width:60ch}
+
+.style-block{margin-bottom:64px}
+.style-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:24px;
+  margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--hairline);
+}
+.style-num{
+  color:#0099ff;font-size:13px;font-weight:500;letter-spacing:-0.13px;
+  display:flex;align-items:center;gap:8px;
+}
+.style-num::before{content:"";width:6px;height:6px;border-radius:50%;background:#0099ff}
+.style-title{
+  font-family:"Mona Sans","Inter",sans-serif;font-weight:500;
+  font-size:26px;letter-spacing:-1px;margin:0;
+}
+.style-desc{color:var(--muted);font-size:14px;letter-spacing:-0.13px;max-width:42ch;text-align:right;margin:0}
+
+.row{
+  display:grid;grid-template-columns:repeat(10,1fr);gap:14px;
+}
+.cell{
+  background:var(--surface-1);border:1px solid var(--hairline);
+  border-radius:14px;padding:18px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.cell .glyph{
+  width:56px;height:56px;display:grid;place-items:center;
+}
+.cell .glyph svg{display:block}
+.cell .name{
+  font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;
+  color:var(--muted);text-align:center;
+}
+
+/* ----- STYLE 1: STROKE (current/Lucide) ----- */
+.s1 .glyph{
+  width:46px;height:46px;border-radius:11px;
+  border:1px solid var(--accent-soft);
+  background:var(--accent-soft);
+  color:var(--accent);
+}
+.s1 .glyph svg{stroke-width:1.8;width:22px;height:22px}
+
+/* ----- STYLE 2: SOLID FILL ----- */
+.s2 .glyph{
+  width:46px;height:46px;border-radius:12px;
+  background:var(--accent);
+  color:#fff;
+  box-shadow:0 6px 18px var(--accent-soft);
+}
+.s2 .glyph svg{width:22px;height:22px;fill:#fff;stroke:none}
+
+/* ----- STYLE 3: MONOGRAM CHIP ----- */
+.s3 .glyph{
+  width:46px;height:46px;border-radius:14px;
+  background:linear-gradient(160deg, var(--accent-strong) 0%, var(--accent) 100%);
+  color:#fff;
+  font-family:"Mona Sans","Inter",sans-serif;
+  font-weight:600;font-size:18px;letter-spacing:-0.5px;
+  display:grid;place-items:center;
+}
+
+/* ----- STYLE 4: DUOTONE (outline + filled accent layer) ----- */
+.s4 .glyph{
+  width:46px;height:46px;border-radius:11px;
+  background:var(--surface-2);
+  border:1px solid rgba(255,255,255,.06);
+  position:relative;
+  display:grid;place-items:center;
+  overflow:hidden;
+}
+.s4 .glyph::after{
+  content:"";position:absolute;inset:auto -10px -10px auto;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent);opacity:.85;filter:blur(2px);
+}
+.s4 .glyph svg{position:relative;z-index:1;color:#fff;stroke-width:1.7;width:22px;height:22px}
+
+/* ----- STYLE 5: BRUTALIST GEO ----- */
+.s5 .glyph{
+  width:46px;height:46px;border-radius:6px;
+  background:var(--canvas);
+  border:1.5px solid var(--accent);
+  color:var(--accent);
+  position:relative;
+}
+.s5 .glyph::before{
+  content:"";position:absolute;left:-1.5px;top:-1.5px;width:8px;height:8px;
+  background:var(--accent);
+}
+.s5 .glyph svg{stroke-width:2.4;width:22px;height:22px;stroke-linejoin:miter;stroke-linecap:square}
+
+/* per-source accents (via data attr) */
+.cell[data-src="FIDELITY"]    { --accent:#28a745; --accent-soft:rgba(40,167,69,.18); --accent-strong:#1e7b34; }
+.cell[data-src="VANGUARD"]    { --accent:#a40000; --accent-soft:rgba(164,0,0,.18); --accent-strong:#7a0000; }
+.cell[data-src="EMPOWER"]     { --accent:#ff7a00; --accent-soft:rgba(255,122,0,.18); --accent-strong:#cc5e00; }
+.cell[data-src="PRINCIPAL"]   { --accent:#0d6efd; --accent-soft:rgba(13,110,253,.18); --accent-strong:#0a4fbb; }
+.cell[data-src="NEWPORT"]     { --accent:#2d78a5; --accent-soft:rgba(45,120,165,.18); --accent-strong:#205573; }
+.cell[data-src="NATIONWIDE"]  { --accent:#0085ca; --accent-soft:rgba(0,133,202,.18); --accent-strong:#005f8f; }
+.cell[data-src="ADP"]         { --accent:#d92231; --accent-soft:rgba(217,34,49,.18); --accent-strong:#a01722; }
+.cell[data-src="ASCENSUS"]    { --accent:#7b4cf0; --accent-soft:rgba(123,76,240,.18); --accent-strong:#5a31bf; }
+.cell[data-src="ALERUS"]      { --accent:#00945e; --accent-soft:rgba(0,148,94,.18); --accent-strong:#006c44; }
+.cell[data-src="HANCOCK"]     { --accent:#e0a838; --accent-soft:rgba(224,168,56,.18); --accent-strong:#a87a1f; }
+
+.banner{
+  background:#0d0d0d;border:1px solid var(--hairline);
+  border-radius:10px;padding:10px 16px;margin-bottom:32px;
+  font-size:12px;color:var(--muted);letter-spacing:-0.12px;
+  display:flex;justify-content:space-between;
+}
+.banner strong{color:#fff;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Source icon style explorations</h1>
+  <p class="lede">Five different visual treatments for the data-source picker icons. Each style across the same ten providers, on the same dark canvas you're using.</p>
+
+  <div class="banner">
+    <span><strong>How to read this:</strong> each row is one icon style, every column is the same source treated in that style</span>
+    <span>Pick a winner and I'll wire it into the picker</span>
+  </div>
+
+  <!-- ========== STYLE 1: STROKE (current) ========== -->
+  <section class="style-block s1">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 01</div>
+        <h2 class="style-title">Stroke / Lucide</h2>
+      </div>
+      <p class="style-desc">Where you are now. Thin 1.8px strokes on a soft-tinted accent background. Clean, neutral, easy to read.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L21 6 L21 12 C21 17 17 21 12 22 C7 21 3 17 3 12 L3 6 Z"/><path d="M9 12 l2 2 l4 -4"/></svg></div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,3 4,21 20,21"/><line x1="12" y1="10" x2="12" y2="17"/></svg></div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 4 14 12 14 11 22 20 10 12 10"/></svg></div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1"/><polyline points="6 9 6 4 18 4 18 9"/><line x1="12" y1="13" x2="12" y2="17"/></svg></div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12 h18"/><path d="M12 3 a14 14 0 0 1 0 18 a14 14 0 0 1 0 -18"/></svg></div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21 V10 L12 4 L20 10 V21"/><path d="M9 21 V14 H15 V21"/></svg></div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 L12 4 L21 21 Z"/><path d="M8 16 H16"/></svg></div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/></svg></div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 4 V20"/><path d="M4 12 H20"/></svg></div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6 V12 L16 14"/></svg></div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- ========== STYLE 2: SOLID FILL ========== -->
+  <section class="style-block s2">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 02</div>
+        <h2 class="style-title">Solid Fill</h2>
+      </div>
+      <p class="style-desc">Bold filled chip in the source's accent color, white glyph on top. More presence. Reads more like a brand mark than a UI icon.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph"><svg viewBox="0 0 24 24"><path d="M12 2 L21 6 L21 12 C21 17 17 21 12 22 C7 21 3 17 3 12 L3 6 Z"/></svg></div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph"><svg viewBox="0 0 24 24"><polygon points="12,3 4,21 20,21"/></svg></div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph"><svg viewBox="0 0 24 24"><polygon points="13,2 4,14 12,14 11,22 20,10 12,10"/></svg></div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="1"/><polygon points="6,9 6,4 18,4 18,9"/></svg></div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph"><svg viewBox="0 0 24 24"><polygon points="4,21 4,10 12,4 20,10 20,21"/></svg></div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph"><svg viewBox="0 0 24 24"><polygon points="3,21 12,4 21,21"/></svg></div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph"><svg viewBox="0 0 24 24"><polygon points="3,21 3,17 9,11 13,15 21,6 21,21"/></svg></div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- ========== STYLE 3: MONOGRAM CHIP ========== -->
+  <section class="style-block s3">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 03</div>
+        <h2 class="style-title">Monogram Chip</h2>
+      </div>
+      <p class="style-desc">Source initials in a gradient chip. Looks like a stock ticker. Self-explanatory — you always know which provider you picked.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph">FD</div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph">VG</div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph">EM</div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph">PR</div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph">NP</div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph">NW</div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph">AD</div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph">AS</div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph">AL</div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph">JH</div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- ========== STYLE 4: DUOTONE ========== -->
+  <section class="style-block s4">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 04</div>
+        <h2 class="style-title">Duotone Glow</h2>
+      </div>
+      <p class="style-desc">White stroke glyph on dark surface with a blurred accent glow in the corner. Feels like the Framer spotlight tiles — atmospheric, premium.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L21 6 L21 12 C21 17 17 21 12 22 C7 21 3 17 3 12 L3 6 Z"/><path d="M9 12 l2 2 l4 -4"/></svg></div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,3 4,21 20,21"/><line x1="12" y1="10" x2="12" y2="17"/></svg></div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 4 14 12 14 11 22 20 10 12 10"/></svg></div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1"/><polyline points="6 9 6 4 18 4 18 9"/></svg></div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12 h18"/></svg></div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21 V10 L12 4 L20 10 V21"/></svg></div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21 L12 4 L21 21 Z"/></svg></div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/></svg></div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 4 V20"/></svg></div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6 V12 L16 14"/></svg></div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- ========== STYLE 5: BRUTALIST GEO ========== -->
+  <section class="style-block s5">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 05</div>
+        <h2 class="style-title">Brutalist Geo</h2>
+      </div>
+      <p class="style-desc">Hard 1.5px borders, sharp corners, single corner block in the source accent. Heavy and architectural — feels like a tool, not a consumer app.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2 L21 6 L21 12 C21 17 17 21 12 22 C7 21 3 17 3 12 L3 6 Z"/></svg></div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12,3 4,21 20,21"/></svg></div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="13 2 4 14 12 14 11 22 20 10 12 10"/></svg></div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="9" width="18" height="12"/><polyline points="6 9 6 4 18 4 18 9"/></svg></div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M3 12 h18"/></svg></div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21 V10 L12 4 L20 10 V21"/></svg></div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21 L12 4 L21 21 Z"/></svg></div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 17 9 11 13 15 21 6"/></svg></div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/></svg></div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 6 V12 L16 14"/></svg></div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

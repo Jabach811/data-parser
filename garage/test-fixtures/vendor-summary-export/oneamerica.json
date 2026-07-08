@@ -1,0 +1,46 @@
+{
+  "sourceKey": "ONEAMERICA",
+  "reports": ["ELECTIONS", "LOAN_HEADER", "LOAN_SOURCE"],
+  "grouped": {
+    "ELECTIONS": [["111-22-3333", "AA", "E", "6", "2024-01-01"]],
+    "LOAN_HEADER": [["111-22-3333", "1", "2023-01-01", "75", "BIWEEKLY", "6.25", "2023-02-01", "ACTIVE", "1000", "750", "2024-01-01"]],
+    "LOAN_SOURCE": [["111-22-3333", "1", "EE", "500", "375", "ACTIVE", "2024-01-01"], ["111-22-3333", "1", "ER", "500", "375", "ACTIVE", "2024-01-01"]]
+  },
+  "layoutsByReport": {
+    "ELECTIONS": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Fund Code", "type": "text" },
+      { "header": "Source Code", "type": "text" },
+      { "header": "Percent", "type": "decimal" },
+      { "header": "As Of Date", "type": "date" }
+    ],
+    "LOAN_HEADER": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Loan Number", "type": "text" },
+      { "header": "Issuance Date", "type": "date" },
+      { "header": "Repayment Amount", "type": "decimal" },
+      { "header": "Payment Frequency", "type": "text" },
+      { "header": "Interest Rate", "type": "decimal" },
+      { "header": "First Payment Date", "type": "date" },
+      { "header": "Loan Status", "type": "text" },
+      { "header": "Loan Amount", "type": "decimal" },
+      { "header": "Loan Balance", "type": "decimal" },
+      { "header": "As Of Date", "type": "date" }
+    ],
+    "LOAN_SOURCE": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Loan Number", "type": "text" },
+      { "header": "Source", "type": "text" },
+      { "header": "Loan Amount", "type": "decimal" },
+      { "header": "Loan Balance", "type": "decimal" },
+      { "header": "Loan Status", "type": "text" },
+      { "header": "As Of Date", "type": "date" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Loan Header", "Loan Source"],
+  "unexpectedTabs": ["Roth Basis"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["Source Code", "Percent"] },
+    { "sheetNumber": 4, "tab": "Loan Source", "includes": ["Source", "Loan Balance"], "excludes": ["Loan ID"], "indexValue": 1, "indexCount": 2 }
+  ]
+}

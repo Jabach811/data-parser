@@ -1,0 +1,53 @@
+{
+  "sourceKey": "ADP",
+  "reports": ["PH", "PF", "LH", "LF"],
+  "grouped": {
+    "PH": [["111223333", "4.0", "2.0", "2022-03-01", "275"]],
+    "PF": [["111223333", "R", "75", "1250"]],
+    "LH": [["111223333", "101", "2023-01-01", "2023-02-01", "2023-01-15", "1000", "800", "6.5", "75", "2025-01-01", "0", "0"]],
+    "LF": [["111223333", "R", "101", "700", "200", "25"], ["111223333", "E", "101", "300", "75", "10"]]
+  },
+  "layoutsByReport": {
+    "PH": [
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Before-Tax Deferral Percent", "type": "decimal" },
+      { "header": "Roth Deferral Percent", "type": "decimal" },
+      { "header": "Roth First Contribution Date", "type": "date" },
+      { "header": "ROTH TAX BASIS", "type": "decimal" }
+    ],
+    "PF": [
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Source ID", "type": "text" },
+      { "header": "Contribution Allocation Percent", "type": "decimal" },
+      { "header": "Gross Contributions Year-to-date", "type": "decimal" }
+    ],
+    "LH": [
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Loan Number", "type": "text" },
+      { "header": "Date of Loan Issue Date", "type": "date" },
+      { "header": "Date of Next Loan Payment", "type": "date" },
+      { "header": "Date of Previous Loan Payment", "type": "date" },
+      { "header": "Loan Original Amount", "type": "decimal" },
+      { "header": "Loan Balance Current", "type": "decimal" },
+      { "header": "Loan Interest Rate", "type": "decimal" },
+      { "header": "Loan Payment Amount", "type": "decimal" },
+      { "header": "Loan Payoff Date", "type": "date" },
+      { "header": "Principal in Arrears", "type": "decimal" },
+      { "header": "Interest in Arrears", "type": "decimal" }
+    ],
+    "LF": [
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Source ID", "type": "text" },
+      { "header": "Loan Number", "type": "text" },
+      { "header": "Original Loan Amount", "type": "decimal" },
+      { "header": "Principal Amount Repaid", "type": "decimal" },
+      { "header": "Interest Amount Repaid", "type": "decimal" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Roth Basis", "Loan Header", "Loan Source"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["Before-Tax Deferral Percent", "Gross Contributions Year-to-date"] },
+    { "sheetNumber": 3, "tab": "Roth Basis", "includes": ["Roth First Contribution Date", "ROTH TAX BASIS"] },
+    { "sheetNumber": 5, "tab": "Loan Source", "includes": ["Source ID", "Principal Amount Repaid"], "excludes": ["Loan ID"], "indexValue": 1, "indexCount": 2 }
+  ]
+}

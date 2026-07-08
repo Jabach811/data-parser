@@ -1,0 +1,57 @@
+{
+  "sourceKey": "EMPOWER",
+  "reports": ["DFRL", "ITD", "PYEB", "LOANS", "LOMNTY"],
+  "grouped": {
+    "DFRL": [["111223333", "PRETAX", "2024-01-01", "6", "0", "2025-01-01"]],
+    "ITD": [["111223333", "RTH", "1250", "2022-03-01"]],
+    "PYEB": [["111223333", "COST", "275", "RTH", "275"]],
+    "LOANS": [["111223333", "LN001", "2024-02-01", "75", "1000", "800", "2026-01-01", "2024-01-15"]],
+    "LOMNTY": [["111223333", "LN001", "EE", "70", "2024-01-01"], ["111223333", "LN001", "ER", "30", "2024-01-01"]]
+  },
+  "layoutsByReport": {
+    "DFRL": [
+      { "header": "SSN", "type": "text" },
+      { "header": "DEFERRAL TYPE", "type": "text" },
+      { "header": "EFFECTIVE DATE", "type": "date" },
+      { "header": "DEFERRAL PERCENT", "type": "decimal" },
+      { "header": "DEFERRAL AMOUNT", "type": "decimal" },
+      { "header": "NEXT SCHEDULED CHANGE DATE", "type": "date" }
+    ],
+    "ITD": [
+      { "header": "SSN", "type": "text" },
+      { "header": "MONEY TYPE", "type": "text" },
+      { "header": "AMOUNT", "type": "decimal" },
+      { "header": "ROTH FIRST CONTRIBUTION DATE", "type": "date" }
+    ],
+    "PYEB": [
+      { "header": "SSN", "type": "text" },
+      { "header": "BASIS", "type": "text" },
+      { "header": "VALUE", "type": "decimal" },
+      { "header": "MONEY TYPE", "type": "text" },
+      { "header": "BALANCE", "type": "decimal" }
+    ],
+    "LOANS": [
+      { "header": "SSN", "type": "text" },
+      { "header": "LOAN NUMBER", "type": "text" },
+      { "header": "FIRST DUE DATE", "type": "date" },
+      { "header": "REPAY AMOUNT", "type": "decimal" },
+      { "header": "ORIGINAL LOAN AMOUNT", "type": "decimal" },
+      { "header": "OUTSTANDING PRINCIPAL", "type": "decimal" },
+      { "header": "MATURITY DATE", "type": "date" },
+      { "header": "LAST REPAYMENT DATE", "type": "date" }
+    ],
+    "LOMNTY": [
+      { "header": "SSN", "type": "text" },
+      { "header": "LOAN NUMBER", "type": "text" },
+      { "header": "MONEY TYPE", "type": "text" },
+      { "header": "SPLIT PERCENT", "type": "decimal" },
+      { "header": "EFFECTIVE DATE", "type": "date" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Roth Basis", "Loan Header", "Loan Source"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["DEFERRAL PERCENT", "DEFERRAL AMOUNT"] },
+    { "sheetNumber": 3, "tab": "Roth Basis", "includes": ["ROTH FIRST CONTRIBUTION DATE", "BALANCE"] },
+    { "sheetNumber": 5, "tab": "Loan Source", "includes": ["MONEY TYPE", "SPLIT PERCENT"], "indexValue": 1, "indexCount": 2 }
+  ]
+}

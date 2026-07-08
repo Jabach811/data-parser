@@ -1,0 +1,51 @@
+{
+  "sourceKey": "NATIONWIDE",
+  "reports": ["PR", "PT", "LN", "LD"],
+  "grouped": {
+    "PR": [["111223333", "5.5", "0", "100", "0", "6", "125"]],
+    "PT": [["111223333", "2023-01-01", "200", "2023-12-31", "180"]],
+    "LN": [["111223333", "L0001", "950", "2023-02-01", "1000", "50", "5.25", "2023-03-01", "2024-01-01"]],
+    "LD": [["111223333", "L0001", "ER", "600"], ["111223333", "L0001", "EE", "350"]]
+  },
+  "layoutsByReport": {
+    "PR": [
+      { "header": "Participant Tax ID", "type": "text" },
+      { "header": "Pre-tax Rate", "type": "decimal" },
+      { "header": "Post-tax Rate", "type": "decimal" },
+      { "header": "Pre-tax Amount", "type": "decimal" },
+      { "header": "Post-tax Amount", "type": "decimal" },
+      { "header": "Roth Elective Deferral Contribution Enrollment Rate", "type": "decimal" },
+      { "header": "Roth Elective Deferral Contribution Enrollment Amount", "type": "decimal" }
+    ],
+    "PT": [
+      { "header": "Participant Tax ID", "type": "text" },
+      { "header": "First Contribution Date", "type": "date" },
+      { "header": "Plan YTD Roth Elective Deferral Amount", "type": "decimal" },
+      { "header": "Plan YTD Roth Elective Deferral Date", "type": "date" },
+      { "header": "Roth Basis Amount", "type": "decimal" }
+    ],
+    "LN": [
+      { "header": "Participant Tax ID", "type": "text" },
+      { "header": "Loan ID", "type": "text" },
+      { "header": "Outstanding Principal Amount", "type": "decimal" },
+      { "header": "Loan Start Date", "type": "date" },
+      { "header": "Original Loan Amount", "type": "decimal" },
+      { "header": "Scheduled Payment Amount", "type": "decimal" },
+      { "header": "Annual Interest Rate", "type": "decimal" },
+      { "header": "Loan First Payment Due Date", "type": "date" },
+      { "header": "Date of Last Loan Payment", "type": "date" }
+    ],
+    "LD": [
+      { "header": "Participant Tax ID", "type": "text" },
+      { "header": "Loan ID", "type": "text" },
+      { "header": "Money Type Code", "type": "text" },
+      { "header": "Outstanding Amount by Money Type", "type": "decimal" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Roth Basis", "Loan Header", "Loan Source"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["Pre-tax Rate", "Roth Elective Deferral Contribution Enrollment Amount"] },
+    { "sheetNumber": 3, "tab": "Roth Basis", "includes": ["First Contribution Date", "Roth Basis Amount"] },
+    { "sheetNumber": 5, "tab": "Loan Source", "includes": ["Money Type Code", "Outstanding Amount by Money Type"], "indexValue": 1, "indexCount": 2 }
+  ]
+}

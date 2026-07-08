@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "source": "EMPOWER",
+    "planName": "Empower Demo Plan",
+    "caseNumber": "QK123456 00001",
+    "inputFiles": ["d123456_test.txt", "s123456_summary.txt"],
+    "mappingStatus": "Validated mapping workbook",
+    "generatedFor": "Export design mock",
+    "asOfDate": "2026-06-19"
+  },
+  "reports": [
+    {
+      "code": "DFRL",
+      "tab": "Deferrals",
+      "name": "Deferral Elections",
+      "status": "Active",
+      "headers": ["SSN", "Participant", "Deferral Type", "Effective Date", "Deferral Percent", "Deferral Amount", "Next Scheduled Change"],
+      "rows": [
+        ["111223333", "John Doe", "PRETX", "2024-01-01", 6.0, 0, "2025-01-01"],
+        ["222334444", "Mara Chen", "ROTH", "2024-01-01", 4.0, 25, "2025-01-01"],
+        ["333445555", "Luis Rivera", "PRETX", "2024-01-01", 8.0, 0, "2025-01-01"],
+        ["444556666", "Aisha Patel", "PRETX", "2024-01-01", 5.0, 50, "2025-01-01"]
+      ]
+    },
+    {
+      "code": "ITD/PYEB",
+      "tab": "Roth Basis",
+      "name": "Roth Basis and Prior Year Basis",
+      "status": "Active",
+      "headers": ["SSN", "Participant", "Money Type", "Roth First Contribution Date", "Roth Contribution", "Basis Value"],
+      "rows": [
+        ["111223333", "John Doe", "RTH", "2022-03-01", 1250, 275],
+        ["222334444", "Mara Chen", "RTH", "2022-03-01", 980, 310],
+        ["333445555", "Luis Rivera", "RTH", "2022-03-01", 725, 190],
+        ["444556666", "Aisha Patel", "RTH", "2022-03-01", 1425, 455]
+      ]
+    },
+    {
+      "code": "LOANS",
+      "tab": "Loan Header",
+      "name": "Loan Header",
+      "status": "Active",
+      "headers": ["SSN", "Participant", "Loan Number", "First Due Date", "Repay Amount", "Original Loan Amount", "Outstanding Principal", "Maturity Date", "Last Repayment Date"],
+      "rows": [
+        ["111223333", "John Doe", "LN001", "2024-02-01", 75, 1000, 800, "2026-01-01", "2024-01-15"],
+        ["333445555", "Luis Rivera", "LN204", "2024-02-01", 110, 2500, 1875, "2026-01-01", "2024-01-15"]
+      ]
+    },
+    {
+      "code": "LOMNTY",
+      "tab": "Loan Source",
+      "name": "Loan Money Type Split",
+      "status": "Active",
+      "headers": ["SSN", "Participant", "Loan Number", "Money Type", "Split Percent", "Effective Date"],
+      "rows": [
+        ["111223333", "John Doe", "LN001", "EE", 70, "2024-01-01"],
+        ["111223333", "John Doe", "LN001", "ER", 30, "2024-01-01"],
+        ["333445555", "Luis Rivera", "LN204", "EE", 65, "2024-01-01"],
+        ["333445555", "Luis Rivera", "LN204", "ER", 35, "2024-01-01"]
+      ]
+    },
+    {
+      "code": "BALANC",
+      "tab": "CIT Balances",
+      "name": "CIT Balance Rows",
+      "status": "Active",
+      "headers": ["SSN", "Participant", "Money Type", "Sequence", "Fund", "Amount", "Balance Effective Date"],
+      "rows": [
+        ["111223333", "John Doe", "RTH", "0001", "FND01", 1250, "2024-01-31"],
+        ["111223333", "John Doe", "PRE", "0002", "FND02", 2840, "2024-01-31"],
+        ["222334444", "Mara Chen", "RTH", "0001", "FND03", 980, "2024-01-31"],
+        ["222334444", "Mara Chen", "ERM", "0002", "FND02", 520, "2024-01-31"],
+        ["333445555", "Luis Rivera", "PRE", "0001", "FND01", 3400, "2024-01-31"],
+        ["333445555", "Luis Rivera", "RTH", "0002", "FND05", 725, "2024-01-31"],
+        ["444556666", "Aisha Patel", "RTH", "0001", "FND01", 1425, "2024-01-31"],
+        ["444556666", "Aisha Patel", "PRE", "0002", "FND04", 2310, "2024-01-31"]
+      ]
+    },
+    {
+      "code": "ALLOC",
+      "tab": "CIT Elections",
+      "name": "CIT Election Percentages",
+      "status": "Active",
+      "headers": ["SSN", "Participant", "Money Type", "Sequence", "Fund", "Percent", "Default Indicator"],
+      "rows": [
+        ["111223333", "John Doe", "RTH", "0001", "FND01", 60, "N"],
+        ["111223333", "John Doe", "PRE", "0002", "FND02", 40, "N"],
+        ["222334444", "Mara Chen", "RTH", "0001", "FND03", 75, "N"],
+        ["222334444", "Mara Chen", "ERM", "0002", "FND02", 25, "N"],
+        ["333445555", "Luis Rivera", "PRE", "0001", "FND01", 80, "N"],
+        ["333445555", "Luis Rivera", "RTH", "0002", "FND05", 20, "N"],
+        ["444556666", "Aisha Patel", "RTH", "0001", "FND01", 55, "N"],
+        ["444556666", "Aisha Patel", "PRE", "0002", "FND04", 45, "N"]
+      ]
+    }
+  ]
+}

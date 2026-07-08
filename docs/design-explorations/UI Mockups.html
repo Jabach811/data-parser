@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook Ingestion Console — 5 UI Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+/* ============ GLOBAL CHROME ============ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:#1a1a1a;
+  color:#fff;
+  font-family:"Inter","Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Sticky switcher */
+.switcher{
+  position:sticky;top:0;z-index:1000;
+  background:rgba(15,15,15,.92);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  padding:14px 28px;
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+}
+.switcher-title{
+  font:600 11px/1 "JetBrains Mono",monospace;
+  color:rgba(255,255,255,.55);
+  letter-spacing:.18em;text-transform:uppercase;
+  padding-right:14px;border-right:1px solid rgba(255,255,255,.12);
+}
+.switcher-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.switcher-tab{
+  appearance:none;border:1px solid rgba(255,255,255,.14);
+  background:transparent;color:rgba(255,255,255,.7);
+  padding:8px 14px;border-radius:999px;
+  font:500 12px/1 "Inter",sans-serif;letter-spacing:.04em;
+  cursor:pointer;transition:all .18s ease;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.switcher-tab:hover{border-color:rgba(255,255,255,.4);color:#fff}
+.switcher-tab.is-active{
+  background:#fff;color:#000;border-color:#fff;
+}
+.switcher-tab .tab-num{
+  font:700 10px/1 "JetBrains Mono",monospace;
+  opacity:.5;
+}
+.switcher-tab.is-active .tab-num{opacity:.6}
+.switcher-spacer{flex:1}
+.switcher-meta{
+  font:500 11px/1 "JetBrains Mono",monospace;
+  color:rgba(255,255,255,.4);
+  letter-spacing:.1em;text-transform:uppercase;
+}
+
+/* Stage holds a single mockup at a time */
+.stage{
+  min-height:calc(100vh - 60px);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:36px 24px 80px;
+}
+.mockup{display:none;width:100%;max-width:1480px}
+.mockup.is-active{display:block}
+
+/* Caption strip above each mockup */
+.caption{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  padding:0 4px 22px;gap:24px;
+  border-bottom:1px dashed rgba(255,255,255,.1);margin-bottom:32px;
+}
+.caption .cap-id{
+  font:700 11px/1 "JetBrains Mono",monospace;
+  color:rgba(255,255,255,.4);letter-spacing:.22em;
+}
+.caption h2{
+  margin:8px 0 4px;font:700 28px/1 "Inter",sans-serif;
+  letter-spacing:-.02em;color:#fff;
+}
+.caption .cap-sub{
+  font:400 14px/1.4 "Inter",sans-serif;
+  color:rgba(255,255,255,.55);max-width:520px;
+}
+.caption .cap-tags{
+  display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;
+}
+.caption .cap-tag{
+  font:600 10px/1 "JetBrains Mono",monospace;
+  color:rgba(255,255,255,.5);
+  border:1px solid rgba(255,255,255,.18);
+  padding:6px 10px;border-radius:999px;
+  letter-spacing:.1em;text-transform:uppercase;
+}
+
+/* Frame around each mockup so they read as artifacts on the dark stage */
+.frame{
+  border-radius:18px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);
+  position:relative;
+}
+
+/* ================================================================== */
+/* ============ MOCKUP 01 — EDITORIAL QUIET (Kenya Hara) ============ */
+/* ================================================================== */
+.mk1{
+  --m1-bg:#fafaf7;
+  --m1-paper:#ffffff;
+  --m1-ink:#1a1a18;
+  --m1-soft:#6a6a64;
+  --m1-rule:rgba(26,26,24,.1);
+  --m1-rule-strong:rgba(26,26,24,.22);
+  --m1-accent:#c0392b;
+  background:var(--m1-bg);color:var(--m1-ink);
+  font-family:"Inter",sans-serif;font-size:14px;line-height:1.5;
+}
+.mk1 .m1-canvas{padding:60px 72px 80px;display:grid;gap:48px}
+.mk1 .m1-hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:40px;padding-bottom:40px;border-bottom:1px solid var(--m1-rule)}
+.mk1 .m1-eyebrow{font:500 11px/1 "JetBrains Mono",monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--m1-soft);margin-bottom:24px}
+.mk1 .m1-title{
+  font-family:"Newsreader",serif;font-weight:400;
+  font-size:64px;line-height:.96;letter-spacing:-.02em;
+  margin:0;color:var(--m1-ink);
+}
+.mk1 .m1-title em{font-style:italic;color:var(--m1-accent);font-weight:500}
+.mk1 .m1-lede{margin-top:18px;max-width:520px;font-size:15px;color:var(--m1-soft);line-height:1.55}
+.mk1 .m1-stepnav{display:flex;flex-direction:column;gap:8px;text-align:right;min-width:200px}
+.mk1 .m1-stepnav .item{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--m1-rule);font:500 12px/1 "Inter",sans-serif}
+.mk1 .m1-stepnav .num{font-family:"JetBrains Mono",monospace;color:var(--m1-soft)}
+.mk1 .m1-stepnav .item.is-active{color:var(--m1-accent)}
+.mk1 .m1-stepnav .item.is-active .num{color:var(--m1-accent)}
+
+.mk1 .m1-grid{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:48px}
+.mk1 .m1-col{display:flex;flex-direction:column;gap:22px;padding-top:8px}
+.mk1 .m1-section-num{
+  font:500 11px/1 "JetBrains Mono",monospace;
+  letter-spacing:.22em;color:var(--m1-soft);
+  display:flex;align-items:baseline;gap:12px;
+}
+.mk1 .m1-section-num::after{content:"";flex:1;height:1px;background:var(--m1-rule)}
+.mk1 .m1-h{font-family:"Newsreader",serif;font-size:26px;font-weight:500;letter-spacing:-.01em;line-height:1.1;margin:8px 0 0}
+.mk1 .m1-desc{color:var(--m1-soft);font-size:13px;margin-top:6px;max-width:36ch;line-height:1.55}
+
+.mk1 .m1-field{display:flex;flex-direction:column;gap:6px}
+.mk1 .m1-label{font:500 10px/1 "JetBrains Mono",monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--m1-soft)}
+.mk1 .m1-input{
+  border:none;border-bottom:1px solid var(--m1-rule-strong);
+  padding:10px 0 10px;background:transparent;font-size:15px;color:var(--m1-ink);
+  font-family:inherit;outline:none;
+}
+.mk1 .m1-input.with-value{font-family:"Newsreader",serif;font-size:18px;font-style:italic}
+.mk1 .m1-row2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+.mk1 .m1-source{
+  border:1px solid var(--m1-rule-strong);padding:18px 20px;
+  background:var(--m1-paper);
+  display:flex;align-items:center;gap:14px;
+}
+.mk1 .m1-source-mark{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--m1-accent);color:#fff;
+  display:grid;place-items:center;
+  font:700 11px/1 "JetBrains Mono",monospace;
+}
+.mk1 .m1-source-info strong{display:block;font-size:14px;font-weight:600}
+.mk1 .m1-source-info span{font-size:12px;color:var(--m1-soft);font-family:"JetBrains Mono",monospace}
+
+.mk1 .m1-file{
+  border:1px dashed var(--m1-rule-strong);
+  padding:24px 20px;text-align:center;
+  font-family:"Newsreader",serif;font-style:italic;font-size:18px;color:var(--m1-ink);
+  cursor:pointer;
+}
+.mk1 .m1-file small{display:block;font-style:normal;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--m1-soft);margin-top:8px}
+
+.mk1 .m1-progress{margin-top:8px;display:flex;align-items:center;gap:12px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--m1-soft)}
+.mk1 .m1-progress-bar{flex:1;height:1px;background:var(--m1-rule)}
+.mk1 .m1-progress-bar > span{display:block;height:1px;background:var(--m1-accent);width:34%}
+
+/* Step 2 stats */
+.mk1 .m1-stats{display:flex;flex-direction:column;gap:0}
+.mk1 .m1-stat-row{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:12px;padding:18px 0;border-bottom:1px solid var(--m1-rule)}
+.mk1 .m1-stat-row .lbl{font:500 11px/1 "JetBrains Mono",monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--m1-soft)}
+.mk1 .m1-stat-row .val{font-family:"Newsreader",serif;font-weight:500;font-size:32px;letter-spacing:-.01em}
+.mk1 .m1-stat-row .val em{font-style:italic;color:var(--m1-accent)}
+.mk1 .m1-breakdown{margin-top:8px;font-size:13px;line-height:1.7;color:var(--m1-soft)}
+.mk1 .m1-breakdown div{display:flex;justify-content:space-between;border-bottom:1px solid var(--m1-rule);padding:6px 0}
+.mk1 .m1-breakdown div span:last-child{font-family:"JetBrains Mono",monospace;color:var(--m1-ink)}
+
+/* Step 3 export */
+.mk1 .m1-export-card{
+  border:1px solid var(--m1-rule-strong);padding:22px;
+  display:flex;flex-direction:column;gap:6px;background:var(--m1-paper);
+}
+.mk1 .m1-export-card strong{font-family:"Newsreader",serif;font-weight:500;font-size:18px;font-style:italic}
+.mk1 .m1-export-card span{font-size:12px;color:var(--m1-soft)}
+.mk1 .m1-btn{
+  appearance:none;border:none;background:var(--m1-ink);color:#fff;
+  padding:16px 22px;font:600 12px/1 "Inter",sans-serif;letter-spacing:.18em;text-transform:uppercase;
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;
+}
+.mk1 .m1-btn.muted{background:transparent;color:var(--m1-ink);border:1px solid var(--m1-rule-strong)}
+.mk1 .m1-btn .arrow{font-family:"Newsreader",serif;font-size:18px;font-style:italic}
+
+.mk1 .m1-foot{
+  border-top:1px solid var(--m1-rule);padding-top:24px;
+  display:grid;grid-template-columns:1fr 1fr;gap:32px;
+}
+.mk1 .m1-foot h4{font-family:"Newsreader",serif;font-weight:500;font-size:18px;margin:0 0 10px}
+.mk1 .m1-empty{
+  font-style:italic;color:var(--m1-soft);font-family:"Newsreader",serif;font-size:15px;line-height:1.5;
+  padding:18px 0;border-top:1px solid var(--m1-rule);
+}
+
+/* ================================================================== */
+/* ============ MOCKUP 02 — TERMINAL CONSOLE (Bloomberg) =========== */
+/* ================================================================== */
+.mk2{
+  --m2-bg:#0a0c0f;
+  --m2-panel:#101418;
+  --m2-panel-2:#161b21;
+  --m2-line:rgba(140,180,220,.1);
+  --m2-line-2:rgba(140,180,220,.18);
+  --m2-text:#d4dde6;
+  --m2-soft:#7c8a99;
+  --m2-amber:#f5a524;
+  --m2-green:#4ade80;
+  --m2-cyan:#22d3ee;
+  --m2-red:#ef4444;
+  background:var(--m2-bg);color:var(--m2-text);
+  font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.45;
+}
+.mk2 .m2-canvas{padding:0;display:flex;flex-direction:column;min-height:920px}
+
+.mk2 .m2-topbar{
+  display:flex;align-items:center;gap:0;
+  border-bottom:1px solid var(--m2-line-2);background:var(--m2-panel);
+  height:42px;
+}
+.mk2 .m2-topbar .brand{
+  padding:0 18px;height:100%;display:flex;align-items:center;gap:8px;
+  font:700 12px/1 "JetBrains Mono",monospace;letter-spacing:.12em;
+  border-right:1px solid var(--m2-line-2);
+}
+.mk2 .m2-topbar .brand .dot{width:8px;height:8px;background:var(--m2-amber);border-radius:50%}
+.mk2 .m2-topbar .modes{display:flex;height:100%}
+.mk2 .m2-topbar .mode{
+  padding:0 16px;height:100%;display:flex;align-items:center;gap:8px;
+  font:600 11px/1 "JetBrains Mono",monospace;letter-spacing:.1em;
+  border-right:1px solid var(--m2-line-2);color:var(--m2-soft);cursor:pointer;
+}
+.mk2 .m2-topbar .mode.is-active{background:var(--m2-panel-2);color:var(--m2-text)}
+.mk2 .m2-topbar .mode .num{color:var(--m2-amber);font-weight:700}
+.mk2 .m2-topbar .ticker{
+  margin-left:auto;display:flex;gap:18px;padding:0 18px;align-items:center;
+  font:500 11px/1 "JetBrains Mono",monospace;color:var(--m2-soft);
+}
+.mk2 .m2-topbar .ticker .live{color:var(--m2-green)}
+.mk2 .m2-topbar .ticker .live::before{content:"● ";color:var(--m2-green)}
+
+.mk2 .m2-cmdbar{
+  display:flex;align-items:center;gap:14px;padding:10px 18px;
+  border-bottom:1px solid var(--m2-line-2);background:#0d1014;
+  font-size:12px;
+}
+.mk2 .m2-cmdbar .prompt{color:var(--m2-amber)}
+.mk2 .m2-cmdbar input{
+  flex:1;background:transparent;border:none;color:var(--m2-text);
+  font-family:inherit;font-size:12px;outline:none;
+}
+.mk2 .m2-cmdbar .help{color:var(--m2-soft);font-size:10px;letter-spacing:.1em}
+
+.mk2 .m2-grid{
+  display:grid;grid-template-columns:340px 1fr 360px;
+  gap:0;flex:1;
+}
+.mk2 .m2-pane{padding:18px 20px;border-right:1px solid var(--m2-line-2);min-height:740px}
+.mk2 .m2-pane:last-child{border-right:0}
+.mk2 .m2-pane-head{
+  display:flex;align-items:center;gap:10px;
+  font:700 10px/1 "JetBrains Mono",monospace;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--m2-soft);padding-bottom:14px;border-bottom:1px solid var(--m2-line);margin-bottom:18px;
+}
+.mk2 .m2-pane-head .num{color:var(--m2-amber);font-weight:700}
+.mk2 .m2-pane-head .meta{margin-left:auto;color:var(--m2-soft);font-size:9px;letter-spacing:.1em}
+
+.mk2 .m2-row{
+  display:grid;grid-template-columns:90px 1fr;gap:12px;
+  padding:8px 0;border-bottom:1px dotted var(--m2-line);align-items:center;
+}
+.mk2 .m2-row .k{color:var(--m2-soft);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.mk2 .m2-row .v{color:var(--m2-text);font-size:12px}
+.mk2 .m2-row .v.amber{color:var(--m2-amber)}
+.mk2 .m2-row .v.cyan{color:var(--m2-cyan)}
+.mk2 .m2-row .v.green{color:var(--m2-green)}
+.mk2 .m2-row .v.red{color:var(--m2-red)}
+
+.mk2 .m2-input-line{
+  margin-top:14px;display:flex;align-items:center;gap:8px;
+  border:1px solid var(--m2-line-2);padding:10px 12px;background:#0c1014;
+  font-size:12px;
+}
+.mk2 .m2-input-line .label{color:var(--m2-soft);font-size:10px;letter-spacing:.1em}
+.mk2 .m2-input-line .value{color:var(--m2-amber);font-weight:600}
+.mk2 .m2-input-line .arrow{margin-left:auto;color:var(--m2-soft)}
+
+.mk2 .m2-progress{margin-top:14px}
+.mk2 .m2-progress .head{display:flex;justify-content:space-between;font-size:10px;color:var(--m2-soft);letter-spacing:.1em;margin-bottom:6px}
+.mk2 .m2-progress .head .pct{color:var(--m2-amber);font-weight:700}
+.mk2 .m2-progress .bar{height:14px;background:#0c1014;border:1px solid var(--m2-line-2);position:relative;display:flex}
+.mk2 .m2-progress .bar .fill{height:100%;background:var(--m2-amber);width:34%}
+.mk2 .m2-progress .bar .ascii{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#0a0c0f;font-weight:700;letter-spacing:.2em;mix-blend-mode:difference}
+
+/* Center pane: stats + table */
+.mk2 .m2-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--m2-line);border:1px solid var(--m2-line);margin-bottom:18px}
+.mk2 .m2-stat{padding:14px 16px;background:var(--m2-panel)}
+.mk2 .m2-stat .lbl{font-size:9px;color:var(--m2-soft);letter-spacing:.18em;text-transform:uppercase}
+.mk2 .m2-stat .val{font-size:24px;font-weight:600;color:var(--m2-text);margin-top:6px;letter-spacing:-.01em}
+.mk2 .m2-stat .val.amber{color:var(--m2-amber)}
+.mk2 .m2-stat .val.green{color:var(--m2-green)}
+.mk2 .m2-stat .val.red{color:var(--m2-red)}
+.mk2 .m2-stat .delta{font-size:10px;color:var(--m2-soft);margin-top:2px}
+
+.mk2 .m2-table{width:100%;border-collapse:collapse;font-size:11px}
+.mk2 .m2-table thead th{
+  text-align:left;padding:8px 10px;color:var(--m2-soft);
+  font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+  border-bottom:1px solid var(--m2-line-2);
+}
+.mk2 .m2-table tbody td{padding:8px 10px;border-bottom:1px dotted var(--m2-line);color:var(--m2-text)}
+.mk2 .m2-table tbody tr:hover td{background:rgba(245,165,36,.04)}
+.mk2 .m2-table .num{font-variant-numeric:tabular-nums;text-align:right;color:var(--m2-amber)}
+.mk2 .m2-table .ok{color:var(--m2-green)}
+.mk2 .m2-table .warn{color:var(--m2-red)}
+
+.mk2 .m2-section-h{
+  display:flex;align-items:baseline;gap:10px;
+  font:700 10px/1 "JetBrains Mono",monospace;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--m2-soft);margin:22px 0 10px;
+}
+.mk2 .m2-section-h::after{content:"";flex:1;height:1px;background:var(--m2-line)}
+.mk2 .m2-section-h .ct{color:var(--m2-amber);font-weight:700}
+
+.mk2 .m2-btn{
+  appearance:none;width:100%;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 16px;background:var(--m2-amber);color:#0a0c0f;
+  border:none;font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.18em;text-transform:uppercase;
+  cursor:pointer;margin-top:14px;
+}
+.mk2 .m2-btn.ghost{background:transparent;color:var(--m2-text);border:1px solid var(--m2-line-2)}
+.mk2 .m2-btn .ts{font-weight:400;color:rgba(10,12,15,.6);font-size:9px;letter-spacing:.1em}
+
+.mk2 .m2-statusbar{
+  display:flex;align-items:center;gap:0;height:24px;
+  border-top:1px solid var(--m2-line-2);background:var(--m2-panel);
+  font:500 10px/1 "JetBrains Mono",monospace;letter-spacing:.1em;
+}
+.mk2 .m2-statusbar .seg{padding:0 14px;height:100%;display:flex;align-items:center;gap:6px;border-right:1px solid var(--m2-line-2);color:var(--m2-soft)}
+.mk2 .m2-statusbar .seg.green{color:var(--m2-green)}
+.mk2 .m2-statusbar .seg.amber{color:var(--m2-amber)}
+.mk2 .m2-statusbar .seg.right{margin-left:auto;border-right:0;border-left:1px solid var(--m2-line-2)}
+
+/* ================================================================== */
+/* ============ MOCKUP 03 — MODERN WORKSPACE (Linear) ============ */
+/* ================================================================== */
+.mk3{
+  --m3-bg:#fafbfc;
+  --m3-panel:#ffffff;
+  --m3-line:#eceef1;
+  --m3-line-2:#e0e3e8;
+  --m3-ink:#1a1d24;
+  --m3-soft:#6b7280;
+  --m3-soft-2:#9ca3af;
+  --m3-accent:#5b6cff;
+  --m3-accent-soft:#eef0ff;
+  --m3-green:#16a34a;
+  --m3-amber:#d97706;
+  background:var(--m3-bg);color:var(--m3-ink);
+  font-family:"Inter",sans-serif;font-size:14px;line-height:1.5;
+}
+.mk3 .m3-canvas{padding:32px 36px 56px;display:flex;flex-direction:column;gap:24px}
+
+.mk3 .m3-topbar{
+  display:flex;align-items:center;gap:14px;padding-bottom:20px;
+  border-bottom:1px solid var(--m3-line);
+}
+.mk3 .m3-logo{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--m3-accent),#7c8aff);
+  display:grid;place-items:center;color:#fff;font:800 13px/1 "Inter";letter-spacing:-.02em;
+}
+.mk3 .m3-crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--m3-soft)}
+.mk3 .m3-crumbs strong{color:var(--m3-ink);font-weight:600}
+.mk3 .m3-crumbs .sep{color:var(--m3-soft-2)}
+.mk3 .m3-topbar .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.mk3 .m3-pill{
+  font:600 11px/1 "Inter";color:var(--m3-soft);
+  border:1px solid var(--m3-line-2);padding:6px 10px;border-radius:6px;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.mk3 .m3-pill .kbd{background:var(--m3-bg);padding:2px 5px;border-radius:3px;font-family:"JetBrains Mono",monospace;font-size:10px}
+.mk3 .m3-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#fcd34d,#f59e0b);display:grid;place-items:center;font:700 11px/1 "Inter";color:#fff}
+
+.mk3 .m3-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:8px 0 4px}
+.mk3 .m3-hero h1{margin:0;font:800 32px/1.1 "Inter";letter-spacing:-.02em}
+.mk3 .m3-hero .lede{margin-top:6px;color:var(--m3-soft);font-size:14px;max-width:520px}
+.mk3 .m3-hero .meta{display:flex;gap:14px;font-size:12px;color:var(--m3-soft);align-items:center}
+.mk3 .m3-hero .meta .dot{width:6px;height:6px;border-radius:50%;background:var(--m3-green)}
+
+.mk3 .m3-progress{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  background:var(--m3-panel);border:1px solid var(--m3-line);border-radius:12px;overflow:hidden;
+}
+.mk3 .m3-step{
+  padding:18px 22px;display:flex;align-items:center;gap:14px;
+  border-right:1px solid var(--m3-line);position:relative;
+}
+.mk3 .m3-step:last-child{border-right:0}
+.mk3 .m3-step .num{width:30px;height:30px;border-radius:50%;background:var(--m3-bg);border:1px solid var(--m3-line-2);display:grid;place-items:center;font:700 12px/1;color:var(--m3-soft)}
+.mk3 .m3-step.is-done .num{background:var(--m3-green);color:#fff;border-color:var(--m3-green)}
+.mk3 .m3-step.is-active .num{background:var(--m3-accent);color:#fff;border-color:var(--m3-accent)}
+.mk3 .m3-step .info strong{display:block;font-size:13px;font-weight:600}
+.mk3 .m3-step .info span{display:block;font-size:11px;color:var(--m3-soft);margin-top:2px}
+.mk3 .m3-step .check{margin-left:auto;color:var(--m3-green);font-size:18px}
+
+.mk3 .m3-grid{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:18px}
+
+.mk3 .m3-card{
+  background:var(--m3-panel);border:1px solid var(--m3-line);border-radius:12px;
+  padding:22px;display:flex;flex-direction:column;gap:16px;
+}
+.mk3 .m3-card-h{display:flex;align-items:center;gap:10px}
+.mk3 .m3-card-h .ic{width:32px;height:32px;border-radius:8px;background:var(--m3-accent-soft);color:var(--m3-accent);display:grid;place-items:center;font:700 13px/1}
+.mk3 .m3-card-h .info strong{font-size:15px;font-weight:600}
+.mk3 .m3-card-h .info span{display:block;font-size:12px;color:var(--m3-soft);margin-top:1px}
+
+.mk3 .m3-field{display:flex;flex-direction:column;gap:6px}
+.mk3 .m3-field label{font:500 12px/1 "Inter";color:var(--m3-ink)}
+.mk3 .m3-field input{
+  border:1px solid var(--m3-line-2);background:var(--m3-panel);padding:10px 12px;border-radius:8px;
+  font:400 13px/1.4 "Inter";color:var(--m3-ink);outline:none;
+}
+.mk3 .m3-field input:focus{border-color:var(--m3-accent);box-shadow:0 0 0 3px var(--m3-accent-soft)}
+.mk3 .m3-field input.placeholder{color:var(--m3-soft-2)}
+.mk3 .m3-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.mk3 .m3-source-pick{
+  display:flex;align-items:center;gap:12px;padding:12px;
+  border:1px solid var(--m3-line-2);border-radius:8px;background:var(--m3-bg);
+}
+.mk3 .m3-source-pick .swatch{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;display:grid;place-items:center;font:700 11px/1}
+.mk3 .m3-source-pick strong{font-size:13px;font-weight:600}
+.mk3 .m3-source-pick span{display:block;font-size:11px;color:var(--m3-soft)}
+.mk3 .m3-source-pick .change{margin-left:auto;font:600 11px/1;color:var(--m3-accent);cursor:pointer}
+
+.mk3 .m3-drop{
+  border:1.5px dashed var(--m3-line-2);border-radius:10px;
+  padding:22px;text-align:center;color:var(--m3-soft);font-size:13px;background:var(--m3-bg);
+}
+.mk3 .m3-drop strong{color:var(--m3-ink);font-weight:600;display:block;margin-bottom:4px;font-size:13px}
+.mk3 .m3-drop .browse{color:var(--m3-accent);font-weight:600}
+
+.mk3 .m3-pbar{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--m3-soft)}
+.mk3 .m3-pbar .track{flex:1;height:6px;background:var(--m3-line);border-radius:999px;overflow:hidden}
+.mk3 .m3-pbar .track > span{display:block;height:100%;background:var(--m3-accent);width:34%;border-radius:999px}
+.mk3 .m3-pbar .pct{font-weight:600;color:var(--m3-ink)}
+
+.mk3 .m3-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mk3 .m3-stat{
+  border:1px solid var(--m3-line);border-radius:10px;padding:14px;background:var(--m3-bg);
+  display:flex;flex-direction:column;gap:4px;
+}
+.mk3 .m3-stat .lbl{font-size:11px;color:var(--m3-soft);font-weight:500}
+.mk3 .m3-stat .val{font:700 22px/1 "Inter";letter-spacing:-.02em}
+.mk3 .m3-stat .val.green{color:var(--m3-green)}
+.mk3 .m3-stat .val.amber{color:var(--m3-amber)}
+.mk3 .m3-stat.span2{grid-column:span 2}
+
+.mk3 .m3-line{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--m3-line);font-size:13px}
+.mk3 .m3-line:last-child{border-bottom:0}
+.mk3 .m3-line .k{color:var(--m3-soft);font-size:12px}
+.mk3 .m3-line .v{font-weight:600;font-variant-numeric:tabular-nums}
+.mk3 .m3-line .ok{color:var(--m3-green);font:600 11px/1;border:1px solid var(--m3-green);padding:3px 8px;border-radius:999px;background:rgba(22,163,74,.06)}
+
+.mk3 .m3-btn{
+  appearance:none;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  border:none;background:var(--m3-accent);color:#fff;
+  padding:12px 16px;border-radius:8px;font:600 13px/1 "Inter";cursor:pointer;
+  box-shadow:0 1px 0 rgba(91,108,255,.4),0 4px 8px rgba(91,108,255,.18);
+}
+.mk3 .m3-btn.ghost{background:var(--m3-panel);color:var(--m3-ink);border:1px solid var(--m3-line-2);box-shadow:none}
+.mk3 .m3-btn.ghost:hover{background:var(--m3-bg)}
+.mk3 .m3-btn.disabled{background:var(--m3-line-2);color:var(--m3-soft);box-shadow:none;cursor:not-allowed}
+
+.mk3 .m3-foot{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.mk3 .m3-empty{
+  border:1px dashed var(--m3-line-2);border-radius:10px;padding:32px;text-align:center;
+  color:var(--m3-soft);font-size:13px;
+}
+.mk3 .m3-empty strong{display:block;color:var(--m3-ink);font-weight:600;margin-bottom:4px;font-size:13px}
+
+/* ================================================================== */
+/* ============ MOCKUP 04 — GLASS ATELIER (Apple Pro) ============ */
+/* ================================================================== */
+.mk4{
+  --m4-ink:#0a0a0c;
+  --m4-soft:rgba(10,10,12,.6);
+  --m4-mute:rgba(10,10,12,.4);
+  --m4-line:rgba(10,10,12,.08);
+  --m4-line-2:rgba(10,10,12,.14);
+  --m4-accent:#0066ff;
+  --m4-warm:#ff5e3a;
+  background:linear-gradient(135deg,#fbe5d6 0%,#e6d6f0 50%,#cae3f5 100%);
+  color:var(--m4-ink);
+  font-family:-apple-system,"SF Pro Display","Inter",sans-serif;
+  font-size:14px;line-height:1.5;
+  position:relative;overflow:hidden;
+}
+.mk4::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(900px 500px at 12% 18%,rgba(255,150,80,.4),transparent 60%),
+    radial-gradient(700px 400px at 80% 12%,rgba(180,120,255,.4),transparent 60%),
+    radial-gradient(800px 500px at 65% 90%,rgba(80,180,255,.4),transparent 60%);
+  pointer-events:none;
+}
+.mk4 .m4-canvas{position:relative;padding:36px 40px 56px;display:flex;flex-direction:column;gap:22px;z-index:1}
+
+.mk4 .m4-topbar{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,.42);
+  -webkit-backdrop-filter:blur(28px) saturate(140%);
+  backdrop-filter:blur(28px) saturate(140%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:18px;padding:12px 18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.04);
+}
+.mk4 .m4-topbar .ico{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#0066ff,#0099ff)}
+.mk4 .m4-topbar h3{font:700 14px/1 -apple-system;letter-spacing:-.01em;margin:0}
+.mk4 .m4-topbar .stepdots{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--m4-soft)}
+.mk4 .m4-topbar .stepdots .ds{width:6px;height:6px;border-radius:50%;background:var(--m4-line-2)}
+.mk4 .m4-topbar .stepdots .ds.is-active{background:var(--m4-accent);box-shadow:0 0 0 4px rgba(0,102,255,.18)}
+
+.mk4 .m4-hero{padding:14px 6px 4px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.mk4 .m4-hero h1{
+  margin:0;font-family:"Fraunces",serif;font-weight:500;
+  font-size:64px;line-height:.96;letter-spacing:-.04em;color:var(--m4-ink);
+}
+.mk4 .m4-hero h1 em{font-style:italic;font-weight:400}
+.mk4 .m4-hero .lede{font-size:15px;color:var(--m4-soft);max-width:480px;text-align:right;font-weight:500}
+
+.mk4 .m4-grid{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:18px}
+.mk4 .m4-card{
+  background:rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(28px) saturate(150%);
+  backdrop-filter:blur(28px) saturate(150%);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:24px;padding:24px;
+  box-shadow:0 12px 36px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.7);
+  display:flex;flex-direction:column;gap:18px;
+}
+.mk4 .m4-card-h{display:flex;align-items:center;gap:12px}
+.mk4 .m4-card-h .step{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--m4-ink),#3a3a3c);color:#fff;
+  display:grid;place-items:center;font:600 12px/1 -apple-system;letter-spacing:.04em;
+  box-shadow:0 4px 10px rgba(0,0,0,.18);
+}
+.mk4 .m4-card-h h2{margin:0;font:600 18px/1 -apple-system;letter-spacing:-.02em}
+.mk4 .m4-card-h .info span{display:block;font-size:12px;color:var(--m4-soft);margin-top:2px;font-weight:500}
+
+.mk4 .m4-field label{font:600 11px/1 -apple-system;letter-spacing:.04em;text-transform:uppercase;color:var(--m4-soft)}
+.mk4 .m4-field{display:flex;flex-direction:column;gap:6px}
+.mk4 .m4-input{
+  background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.7);
+  padding:12px 14px;border-radius:12px;font-size:14px;color:var(--m4-ink);
+  font-family:inherit;outline:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+}
+.mk4 .m4-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.mk4 .m4-source{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.7);
+  padding:14px 16px;border-radius:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+}
+.mk4 .m4-source .av{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#34c759,#30a14e);color:#fff;display:grid;place-items:center;font:700 12px/1 -apple-system}
+.mk4 .m4-source strong{font-size:15px;font-weight:600}
+.mk4 .m4-source span{display:block;font-size:12px;color:var(--m4-soft);font-weight:500}
+.mk4 .m4-source .pill{margin-left:auto;font:600 11px/1 -apple-system;color:var(--m4-accent);background:rgba(0,102,255,.1);padding:6px 10px;border-radius:999px}
+
+.mk4 .m4-drop{
+  border:1.5px dashed rgba(10,10,12,.16);border-radius:14px;
+  padding:24px;text-align:center;color:var(--m4-soft);font-size:13px;
+  background:rgba(255,255,255,.35);
+}
+.mk4 .m4-drop strong{color:var(--m4-ink);font-weight:600;font-size:14px;display:block;margin-bottom:4px}
+
+.mk4 .m4-prog{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--m4-soft);font-weight:500}
+.mk4 .m4-prog .track{flex:1;height:6px;background:rgba(10,10,12,.08);border-radius:999px;overflow:hidden}
+.mk4 .m4-prog .track > span{display:block;height:100%;background:linear-gradient(90deg,var(--m4-accent),#00aaff);width:34%;border-radius:999px}
+
+.mk4 .m4-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mk4 .m4-stat{
+  background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.7);
+  padding:16px;border-radius:14px;
+  display:flex;flex-direction:column;gap:4px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+}
+.mk4 .m4-stat .lbl{font:600 10px/1 -apple-system;letter-spacing:.08em;text-transform:uppercase;color:var(--m4-soft)}
+.mk4 .m4-stat .val{font-family:"Fraunces",serif;font-weight:500;font-size:34px;line-height:1;letter-spacing:-.02em}
+.mk4 .m4-stat .val.amber{color:var(--m4-warm)}
+.mk4 .m4-stat.span2{grid-column:span 2}
+.mk4 .m4-stat .delta{font-size:11px;color:var(--m4-soft);font-weight:500;margin-top:2px}
+
+.mk4 .m4-bd{display:flex;flex-direction:column;gap:0;margin-top:8px}
+.mk4 .m4-bd .h{font:600 11px/1 -apple-system;letter-spacing:.06em;text-transform:uppercase;color:var(--m4-soft);margin-bottom:6px}
+.mk4 .m4-bd .row{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid rgba(10,10,12,.06)}
+.mk4 .m4-bd .row .v{font-weight:600;font-variant-numeric:tabular-nums}
+
+.mk4 .m4-btn{
+  appearance:none;width:100%;
+  background:linear-gradient(180deg,var(--m4-ink),#1a1a1d);color:#fff;
+  border:none;padding:15px;border-radius:14px;
+  font:600 14px/1 -apple-system;letter-spacing:-.01em;cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.18);
+  display:flex;justify-content:center;align-items:center;gap:8px;
+}
+.mk4 .m4-btn.ghost{background:rgba(255,255,255,.6);color:var(--m4-ink);border:1px solid rgba(255,255,255,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.mk4 .m4-btn.dis{background:rgba(10,10,12,.08);color:var(--m4-mute);box-shadow:none;cursor:not-allowed}
+
+/* ================================================================== */
+/* ============ MOCKUP 05 — SWISS BRUTALIST (Müller-Brockmann) ===== */
+/* ================================================================== */
+.mk5{
+  --m5-paper:#f5f1e8;
+  --m5-ink:#0a0a0a;
+  --m5-red:#d92f1f;
+  background:var(--m5-paper);color:var(--m5-ink);
+  font-family:"Space Grotesk","Inter",sans-serif;
+  font-size:14px;line-height:1.4;
+}
+.mk5 .m5-canvas{padding:0;display:flex;flex-direction:column}
+
+.mk5 .m5-bar{
+  display:flex;align-items:center;gap:0;
+  border-bottom:3px solid var(--m5-ink);height:56px;background:var(--m5-paper);
+}
+.mk5 .m5-bar .id{
+  height:100%;display:flex;align-items:center;
+  padding:0 24px;border-right:3px solid var(--m5-ink);
+  font:700 14px/1 "Space Grotesk";letter-spacing:.04em;text-transform:uppercase;
+}
+.mk5 .m5-bar .id .red{color:var(--m5-red)}
+.mk5 .m5-bar .progress{
+  flex:1;display:grid;grid-template-columns:repeat(3,1fr);height:100%;
+}
+.mk5 .m5-bar .seg{
+  border-right:3px solid var(--m5-ink);display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+  font:700 11px/1 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase;
+}
+.mk5 .m5-bar .seg:last-child{border-right:0}
+.mk5 .m5-bar .seg.is-active{background:var(--m5-ink);color:var(--m5-paper)}
+.mk5 .m5-bar .seg.is-done{background:var(--m5-red);color:var(--m5-paper)}
+.mk5 .m5-bar .seg .num{font-size:14px;font-weight:700}
+.mk5 .m5-bar .meta{padding:0 24px;height:100%;display:flex;align-items:center;border-left:3px solid var(--m5-ink);font:700 11px/1 "Space Grotesk";letter-spacing:.14em;text-transform:uppercase}
+
+.mk5 .m5-hero{
+  display:grid;grid-template-columns:repeat(12,1fr);gap:0;
+  border-bottom:3px solid var(--m5-ink);
+}
+.mk5 .m5-hero .h-title{
+  grid-column:1 / span 9;padding:32px 24px 24px;border-right:3px solid var(--m5-ink);
+}
+.mk5 .m5-hero h1{
+  margin:0;font:900 88px/.86 "Space Grotesk";letter-spacing:-.04em;text-transform:uppercase;
+}
+.mk5 .m5-hero h1 .red{color:var(--m5-red)}
+.mk5 .m5-hero .h-meta{padding:24px;display:flex;flex-direction:column;justify-content:space-between;grid-column:10 / span 3;gap:18px}
+.mk5 .m5-hero .h-meta .row{font:600 11px/1.5 "Space Grotesk";letter-spacing:.14em;text-transform:uppercase}
+.mk5 .m5-hero .h-meta .row strong{display:block;font-weight:700;font-size:14px;letter-spacing:-.01em;text-transform:none;margin-top:4px}
+.mk5 .m5-hero .h-meta .row .red{color:var(--m5-red)}
+
+.mk5 .m5-grid{
+  display:grid;grid-template-columns:repeat(12,1fr);gap:0;
+  border-bottom:3px solid var(--m5-ink);
+}
+.mk5 .m5-block{padding:24px;border-right:3px solid var(--m5-ink);min-height:520px;display:flex;flex-direction:column;gap:18px}
+.mk5 .m5-block:last-child{border-right:0}
+.mk5 .m5-block.b1{grid-column:span 5}
+.mk5 .m5-block.b2{grid-column:span 4}
+.mk5 .m5-block.b3{grid-column:span 3}
+
+.mk5 .m5-blocknum{
+  display:flex;align-items:baseline;gap:14px;
+  border-bottom:3px solid var(--m5-ink);padding-bottom:14px;
+}
+.mk5 .m5-blocknum .num{font:900 56px/.8 "Space Grotesk";color:var(--m5-red);letter-spacing:-.04em}
+.mk5 .m5-blocknum .info h2{margin:0;font:800 22px/1 "Space Grotesk";text-transform:uppercase;letter-spacing:-.02em}
+.mk5 .m5-blocknum .info span{font:500 11px/1 "Space Grotesk";letter-spacing:.16em;text-transform:uppercase;display:block;margin-top:6px}
+
+.mk5 .m5-field{display:flex;flex-direction:column;gap:4px}
+.mk5 .m5-field label{font:700 10px/1 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase}
+.mk5 .m5-field input{
+  border:none;background:transparent;border-bottom:2px solid var(--m5-ink);
+  padding:10px 0;font:600 18px/1.2 "Space Grotesk";color:var(--m5-ink);outline:none;
+  font-family:inherit;
+}
+.mk5 .m5-field input.placeholder{color:rgba(10,10,10,.35);font-weight:400}
+
+.mk5 .m5-source-row{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  border:3px solid var(--m5-ink);padding:14px 16px;background:#fff;
+}
+.mk5 .m5-source-row .mark{
+  width:46px;height:46px;background:var(--m5-red);color:#fff;
+  display:grid;place-items:center;font:900 14px/1 "Space Grotesk";letter-spacing:.02em;
+}
+.mk5 .m5-source-row strong{font:800 16px/1 "Space Grotesk";letter-spacing:-.01em;text-transform:uppercase;display:block}
+.mk5 .m5-source-row span{font:600 11px/1.4 "Space Grotesk";letter-spacing:.14em;text-transform:uppercase;display:block;margin-top:4px}
+.mk5 .m5-source-row .ch{font:800 11px/1 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+.mk5 .m5-drop{
+  border:3px dashed var(--m5-ink);padding:18px;text-align:center;background:transparent;
+}
+.mk5 .m5-drop strong{display:block;font:800 18px/1 "Space Grotesk";text-transform:uppercase;letter-spacing:-.01em}
+.mk5 .m5-drop span{font:600 10px/1.4 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase;display:block;margin-top:6px}
+
+.mk5 .m5-prog{margin-top:auto}
+.mk5 .m5-prog .h{display:flex;justify-content:space-between;font:700 11px/1 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px}
+.mk5 .m5-prog .h .pct{color:var(--m5-red)}
+.mk5 .m5-prog .bar{height:14px;border:3px solid var(--m5-ink);background:#fff}
+.mk5 .m5-prog .bar > span{display:block;height:100%;background:var(--m5-ink);width:34%}
+
+.mk5 .m5-bigval{
+  border-bottom:3px solid var(--m5-ink);padding-bottom:14px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.mk5 .m5-bigval .lbl{font:700 11px/1 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase}
+.mk5 .m5-bigval .val{font:900 64px/.86 "Space Grotesk";letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.mk5 .m5-bigval .val.red{color:var(--m5-red)}
+
+.mk5 .m5-pair{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:3px solid var(--m5-ink)}
+.mk5 .m5-pair .cell{padding:14px 0;display:flex;flex-direction:column;gap:4px}
+.mk5 .m5-pair .cell:first-child{border-right:3px solid var(--m5-ink);padding-right:14px}
+.mk5 .m5-pair .cell:last-child{padding-left:14px}
+.mk5 .m5-pair .lbl{font:700 10px/1 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase}
+.mk5 .m5-pair .val{font:900 32px/.9 "Space Grotesk";letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+.mk5 .m5-bd{display:flex;flex-direction:column}
+.mk5 .m5-bd .h{font:700 10px/1 "Space Grotesk";letter-spacing:.18em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--m5-ink);margin-bottom:6px}
+.mk5 .m5-bd .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(10,10,10,.2);font:600 12px/1 "Space Grotesk"}
+.mk5 .m5-bd .row .v{font-weight:700;font-variant-numeric:tabular-nums}
+
+.mk5 .m5-btn{
+  appearance:none;display:flex;justify-content:space-between;align-items:center;
+  width:100%;padding:18px 20px;border:3px solid var(--m5-ink);background:var(--m5-ink);color:var(--m5-paper);
+  font:800 14px/1 "Space Grotesk";letter-spacing:.14em;text-transform:uppercase;cursor:pointer;
+}
+.mk5 .m5-btn.ghost{background:transparent;color:var(--m5-ink)}
+.mk5 .m5-btn.red{background:var(--m5-red);border-color:var(--m5-red);color:#fff}
+.mk5 .m5-btn.dis{background:transparent;color:rgba(10,10,10,.35);border-color:rgba(10,10,10,.25);cursor:not-allowed}
+
+.mk5 .m5-foot{
+  display:grid;grid-template-columns:1fr 1fr;border-bottom:3px solid var(--m5-ink);
+}
+.mk5 .m5-foot .cell{padding:24px;border-right:3px solid var(--m5-ink);display:flex;flex-direction:column;gap:6px;min-height:140px}
+.mk5 .m5-foot .cell:last-child{border-right:0}
+.mk5 .m5-foot .cell h3{margin:0;font:800 16px/1 "Space Grotesk";text-transform:uppercase;letter-spacing:-.01em}
+.mk5 .m5-foot .cell .blank{font:500 11px/1.4 "Space Grotesk";letter-spacing:.16em;text-transform:uppercase;color:rgba(10,10,10,.5)}
+
+</style>
+</head>
+<body>
+
+<!-- =============================================== -->
+<!-- ============ STICKY SWITCHER ================== -->
+<!-- =============================================== -->
+<div class="switcher">
+  <span class="switcher-title">Workbook Console · Mockups</span>
+  <div class="switcher-tabs" role="tablist">
+    <button class="switcher-tab is-active" data-mock="1"><span class="tab-num">01</span>Editorial Quiet</button>
+    <button class="switcher-tab" data-mock="2"><span class="tab-num">02</span>Terminal Console</button>
+    <button class="switcher-tab" data-mock="3"><span class="tab-num">03</span>Modern Workspace</button>
+    <button class="switcher-tab" data-mock="4"><span class="tab-num">04</span>Glass Atelier</button>
+    <button class="switcher-tab" data-mock="5"><span class="tab-num">05</span>Swiss Brutalist</button>
+  </div>
+  <div class="switcher-spacer"></div>
+  <span class="switcher-meta" id="switcherMeta">5 Variations · ← → to switch</span>
+</div>
+
+<div class="stage">
+
+<!-- ================================================================== -->
+<!-- ============ MOCKUP 01 — EDITORIAL QUIET ======================== -->
+<!-- ================================================================== -->
+<div class="mockup is-active" data-mock="1">
+  <div class="caption">
+    <div>
+      <div class="cap-id">MOCKUP 01</div>
+      <h2>Editorial Quiet</h2>
+      <p class="cap-sub">Kenya Hara inspired — hairline rules, generous white space, serif display, single accent. Aspires to feel less like a tool, more like a quiet reading room.</p>
+    </div>
+    <div class="cap-tags">
+      <span class="cap-tag">Newsreader Serif</span>
+      <span class="cap-tag">Hairline rules</span>
+      <span class="cap-tag">Single accent · Cinnabar</span>
+      <span class="cap-tag">Low density</span>
+    </div>
+  </div>
+
+  <div class="frame mk1">
+    <div class="m1-canvas">
+
+      <div class="m1-hero">
+        <div>
+          <div class="m1-eyebrow">Workbook Ingestion · Cursor Design</div>
+          <h1 class="m1-title">A console for the<br/><em>quiet</em> work of parsing.</h1>
+          <p class="m1-lede">Configure the job, upload a fixed-width text file, then map and export. We handle parsing, validation, and the final workbook output.</p>
+        </div>
+        <div class="m1-stepnav" aria-label="Progress">
+          <div class="item is-active"><span>Configure &amp; Load</span><span class="num">01</span></div>
+          <div class="item"><span>Review Results</span><span class="num">02</span></div>
+          <div class="item"><span>Map &amp; Export</span><span class="num">03</span></div>
+        </div>
+      </div>
+
+      <div class="m1-grid">
+
+        <!-- Step 1 -->
+        <div class="m1-col">
+          <div>
+            <div class="m1-section-num"><span>I.</span><span>Setup</span></div>
+            <h3 class="m1-h">Configure &amp; load</h3>
+            <p class="m1-desc">Pick a data source, record plan details, then load your file.</p>
+          </div>
+
+          <div class="m1-field">
+            <span class="m1-label">Data Source</span>
+            <div class="m1-source">
+              <div class="m1-source-mark">FID</div>
+              <div class="m1-source-info">
+                <strong>Fidelity</strong>
+                <span>Fixed-width · 80 cols</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="m1-row2">
+            <div class="m1-field">
+              <span class="m1-label">Case Number</span>
+              <input class="m1-input with-value" value="2024-A-441" />
+            </div>
+            <div class="m1-field">
+              <span class="m1-label">Plan Name</span>
+              <input class="m1-input with-value" value="Hawthorn Holdings 401(k)" />
+            </div>
+          </div>
+
+          <div class="m1-field">
+            <span class="m1-label">Source File</span>
+            <div class="m1-file">
+              <span>fidelity_2024_q3_export.dat</span>
+              <small>Browse · 4.7 MB · 12,484 lines</small>
+            </div>
+          </div>
+
+          <div class="m1-progress">
+            <span>Parsing</span>
+            <div class="m1-progress-bar"><span></span></div>
+            <span>34%</span>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="m1-col">
+          <div>
+            <div class="m1-section-num"><span>II.</span><span>Results</span></div>
+            <h3 class="m1-h">Parse summary</h3>
+            <p class="m1-desc">Totals and counters from the current parse.</p>
+          </div>
+
+          <div class="m1-stats">
+            <div class="m1-stat-row">
+              <span class="lbl">Grand Total</span>
+              <span class="val"><em>$</em>4,218,704.<small style="font-size:18px">12</small></span>
+            </div>
+            <div class="m1-stat-row">
+              <span class="lbl">Participants</span>
+              <span class="val">1,427</span>
+            </div>
+            <div class="m1-stat-row">
+              <span class="lbl">Lines Accepted</span>
+              <span class="val">12,481 <em>/ 12,484</em></span>
+            </div>
+          </div>
+
+          <div>
+            <span class="m1-label" style="display:block;margin-bottom:8px">Source Totals</span>
+            <div class="m1-breakdown">
+              <div><span>EE Pre-Tax</span><span>$1,842,310.04</span></div>
+              <div><span>EE Roth</span><span>$612,448.18</span></div>
+              <div><span>ER Match</span><span>$1,160,221.40</span></div>
+              <div><span>ER Profit Share</span><span>$603,724.50</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="m1-col">
+          <div>
+            <div class="m1-section-num"><span>III.</span><span>Mapping &amp; Export</span></div>
+            <h3 class="m1-h">Map &amp; export</h3>
+            <p class="m1-desc">Validate the mapping workbook, reconcile totals, then generate output.</p>
+          </div>
+
+          <div class="m1-export-card">
+            <strong>Mapping workbook</strong>
+            <span>hawthorn_mapping_v3.xlsx · validated · 0 errors</span>
+          </div>
+          <button class="m1-btn muted">Replace mapping <span class="arrow">→</span></button>
+
+          <div class="m1-export-card">
+            <strong>Reconciliation</strong>
+            <span>Source codes 4 of 4 · Funds 11 of 11 · all matched</span>
+          </div>
+
+          <button class="m1-btn">Export workbook <span class="arrow">→</span></button>
+        </div>
+
+      </div>
+
+      <div class="m1-foot">
+        <div>
+          <h4>Report list</h4>
+          <div class="m1-empty">No source selected. Pick a data source in step one to see available report types.</div>
+        </div>
+        <div>
+          <h4>Parsed reports</h4>
+          <div class="m1-empty">No parsed reports yet — output will appear here once the file finishes processing.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- ============ MOCKUP 02 — TERMINAL CONSOLE ======================= -->
+<!-- ================================================================== -->
+<div class="mockup" data-mock="2">
+  <div class="caption">
+    <div>
+      <div class="cap-id">MOCKUP 02</div>
+      <h2>Terminal Console</h2>
+      <p class="cap-sub">Bloomberg / IBM ops console. Dense, monospace, dark. Power-user mode — every pixel earns its place. Live counters, status bars, command bar.</p>
+    </div>
+    <div class="cap-tags">
+      <span class="cap-tag">JetBrains Mono</span>
+      <span class="cap-tag">High density</span>
+      <span class="cap-tag">Status-driven</span>
+      <span class="cap-tag">Amber accent</span>
+    </div>
+  </div>
+
+  <div class="frame mk2">
+    <div class="m2-canvas">
+
+      <div class="m2-topbar">
+        <div class="brand"><span class="dot"></span>WBC · v2.4</div>
+        <div class="modes">
+          <div class="mode is-active"><span class="num">01</span>CONFIG</div>
+          <div class="mode"><span class="num">02</span>PARSE</div>
+          <div class="mode"><span class="num">03</span>MAP+EXPORT</div>
+        </div>
+        <div class="ticker">
+          <span>SESS · 04:21:48</span>
+          <span>USER · m.bachelier</span>
+          <span class="live">LIVE</span>
+        </div>
+      </div>
+
+      <div class="m2-cmdbar">
+        <span class="prompt">&gt; CMD</span>
+        <input value="LOAD fidelity_2024_q3_export.dat — CASE 2024-A-441" />
+        <span class="help">F1 HELP · F2 SOURCES · F3 MAP · F4 EXPORT</span>
+      </div>
+
+      <div class="m2-grid">
+
+        <!-- Pane 1: Config -->
+        <div class="m2-pane">
+          <div class="m2-pane-head"><span class="num">01</span>CONFIGURE &amp; LOAD<span class="meta">REQ</span></div>
+
+          <div class="m2-row"><span class="k">Source</span><span class="v amber">FIDELITY · 80 col</span></div>
+          <div class="m2-row"><span class="k">Case</span><span class="v">2024-A-441</span></div>
+          <div class="m2-row"><span class="k">Plan</span><span class="v">HAWTHORN HOLDINGS 401(K)</span></div>
+          <div class="m2-row"><span class="k">Mode</span><span class="v cyan">FILE · single</span></div>
+
+          <div class="m2-input-line">
+            <span class="label">FILE</span>
+            <span class="value">fidelity_2024_q3_export.dat</span>
+            <span class="arrow">▸</span>
+          </div>
+
+          <div class="m2-progress">
+            <div class="head"><span>PARSE</span><span class="pct">34%</span></div>
+            <div class="bar">
+              <div class="fill"></div>
+              <span class="ascii">▰▰▰▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱▱▱</span>
+            </div>
+          </div>
+
+          <div class="m2-section-h"><span>FIELD MAP</span><span class="ct">[80]</span></div>
+          <div class="m2-row"><span class="k">PlanNum</span><span class="v">1·5</span></div>
+          <div class="m2-row"><span class="k">PartId</span><span class="v">13·12</span></div>
+          <div class="m2-row"><span class="k">Record</span><span class="v amber">30·2</span></div>
+          <div class="m2-row"><span class="k">Name</span><span class="v">32·20</span></div>
+          <div class="m2-row"><span class="k">Amount</span><span class="v">61·11</span></div>
+        </div>
+
+        <!-- Pane 2: Live data -->
+        <div class="m2-pane">
+          <div class="m2-pane-head"><span class="num">02</span>PARSE SUMMARY<span class="meta">LIVE · 250ms</span></div>
+
+          <div class="m2-stats">
+            <div class="m2-stat"><div class="lbl">GRAND TOTAL</div><div class="val amber">$4,218,704.12</div><div class="delta">USD · sum</div></div>
+            <div class="m2-stat"><div class="lbl">PARTS</div><div class="val">1,427</div><div class="delta">unique IDs</div></div>
+            <div class="m2-stat"><div class="lbl">ACCEPTED</div><div class="val green">12,481</div><div class="delta">99.98%</div></div>
+            <div class="m2-stat"><div class="lbl">DISCARDED</div><div class="val red">3</div><div class="delta">manual review</div></div>
+          </div>
+
+          <div class="m2-section-h"><span>SOURCE TOTALS</span><span class="ct">[4]</span></div>
+          <table class="m2-table">
+            <thead><tr><th>CODE</th><th>DESC</th><th class="num">AMOUNT</th><th class="num">CT</th><th>STAT</th></tr></thead>
+            <tbody>
+              <tr><td class="amber">EE-PT</td><td>EE Pre-Tax</td><td class="num">1,842,310.04</td><td class="num">11,402</td><td class="ok">OK</td></tr>
+              <tr><td class="amber">EE-RH</td><td>EE Roth</td><td class="num">612,448.18</td><td class="num">3,889</td><td class="ok">OK</td></tr>
+              <tr><td class="amber">ER-MT</td><td>ER Match</td><td class="num">1,160,221.40</td><td class="num">11,402</td><td class="ok">OK</td></tr>
+              <tr><td class="amber">ER-PS</td><td>ER Profit Share</td><td class="num">603,724.50</td><td class="num">1,427</td><td class="ok">OK</td></tr>
+            </tbody>
+          </table>
+
+          <div class="m2-section-h"><span>FUND ALLOCATION</span><span class="ct">[11]</span></div>
+          <table class="m2-table">
+            <thead><tr><th>FUND</th><th>NAME</th><th class="num">$</th><th class="num">%</th></tr></thead>
+            <tbody>
+              <tr><td class="amber">VITSX</td><td>Vanguard Total Stock Index</td><td class="num">1,184,221.18</td><td class="num">28.07</td></tr>
+              <tr><td class="amber">VBTLX</td><td>Vanguard Total Bond Index</td><td class="num">621,442.30</td><td class="num">14.73</td></tr>
+              <tr><td class="amber">VTSAX</td><td>Vanguard Total Intl Stk</td><td class="num">488,201.04</td><td class="num">11.57</td></tr>
+              <tr><td class="amber">FXAIX</td><td>Fidelity 500 Index</td><td class="num">441,021.88</td><td class="num">10.46</td></tr>
+              <tr><td class="amber">FSKAX</td><td>Fidelity Total Mkt Index</td><td class="num">408,210.60</td><td class="num">9.68</td></tr>
+              <tr><td class="amber">···</td><td><span style="color:var(--m2-soft)">+ 6 more funds</span></td><td class="num"><span style="color:var(--m2-soft)">·</span></td><td class="num"><span style="color:var(--m2-soft)">·</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pane 3: Map + Export -->
+        <div class="m2-pane">
+          <div class="m2-pane-head"><span class="num">03</span>MAP+EXPORT<span class="meta">READY</span></div>
+
+          <div class="m2-row"><span class="k">Map file</span><span class="v">hawthorn_mapping_v3.xlsx</span></div>
+          <div class="m2-row"><span class="k">Validated</span><span class="v green">✓ 0 errors</span></div>
+          <div class="m2-row"><span class="k">Updated</span><span class="v">2024-09-12 14:08:22</span></div>
+
+          <div class="m2-section-h"><span>RECONCILIATION</span><span class="ct">[15]</span></div>
+          <div class="m2-row"><span class="k">Sources</span><span class="v green">4 / 4 matched</span></div>
+          <div class="m2-row"><span class="k">Funds</span><span class="v green">11 / 11 matched</span></div>
+          <div class="m2-row"><span class="k">Conflicts</span><span class="v">0</span></div>
+
+          <div class="m2-section-h"><span>EXPORT</span><span class="ct">XLSX</span></div>
+          <div class="m2-row"><span class="k">Title page</span><span class="v cyan">included</span></div>
+          <div class="m2-row"><span class="k">Tabs</span><span class="v">23 reports</span></div>
+          <div class="m2-row"><span class="k">Est size</span><span class="v">2.4 MB</span></div>
+
+          <button class="m2-btn ghost">REPLACE MAP <span class="ts">F3</span></button>
+          <button class="m2-btn">EXPORT WORKBOOK <span class="ts">F4 · ↵</span></button>
+
+          <div class="m2-section-h"><span>LAST 4 EVENTS</span><span class="ct">LOG</span></div>
+          <div style="font-size:10.5px;color:var(--m2-soft);line-height:1.7">
+            <div>14:21:08 · MAP loaded · v3</div>
+            <div>14:21:14 · MAP validated · 0 err</div>
+            <div>14:22:01 · PARSE start · 12,484 lines</div>
+            <div>14:22:14 · PARSE 34% · 4,244 ok</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="m2-statusbar">
+        <span class="seg green">● PARSE OK</span>
+        <span class="seg amber">▲ 34%</span>
+        <span class="seg">FIDELITY · 80 COL</span>
+        <span class="seg">12,484 LINES</span>
+        <span class="seg">99.98% ACCEPT</span>
+        <span class="seg right">F1 HELP · F4 EXPORT · ESC RESET</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- ============ MOCKUP 03 — MODERN WORKSPACE (Linear) ============== -->
+<!-- ================================================================== -->
+<div class="mockup" data-mock="3">
+  <div class="caption">
+    <div>
+      <div class="cap-id">MOCKUP 03</div>
+      <h2>Modern Workspace</h2>
+      <p class="cap-sub">Linear / Notion ergonomics. Soft neutrals, mid-density cards, clean Inter, subtle shadows. The "default good SaaS" feel — calm but full-featured.</p>
+    </div>
+    <div class="cap-tags">
+      <span class="cap-tag">Inter</span>
+      <span class="cap-tag">Neutral palette</span>
+      <span class="cap-tag">Cmd-K shortcuts</span>
+      <span class="cap-tag">Iris accent</span>
+    </div>
+  </div>
+
+  <div class="frame mk3">
+    <div class="m3-canvas">
+
+      <div class="m3-topbar">
+        <div class="m3-logo">W</div>
+        <div class="m3-crumbs">
+          <span>Workbook Console</span><span class="sep">/</span>
+          <span>Cases</span><span class="sep">/</span>
+          <strong>2024-A-441 · Hawthorn Holdings</strong>
+        </div>
+        <div class="right">
+          <span class="m3-pill"><span class="kbd">⌘K</span> Search</span>
+          <span class="m3-pill"><span class="kbd">?</span> Help</span>
+          <span class="m3-avatar">MB</span>
+        </div>
+      </div>
+
+      <div class="m3-hero">
+        <div>
+          <h1>Ingest workbook for Hawthorn Holdings</h1>
+          <p class="lede">Configure the job, parse the file, then map and export. We'll handle validation along the way.</p>
+        </div>
+        <div class="meta">
+          <span class="dot"></span><span>Auto-saved 2 min ago</span>
+          <span>·</span>
+          <span>Started Sep 12, 2024</span>
+        </div>
+      </div>
+
+      <div class="m3-progress">
+        <div class="m3-step is-done">
+          <div class="num">✓</div>
+          <div class="info"><strong>Configure &amp; Load</strong><span>Source · file · plan details</span></div>
+          <div class="check">✓</div>
+        </div>
+        <div class="m3-step is-active">
+          <div class="num">2</div>
+          <div class="info"><strong>Review Results</strong><span>34% · parsing in progress</span></div>
+        </div>
+        <div class="m3-step">
+          <div class="num">3</div>
+          <div class="info"><strong>Map &amp; Export</strong><span>Awaiting parse complete</span></div>
+        </div>
+      </div>
+
+      <div class="m3-grid">
+
+        <!-- Step 1 card -->
+        <div class="m3-card">
+          <div class="m3-card-h">
+            <div class="ic">01</div>
+            <div class="info">
+              <strong>Configure &amp; Load</strong>
+              <span>Pick a data source, record plan details, then load your file.</span>
+            </div>
+          </div>
+
+          <div class="m3-field">
+            <label>Data source</label>
+            <div class="m3-source-pick">
+              <div class="swatch">FID</div>
+              <div>
+                <strong>Fidelity</strong>
+                <span>Fixed-width · 80 columns · 23 report types</span>
+              </div>
+              <span class="change">Change</span>
+            </div>
+          </div>
+
+          <div class="m3-row2">
+            <div class="m3-field">
+              <label>Case number</label>
+              <input value="2024-A-441" />
+            </div>
+            <div class="m3-field">
+              <label>Plan name</label>
+              <input value="Hawthorn Holdings 401(k)" />
+            </div>
+          </div>
+
+          <div class="m3-field">
+            <label>Source file</label>
+            <div class="m3-drop">
+              <strong>fidelity_2024_q3_export.dat</strong>
+              <span>4.7 MB · 12,484 lines · drag a different file or <span class="browse">browse</span></span>
+            </div>
+          </div>
+
+          <div class="m3-pbar">
+            <span>Parsing</span>
+            <div class="track"><span></span></div>
+            <span class="pct">34%</span>
+          </div>
+        </div>
+
+        <!-- Step 2 card -->
+        <div class="m3-card">
+          <div class="m3-card-h">
+            <div class="ic">02</div>
+            <div class="info">
+              <strong>Parse Summary</strong>
+              <span>Live totals from the current parse.</span>
+            </div>
+          </div>
+
+          <div class="m3-stat-grid">
+            <div class="m3-stat span2"><span class="lbl">Grand total</span><span class="val">$4,218,704.12</span></div>
+            <div class="m3-stat"><span class="lbl">Participants</span><span class="val">1,427</span></div>
+            <div class="m3-stat"><span class="lbl">Lines parsed</span><span class="val">12,481</span></div>
+            <div class="m3-stat"><span class="lbl">Accepted</span><span class="val green">99.98%</span></div>
+            <div class="m3-stat"><span class="lbl">Discarded</span><span class="val amber">3</span></div>
+          </div>
+
+          <div>
+            <div class="m3-line"><span class="k">EE Pre-Tax</span><span class="v">$1,842,310.04</span></div>
+            <div class="m3-line"><span class="k">EE Roth</span><span class="v">$612,448.18</span></div>
+            <div class="m3-line"><span class="k">ER Match</span><span class="v">$1,160,221.40</span></div>
+            <div class="m3-line"><span class="k">ER Profit Share</span><span class="v">$603,724.50</span></div>
+          </div>
+        </div>
+
+        <!-- Step 3 card -->
+        <div class="m3-card">
+          <div class="m3-card-h">
+            <div class="ic">03</div>
+            <div class="info">
+              <strong>Map &amp; Export</strong>
+              <span>Validate the mapping, reconcile totals, generate output.</span>
+            </div>
+          </div>
+
+          <div class="m3-line"><span class="k">Mapping file</span><span class="v">v3.xlsx</span></div>
+          <div class="m3-line"><span class="k">Validation</span><span class="ok">0 errors</span></div>
+          <div class="m3-line"><span class="k">Source codes matched</span><span class="v">4 / 4</span></div>
+          <div class="m3-line"><span class="k">Funds matched</span><span class="v">11 / 11</span></div>
+          <div class="m3-line"><span class="k">Output tabs</span><span class="v">23 reports</span></div>
+          <div class="m3-line"><span class="k">Est. size</span><span class="v">2.4 MB</span></div>
+
+          <button class="m3-btn ghost">Replace mapping</button>
+          <button class="m3-btn">Export workbook →</button>
+        </div>
+
+      </div>
+
+      <div class="m3-foot">
+        <div class="m3-card" style="padding-top:18px">
+          <div class="m3-card-h">
+            <div class="ic" style="background:#fef3c7;color:#b45309">📋</div>
+            <div class="info"><strong>Available reports for Fidelity</strong><span>23 report types · 04 selected</span></div>
+          </div>
+          <div>
+            <div class="m3-line"><span class="k">01 · Demographic</span><span class="ok">included</span></div>
+            <div class="m3-line"><span class="k">02D · Distribution Detail</span><span class="ok">included</span></div>
+            <div class="m3-line"><span class="k">07D · Year-end Distribution</span><span class="ok">included</span></div>
+            <div class="m3-line"><span class="k">15 · Termination</span><span class="ok">included</span></div>
+          </div>
+        </div>
+        <div class="m3-empty">
+          <strong>Parsed reports will appear here</strong>
+          Output rendering starts at 100%. Currently 34%.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- ============ MOCKUP 04 — GLASS ATELIER (Apple Pro) ============== -->
+<!-- ================================================================== -->
+<div class="mockup" data-mock="4">
+  <div class="caption">
+    <div>
+      <div class="cap-id">MOCKUP 04</div>
+      <h2>Glass Atelier</h2>
+      <p class="cap-sub">Apple-Pro inspired. Light glassmorphism, depth from blur, generous padding, italic Fraunces display. Premium, almost ceremonial — for important data.</p>
+    </div>
+    <div class="cap-tags">
+      <span class="cap-tag">Fraunces italic</span>
+      <span class="cap-tag">Backdrop-filter</span>
+      <span class="cap-tag">Aurora bg</span>
+      <span class="cap-tag">Depth</span>
+    </div>
+  </div>
+
+  <div class="frame mk4">
+    <div class="m4-canvas">
+
+      <div class="m4-topbar">
+        <div class="ico"></div>
+        <h3>Workbook Console</h3>
+        <div class="stepdots">
+          <span class="ds is-active"></span>
+          <span class="ds is-active"></span>
+          <span class="ds"></span>
+          <span style="margin-left:6px">Step 2 of 3 · review results</span>
+        </div>
+      </div>
+
+      <div class="m4-hero">
+        <h1>Ingestion, in <em>three quiet</em> moves.</h1>
+        <p class="lede">Configure the job, parse the file, then map and export. Hawthorn Holdings 401(k) · Case 2024-A-441 · started Sep 12.</p>
+      </div>
+
+      <div class="m4-grid">
+
+        <!-- Step 1 -->
+        <div class="m4-card">
+          <div class="m4-card-h">
+            <div class="step">01</div>
+            <div class="info">
+              <h2>Configure &amp; Load</h2>
+              <span>Source · plan details · file</span>
+            </div>
+          </div>
+
+          <div class="m4-source">
+            <div class="av">FID</div>
+            <div>
+              <strong>Fidelity</strong>
+              <span>Fixed-width · 80 columns</span>
+            </div>
+            <span class="pill">Change</span>
+          </div>
+
+          <div class="m4-row2">
+            <div class="m4-field">
+              <label>Case Number</label>
+              <input class="m4-input" value="2024-A-441" />
+            </div>
+            <div class="m4-field">
+              <label>Plan Name</label>
+              <input class="m4-input" value="Hawthorn Holdings 401(k)" />
+            </div>
+          </div>
+
+          <div class="m4-field">
+            <label>Source File</label>
+            <div class="m4-drop">
+              <strong>fidelity_2024_q3_export.dat</strong>
+              <span>4.7 MB · 12,484 lines · drag to replace</span>
+            </div>
+          </div>
+
+          <div class="m4-prog">
+            <span>Parsing</span>
+            <div class="track"><span></span></div>
+            <span style="font-weight:600;color:var(--m4-ink)">34%</span>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="m4-card">
+          <div class="m4-card-h">
+            <div class="step">02</div>
+            <div class="info">
+              <h2>Parse Summary</h2>
+              <span>Totals · counts · live</span>
+            </div>
+          </div>
+
+          <div class="m4-stats">
+            <div class="m4-stat span2"><span class="lbl">Grand Total</span><span class="val amber">$4,218,704.<span style="font-size:20px">12</span></span><span class="delta">USD · sum across sources</span></div>
+            <div class="m4-stat"><span class="lbl">Participants</span><span class="val">1,427</span></div>
+            <div class="m4-stat"><span class="lbl">Accepted</span><span class="val">99.98%</span></div>
+          </div>
+
+          <div class="m4-bd">
+            <div class="h">Source Totals</div>
+            <div class="row"><span>EE Pre-Tax</span><span class="v">$1,842,310.04</span></div>
+            <div class="row"><span>EE Roth</span><span class="v">$612,448.18</span></div>
+            <div class="row"><span>ER Match</span><span class="v">$1,160,221.40</span></div>
+            <div class="row"><span>ER Profit Share</span><span class="v">$603,724.50</span></div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="m4-card">
+          <div class="m4-card-h">
+            <div class="step">03</div>
+            <div class="info">
+              <h2>Map &amp; Export</h2>
+              <span>Reconcile · validate · output</span>
+            </div>
+          </div>
+
+          <div class="m4-source">
+            <div class="av" style="background:linear-gradient(135deg,#a855f7,#7c3aed)">XLS</div>
+            <div>
+              <strong>hawthorn_mapping_v3.xlsx</strong>
+              <span>Validated · 0 errors</span>
+            </div>
+            <span class="pill" style="color:#16a34a;background:rgba(22,163,74,.12)">✓ Ready</span>
+          </div>
+
+          <div class="m4-bd">
+            <div class="row"><span>Source codes</span><span class="v">4 / 4 matched</span></div>
+            <div class="row"><span>Funds</span><span class="v">11 / 11 matched</span></div>
+            <div class="row"><span>Output tabs</span><span class="v">23 reports</span></div>
+            <div class="row"><span>Estimated size</span><span class="v">2.4 MB</span></div>
+          </div>
+
+          <button class="m4-btn ghost">Replace mapping</button>
+          <button class="m4-btn">Export workbook</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- ============ MOCKUP 05 — SWISS BRUTALIST ======================== -->
+<!-- ================================================================== -->
+<div class="mockup" data-mock="5">
+  <div class="caption">
+    <div>
+      <div class="cap-id">MOCKUP 05</div>
+      <h2>Swiss Brutalist</h2>
+      <p class="cap-sub">Müller-Brockmann grid. Heavy 3px black borders, monolithic uppercase Space Grotesk, two colors only (ink + cinnabar). Honest about being a tool.</p>
+    </div>
+    <div class="cap-tags">
+      <span class="cap-tag">Space Grotesk</span>
+      <span class="cap-tag">12-col grid</span>
+      <span class="cap-tag">Two colors</span>
+      <span class="cap-tag">3px borders</span>
+    </div>
+  </div>
+
+  <div class="frame mk5">
+    <div class="m5-canvas">
+
+      <div class="m5-bar">
+        <div class="id">Workbook<span class="red">·</span>Console</div>
+        <div class="progress">
+          <div class="seg is-done"><span>STEP 01 · CONFIGURE</span><span class="num">✓</span></div>
+          <div class="seg is-active"><span>STEP 02 · PARSE</span><span class="num">34%</span></div>
+          <div class="seg"><span>STEP 03 · EXPORT</span><span class="num">—</span></div>
+        </div>
+        <div class="meta">SESSION · M.B. · 04:21</div>
+      </div>
+
+      <div class="m5-hero">
+        <div class="h-title">
+          <h1>WORKBOOK <span class="red">/</span><br/>INGESTION <span class="red">→</span></h1>
+        </div>
+        <div class="h-meta">
+          <div class="row">CASE NUMBER<strong>2024-A-441</strong></div>
+          <div class="row">PLAN NAME<strong>Hawthorn Holdings 401(k)</strong></div>
+          <div class="row">SOURCE<strong class="red">FIDELITY</strong></div>
+          <div class="row">FILE<strong>fidelity_2024_q3_export.dat</strong></div>
+        </div>
+      </div>
+
+      <div class="m5-grid">
+
+        <!-- Block 1: Configure -->
+        <div class="m5-block b1">
+          <div class="m5-blocknum">
+            <div class="num">01</div>
+            <div class="info"><h2>Configure</h2><span>Source · plan · file</span></div>
+          </div>
+
+          <div class="m5-source-row">
+            <div class="mark">FID</div>
+            <div>
+              <strong>Fidelity</strong>
+              <span>Fixed-width · 80 col · 23 reports</span>
+            </div>
+            <span class="ch">Change</span>
+          </div>
+
+          <div class="m5-field">
+            <label>Case Number</label>
+            <input value="2024-A-441" />
+          </div>
+          <div class="m5-field">
+            <label>Plan Name</label>
+            <input value="Hawthorn Holdings 401(k)" />
+          </div>
+
+          <div class="m5-drop">
+            <strong>FIDELITY_2024_Q3_EXPORT.DAT</strong>
+            <span>4.7 MB · 12,484 lines · click to replace</span>
+          </div>
+
+          <div class="m5-prog">
+            <div class="h"><span>PARSING</span><span class="pct">34%</span></div>
+            <div class="bar"><span></span></div>
+          </div>
+        </div>
+
+        <!-- Block 2: Parse summary -->
+        <div class="m5-block b2">
+          <div class="m5-blocknum">
+            <div class="num">02</div>
+            <div class="info"><h2>Parse</h2><span>Live totals</span></div>
+          </div>
+
+          <div class="m5-bigval">
+            <div class="lbl">Grand Total · USD</div>
+            <div class="val">4,218,704<span class="red">.12</span></div>
+          </div>
+
+          <div class="m5-pair">
+            <div class="cell"><span class="lbl">Parts</span><span class="val">1,427</span></div>
+            <div class="cell"><span class="lbl">Accept</span><span class="val">99.98%</span></div>
+          </div>
+
+          <div class="m5-bd">
+            <div class="h">Source Totals · 4</div>
+            <div class="row"><span>EE Pre-Tax</span><span class="v">1,842,310.04</span></div>
+            <div class="row"><span>EE Roth</span><span class="v">612,448.18</span></div>
+            <div class="row"><span>ER Match</span><span class="v">1,160,221.40</span></div>
+            <div class="row"><span>ER Profit Share</span><span class="v">603,724.50</span></div>
+          </div>
+        </div>
+
+        <!-- Block 3: Export -->
+        <div class="m5-block b3">
+          <div class="m5-blocknum">
+            <div class="num">03</div>
+            <div class="info"><h2>Export</h2><span>Map · output</span></div>
+          </div>
+
+          <div class="m5-bd">
+            <div class="h">Mapping</div>
+            <div class="row"><span>File</span><span class="v">v3.xlsx</span></div>
+            <div class="row"><span>Errors</span><span class="v">0</span></div>
+            <div class="row"><span>Sources</span><span class="v">4/4</span></div>
+            <div class="row"><span>Funds</span><span class="v">11/11</span></div>
+            <div class="row"><span>Tabs</span><span class="v">23</span></div>
+          </div>
+
+          <button class="m5-btn ghost">Replace Map →</button>
+          <button class="m5-btn red">Export ↵</button>
+        </div>
+
+      </div>
+
+      <div class="m5-foot">
+        <div class="cell">
+          <h3>Report List</h3>
+          <span class="blank">04 reports queued for Fidelity · 23 available</span>
+          <div class="m5-bd" style="margin-top:auto">
+            <div class="row"><span>01</span><span class="v">DEMOGRAPHIC</span></div>
+            <div class="row"><span>02D</span><span class="v">DISTRIB. DETAIL</span></div>
+            <div class="row"><span>07D</span><span class="v">YEAR-END DIST.</span></div>
+            <div class="row"><span>15</span><span class="v">TERMINATION</span></div>
+          </div>
+        </div>
+        <div class="cell">
+          <h3>Parsed Reports</h3>
+          <span class="blank">Awaiting parse complete · output appears at 100%</span>
+          <div style="margin-top:auto;font:900 84px/.86 'Space Grotesk';letter-spacing:-.04em;color:var(--m5-red)">34<span style="color:var(--m5-ink);font-size:36px">%</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.switcher-tab');
+  const mocks = document.querySelectorAll('.mockup');
+  const meta = document.getElementById('switcherMeta');
+  const titles = ['Editorial Quiet','Terminal Console','Modern Workspace','Glass Atelier','Swiss Brutalist'];
+
+  function activate(idx){
+    tabs.forEach(t => t.classList.toggle('is-active', t.dataset.mock == idx));
+    mocks.forEach(m => m.classList.toggle('is-active', m.dataset.mock == idx));
+    meta.textContent = `0${idx} of 5 · ${titles[idx-1]}`;
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.mock)));
+
+  document.addEventListener('keydown', (e) => {
+    const cur = parseInt(document.querySelector('.switcher-tab.is-active').dataset.mock,10);
+    if(e.key === 'ArrowRight' && cur < 5){ activate(cur+1) }
+    if(e.key === 'ArrowLeft' && cur > 1){ activate(cur-1) }
+    if(['1','2','3','4','5'].includes(e.key)){ activate(parseInt(e.key,10)) }
+  });
+})();
+</script>
+</body>
+</html>

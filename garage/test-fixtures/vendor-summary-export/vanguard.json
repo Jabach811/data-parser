@@ -1,0 +1,52 @@
+{
+  "sourceKey": "VANGUARD",
+  "reports": ["ELECTIONS", "LOAN_HEADER", "LOAN_SOURCE"],
+  "grouped": {
+    "ELECTIONS": [["111223333", "CURRENT", "EE", "PCT", "6", "0", "2024-01-01", "2024-01-31"]],
+    "LOAN_HEADER": [["111223333", "001", "1000", "750", "6.25", "2023-01-01", "2023-01-02", "2024-02-01", "2025-01-01", "50", "1", "6", "0", "0", "2024-01-31"]],
+    "LOAN_SOURCE": [["111223333", "001", "EE", "500", "150", "2024-01-31"], ["111223333", "001", "ER", "250", "75", "2024-01-31"]]
+  },
+  "layoutsByReport": {
+    "ELECTIONS": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Election Type", "type": "text" },
+      { "header": "Source Code", "type": "text" },
+      { "header": "Value Type", "type": "text" },
+      { "header": "Percent", "type": "decimal" },
+      { "header": "Amount", "type": "decimal" },
+      { "header": "Effective Date", "type": "date" },
+      { "header": "As Of Date", "type": "date" }
+    ],
+    "LOAN_HEADER": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Loan Number", "type": "text" },
+      { "header": "Original Loan Amount", "type": "decimal" },
+      { "header": "Outstanding Loan Balance", "type": "decimal" },
+      { "header": "Loan Interest Rate", "type": "decimal" },
+      { "header": "Original Loan Issue Date", "type": "date" },
+      { "header": "Vanguard Loan Issue Date", "type": "date" },
+      { "header": "Next Scheduled Payment Date", "type": "date" },
+      { "header": "Loan Payoff Date", "type": "date" },
+      { "header": "Loan Payment Amount", "type": "decimal" },
+      { "header": "Loan Repayment Option", "type": "text" },
+      { "header": "Loan Repayment Frequency", "type": "text" },
+      { "header": "Loan Use Flag", "type": "text" },
+      { "header": "Loan Type Flag", "type": "text" },
+      { "header": "As Of Date", "type": "date" }
+    ],
+    "LOAN_SOURCE": [
+      { "header": "Participant Id", "type": "text" },
+      { "header": "Loan Number", "type": "text" },
+      { "header": "Source Code", "type": "text" },
+      { "header": "Loan Balance In Source", "type": "decimal" },
+      { "header": "ITD Loan Principal Repaid", "type": "decimal" },
+      { "header": "As Of Date", "type": "date" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Loan Header", "Loan Source"],
+  "unexpectedTabs": ["Roth Basis"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["Election Type", "Amount"] },
+    { "sheetNumber": 4, "tab": "Loan Source", "includes": ["Loan Balance In Source", "ITD Loan Principal Repaid"], "excludes": ["Loan ID"], "indexValue": 1, "indexCount": 2 }
+  ]
+}

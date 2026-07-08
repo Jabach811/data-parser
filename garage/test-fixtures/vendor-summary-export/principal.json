@@ -1,0 +1,18 @@
+{
+  "sourceKey": "PRINCIPAL",
+  "reports": ["BALANCES"],
+  "grouped": {
+    "BALANCES": [["111223333", "EE", "Investment A", "1250"]]
+  },
+  "layoutsByReport": {
+    "BALANCES": [
+      { "header": "EE SS#", "type": "text" },
+      { "header": "CONTRIBUTION ID", "type": "text" },
+      { "header": "Investment", "type": "text" },
+      { "header": "End Balance", "type": "decimal" }
+    ]
+  },
+  "expectedTabs": [],
+  "unexpectedTabs": ["Deferrals", "Roth Basis", "Loan Header", "Loan Source"],
+  "sheetChecks": []
+}

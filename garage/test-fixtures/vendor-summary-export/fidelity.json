@@ -1,0 +1,68 @@
+{
+  "sourceKey": "FIDELITY",
+  "reports": ["09", "07DR", "18R", "37", "38", "40", "79"],
+  "grouped": {
+    "09": [["12345", "111223333", "09", "5.5", "2.25"]],
+    "07DR": [["12345", "111223333", "2024-01-15"]],
+    "18R": [["12345", "111223333", "100.25", "75.5"]],
+    "37": [["12345", "111223333", "LN001", "1000", "5", "M", "2024-02-01"]],
+    "38": [["12345", "111223333", "LN001", "900", "125"]],
+    "40": [["12345", "111223333", "LN001", "2024-05-01"]],
+    "79": [["12345", "111223333", "LN001", "01", "450"], ["12345", "111223333", "LN001", "02", "300"]]
+  },
+  "layoutsByReport": {
+    "09": [
+      { "header": "Plan Number", "type": "text" },
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Record Identifier", "type": "text" },
+      { "header": "Before Tax Percentage", "type": "decimal" },
+      { "header": "Catch-Up Election Pctg", "type": "decimal" }
+    ],
+    "07DR": [
+      { "header": "Plan Number", "type": "text" },
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Date Of 1st Roth Contribution", "type": "date" }
+    ],
+    "18R": [
+      { "header": "Plan Number", "type": "text" },
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Roth Gross", "type": "decimal" },
+      { "header": "Roth Rpt", "type": "decimal" }
+    ],
+    "37": [
+      { "header": "Plan Number", "type": "text" },
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Loan ID", "type": "text" },
+      { "header": "Loan Amount", "type": "decimal" },
+      { "header": "Interest Rate", "type": "decimal" },
+      { "header": "Payment Frequency", "type": "text" },
+      { "header": "Loan Date", "type": "date" }
+    ],
+    "38": [
+      { "header": "Plan Number", "type": "text" },
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Loan ID", "type": "text" },
+      { "header": "Principal Balance", "type": "decimal" },
+      { "header": "Regular Payment Amount", "type": "decimal" }
+    ],
+    "40": [
+      { "header": "Plan Number", "type": "text" },
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Loan ID", "type": "text" },
+      { "header": "Default Date", "type": "date" }
+    ],
+    "79": [
+      { "header": "Plan Number", "type": "text" },
+      { "header": "Social Security Number", "type": "text" },
+      { "header": "Loan ID", "type": "text" },
+      { "header": "Source", "type": "text" },
+      { "header": "Outstanding Loan Balance", "type": "decimal" }
+    ]
+  },
+  "expectedTabs": ["Deferrals", "Roth Basis", "Loan Header", "Loan Source"],
+  "sheetChecks": [
+    { "sheetNumber": 2, "tab": "Deferrals", "includes": ["Before Tax Percentage", "Catch-Up Election Pctg"], "excludes": ["Report Code", "Loan ID"] },
+    { "sheetNumber": 3, "tab": "Roth Basis", "includes": ["Date of 1st Roth Contribution", "Contribution Basis"] },
+    { "sheetNumber": 5, "tab": "Loan Source", "includes": ["Source", "Outstanding Loan Balance"], "excludes": ["Loan ID"], "indexValue": 1, "indexCount": 2 }
+  ]
+}

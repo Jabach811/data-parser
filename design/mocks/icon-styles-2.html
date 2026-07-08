@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Source icon style explorations — round 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Mona+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#090909;
+  --surface-1:#141414;
+  --surface-2:#1c1c1c;
+  --ink:#fff;
+  --muted:#999;
+  --hairline:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--canvas);color:var(--ink);
+  font-family:"Inter",sans-serif;
+  font-size:15px;line-height:1.4;letter-spacing:-0.13px;
+  font-feature-settings:"cv01","cv05","cv09","cv11","ss03","ss07","dlig";
+  min-height:100vh;padding:40px 32px 80px;
+}
+.wrap{max-width:1320px;margin:0 auto}
+h1{
+  font-family:"Mona Sans","Inter",sans-serif;font-weight:500;
+  font-size:42px;line-height:1;letter-spacing:-1.8px;margin:0 0 6px;
+}
+.lede{color:var(--muted);font-size:16px;letter-spacing:-0.15px;margin:0 0 48px;max-width:60ch}
+
+.style-block{margin-bottom:64px}
+.style-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:24px;
+  margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--hairline);
+}
+.style-num{
+  color:#0099ff;font-size:13px;font-weight:500;letter-spacing:-0.13px;
+  display:flex;align-items:center;gap:8px;
+}
+.style-num::before{content:"";width:6px;height:6px;border-radius:50%;background:#0099ff}
+.style-title{
+  font-family:"Mona Sans","Inter",sans-serif;font-weight:500;
+  font-size:26px;letter-spacing:-1px;margin:0;
+}
+.style-desc{color:var(--muted);font-size:14px;letter-spacing:-0.13px;max-width:42ch;text-align:right;margin:0}
+
+.row{display:grid;grid-template-columns:repeat(10,1fr);gap:14px}
+.cell{
+  background:var(--surface-1);border:1px solid var(--hairline);
+  border-radius:14px;padding:18px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.cell .name{
+  font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;
+  color:var(--muted);text-align:center;
+}
+
+/* ----- STYLE 06: TICKER BRACKET (Bloomberg vibe) ----- */
+.s6 .glyph{
+  font-family:"JetBrains Mono",monospace;
+  font-weight:500;font-size:14px;
+  color:#fff;letter-spacing:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;
+  height:46px;padding:0 10px;
+  border-radius:6px;
+  position:relative;
+}
+.s6 .glyph::before, .s6 .glyph::after{
+  font-weight:500;color:var(--accent);font-size:18px;line-height:1;
+  position:relative;top:-1px;
+}
+.s6 .glyph::before{content:"[";margin-right:6px}
+.s6 .glyph::after{content:"]";margin-left:6px}
+
+/* ----- STYLE 07: COIN MEDALLION ----- */
+.s7 .glyph{
+  width:48px;height:48px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #2a2a2a, #0d0d0d);
+  border:1px solid var(--accent);
+  display:grid;place-items:center;
+  color:var(--accent);
+  font-family:"Mona Sans","Inter",sans-serif;
+  font-weight:600;font-size:16px;letter-spacing:-0.5px;
+  position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 1px rgba(255,255,255,.03);
+}
+.s7 .glyph::before{
+  content:"";position:absolute;inset:4px;border-radius:50%;
+  border:1px dashed rgba(255,255,255,.10);
+}
+
+/* ----- STYLE 08: AURORA BLOOM (no glyph, pure color identity) ----- */
+.s8 .glyph{
+  width:48px;height:48px;border-radius:14px;
+  background:
+    radial-gradient(circle at 25% 25%, var(--accent-strong), transparent 50%),
+    radial-gradient(circle at 75% 30%, var(--accent), transparent 55%),
+    radial-gradient(circle at 50% 80%, var(--accent-soft), transparent 60%),
+    #0d0d0d;
+  position:relative;overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.s8 .glyph::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,.10) 0%, transparent 50%);
+}
+
+/* ----- STYLE 09: PIXEL GRID ----- */
+.s9 .glyph{
+  width:48px;height:48px;border-radius:10px;
+  background:#0d0d0d;
+  border:1px solid var(--hairline);
+  display:grid;place-items:center;
+  position:relative;
+}
+.s9 .glyph .px{
+  display:grid;grid-template-columns:repeat(4,5px);grid-template-rows:repeat(4,5px);
+  gap:2px;
+}
+.s9 .glyph .px i{display:block;background:var(--accent);border-radius:1px;opacity:.95}
+.s9 .glyph .px i.off{background:rgba(255,255,255,.04);opacity:1}
+
+/* ----- STYLE 10: HEX EMBLEM ----- */
+.s10 .glyph{
+  width:50px;height:50px;
+  display:grid;place-items:center;
+  position:relative;
+}
+.s10 .glyph svg{position:absolute;inset:0;width:100%;height:100%}
+.s10 .glyph .label{
+  position:relative;z-index:1;
+  font-family:"Mona Sans","Inter",sans-serif;
+  font-weight:600;font-size:14px;letter-spacing:-0.4px;color:#fff;
+}
+
+/* per-source accents */
+.cell[data-src="FIDELITY"]    { --accent:#28a745; --accent-soft:rgba(40,167,69,.32); --accent-strong:#1e7b34; }
+.cell[data-src="VANGUARD"]    { --accent:#a40000; --accent-soft:rgba(164,0,0,.32); --accent-strong:#7a0000; }
+.cell[data-src="EMPOWER"]     { --accent:#ff7a00; --accent-soft:rgba(255,122,0,.32); --accent-strong:#cc5e00; }
+.cell[data-src="PRINCIPAL"]   { --accent:#0d6efd; --accent-soft:rgba(13,110,253,.32); --accent-strong:#0a4fbb; }
+.cell[data-src="NEWPORT"]     { --accent:#2d78a5; --accent-soft:rgba(45,120,165,.32); --accent-strong:#205573; }
+.cell[data-src="NATIONWIDE"]  { --accent:#0085ca; --accent-soft:rgba(0,133,202,.32); --accent-strong:#005f8f; }
+.cell[data-src="ADP"]         { --accent:#d92231; --accent-soft:rgba(217,34,49,.32); --accent-strong:#a01722; }
+.cell[data-src="ASCENSUS"]    { --accent:#7b4cf0; --accent-soft:rgba(123,76,240,.32); --accent-strong:#5a31bf; }
+.cell[data-src="ALERUS"]      { --accent:#00945e; --accent-soft:rgba(0,148,94,.32); --accent-strong:#006c44; }
+.cell[data-src="HANCOCK"]     { --accent:#e0a838; --accent-soft:rgba(224,168,56,.32); --accent-strong:#a87a1f; }
+
+.banner{
+  background:#0d0d0d;border:1px solid var(--hairline);
+  border-radius:10px;padding:10px 16px;margin-bottom:32px;
+  font-size:12px;color:var(--muted);letter-spacing:-0.12px;
+  display:flex;justify-content:space-between;
+}
+.banner strong{color:#fff;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Source icon styles — round 2</h1>
+  <p class="lede">Different directions this time. Less Lucide, more identity. Each row is one style, ten providers across.</p>
+
+  <div class="banner">
+    <span><strong>Round 2:</strong> ticker bracket · coin medallion · aurora bloom · pixel grid · hex emblem</span>
+    <span>Pick one (or mix-and-match) and I'll wire it</span>
+  </div>
+
+  <!-- STYLE 06 -->
+  <section class="style-block s6">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 06</div>
+        <h2 class="style-title">Ticker Bracket</h2>
+      </div>
+      <p class="style-desc">Source initials in JetBrains Mono between accent-colored brackets. Bloomberg-terminal energy. Reads as a system identifier, not decoration.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph">FID</div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph">VAN</div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph">EMP</div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph">PRN</div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph">NPT</div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph">NWD</div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph">ADP</div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph">ASC</div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph">ALR</div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph">HCK</div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- STYLE 07 -->
+  <section class="style-block s7">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 07</div>
+        <h2 class="style-title">Coin Medallion</h2>
+      </div>
+      <p class="style-desc">Circular disc with dashed inner ring and accent border. Premium / institutional. Reads like a vintage bank seal or a poker chip.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph">FD</div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph">VG</div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph">EM</div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph">PR</div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph">NP</div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph">NW</div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph">AD</div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph">AS</div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph">AL</div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph">JH</div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- STYLE 08 -->
+  <section class="style-block s8">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 08</div>
+        <h2 class="style-title">Aurora Bloom</h2>
+      </div>
+      <p class="style-desc">No glyph, no letters. Each source is just a unique multi-color radial bloom in its own palette. Pure atmospheric identity, like Stripe's source avatars.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph"></div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph"></div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph"></div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph"></div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph"></div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph"></div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph"></div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph"></div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph"></div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph"></div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- STYLE 09 -->
+  <section class="style-block s9">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 09</div>
+        <h2 class="style-title">Pixel Grid</h2>
+      </div>
+      <p class="style-desc">4×4 pixel pattern in the source's accent color. Each source gets its own pattern — could be the letter shape or just a generated mark. Retro / industrial / system-feel.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph"><div class="px"><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i></div></div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph"><div class="px"><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i class="off"></i></div></div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph"><div class="px"><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i class="off"></i><i></i><i></i><i></i><i></i></div></div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph"><div class="px"><i></i><i></i><i></i><i class="off"></i><i></i><i class="off"></i><i></i><i class="off"></i><i></i><i></i><i></i><i class="off"></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i></div></div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph"><div class="px"><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i class="off"></i><i></i><i></i><i class="off"></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i></div></div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph"><div class="px"><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i class="off"></i><i></i><i></i><i class="off"></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i></div></div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph"><div class="px"><i class="off"></i><i></i><i></i><i class="off"></i><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i></div></div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph"><div class="px"><i class="off"></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i></i><i></i><i class="off"></i><i></i><i></i><i></i><i></i></div></div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph"><div class="px"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i></i></div></div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph"><div class="px"><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i><i></i><i class="off"></i><i class="off"></i><i></i></div></div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+  <!-- STYLE 10 -->
+  <section class="style-block s10">
+    <div class="style-head">
+      <div>
+        <div class="style-num">Style 10</div>
+        <h2 class="style-title">Hex Emblem</h2>
+      </div>
+      <p class="style-desc">Hexagonal shape with a thin accent vein crossing through. Industrial / technical / engineered. Feels like an SDK badge or a workshop stamp.</p>
+    </div>
+    <div class="row">
+      <div class="cell" data-src="FIDELITY"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">FD</span></div><div class="name">Fidelity</div></div>
+      <div class="cell" data-src="VANGUARD"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">VG</span></div><div class="name">Vanguard</div></div>
+      <div class="cell" data-src="EMPOWER"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">EM</span></div><div class="name">Empower</div></div>
+      <div class="cell" data-src="PRINCIPAL"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">PR</span></div><div class="name">Principal</div></div>
+      <div class="cell" data-src="NEWPORT"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">NP</span></div><div class="name">Newport</div></div>
+      <div class="cell" data-src="NATIONWIDE"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">NW</span></div><div class="name">Nationwide</div></div>
+      <div class="cell" data-src="ADP"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">AD</span></div><div class="name">ADP</div></div>
+      <div class="cell" data-src="ASCENSUS"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">AS</span></div><div class="name">Ascensus</div></div>
+      <div class="cell" data-src="ALERUS"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">AL</span></div><div class="name">Alerus</div></div>
+      <div class="cell" data-src="HANCOCK"><div class="glyph"><svg viewBox="0 0 50 50"><polygon points="25,3 45,14 45,36 25,47 5,36 5,14" fill="#0d0d0d" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"/><line x1="5" y1="14" x2="45" y2="36" stroke="currentColor" stroke-width="1" style="color:var(--accent);opacity:.4"/></svg><span class="label">JH</span></div><div class="name">Hancock</div></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

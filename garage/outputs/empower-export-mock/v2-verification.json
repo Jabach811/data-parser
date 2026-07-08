@@ -1,0 +1,6 @@
+{
+  "fullParsePath": "C:\\Users\\mabac\\OneDrive\\Desktop\\Joel's Workspaces\\Work - Transamerica\\Data Parser\\garage\\outputs\\empower-export-mock\\Empower Full Parse - Standard.xlsx",
+  "summaryPath": "C:\\Users\\mabac\\OneDrive\\Desktop\\Joel's Workspaces\\Work - Transamerica\\Data Parser\\garage\\outputs\\empower-export-mock\\Empower Secondary Export - Summary.xlsx",
+  "fullErrors": "{\"kind\":\"notice\",\"message\":\"Cell search matched 0 entries.\"}",
+  "summaryErrors": "{\"kind\":\"notice\",\"message\":\"Cell search matched 0 entries.\"}"
+}

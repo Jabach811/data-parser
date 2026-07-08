@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>One Mind. One System. One Future. — Animated</title>
+<style>
+  :root {
+    /* Bulb / brain center as % of poster, eyeballed from the source.
+       Tweak if the glow doesn't sit on the bulb filament. */
+    --bx: 72%;
+    --by: 38%;
+    --duration: 7s;
+  }
+  html, body {
+    margin: 0;
+    background: #000;
+    height: 100%;
+    overflow: hidden;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .frame {
+    position: relative;
+    width: min(100vw, calc(100vh * 1.5));
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: #000;
+  }
+
+  /* Two stacked copies of the poster:
+     - .layer-dark : permanent dim base (always visible behind everything)
+     - .layer-glow : full brightness, revealed by an animated clip-path circle
+                     that grows from the bulb outward.            */
+  .layer {
+    position: absolute;
+    inset: 0;
+    background-image: url('poster.png');
+    background-size: cover;
+    background-position: center;
+  }
+  .layer-dark {
+    filter: brightness(0.10) saturate(0.08) contrast(1.05);
+  }
+  .layer-glow {
+    filter: brightness(1.05) saturate(1.4) contrast(1.05);
+    clip-path: circle(0% at var(--bx) var(--by));
+    animation: reveal var(--duration) cubic-bezier(.55,.05,.25,1) forwards;
+  }
+  /* Soft feathered edge: a second, slightly larger glow layer that sits
+     just outside the hard reveal, blended in via screen — sells the
+     "light pouring out from inside" rather than a hard wipe. */
+  .layer-feather {
+    filter: brightness(1.5) saturate(1.5);
+    mix-blend-mode: screen;
+    opacity: 0.55;
+    clip-path: circle(0% at var(--bx) var(--by));
+    animation: feather var(--duration) cubic-bezier(.55,.05,.25,1) forwards;
+  }
+
+  @keyframes reveal {
+    0%   { clip-path: circle(0%   at var(--bx) var(--by)); }
+    8%   { clip-path: circle(7%   at var(--bx) var(--by)); }   /* filament wakes */
+    20%  { clip-path: circle(15%  at var(--bx) var(--by)); }   /* bulb halo */
+    38%  { clip-path: circle(40%  at var(--bx) var(--by)); }   /* sunburst + nearest nodes */
+    58%  { clip-path: circle(75%  at var(--bx) var(--by)); }   /* mid network */
+    78%  { clip-path: circle(120% at var(--bx) var(--by)); }   /* full poster lit */
+    100% { clip-path: circle(120% at var(--bx) var(--by)); }
+  }
+  @keyframes feather {
+    0%   { clip-path: circle(0%   at var(--bx) var(--by)); opacity: 0; }
+    8%   { clip-path: circle(11%  at var(--bx) var(--by)); opacity: 0.65; }
+    20%  { clip-path: circle(22%  at var(--bx) var(--by)); opacity: 0.55; }
+    38%  { clip-path: circle(50%  at var(--bx) var(--by)); opacity: 0.4; }
+    58%  { clip-path: circle(85%  at var(--bx) var(--by)); opacity: 0.3; }
+    78%  { clip-path: circle(130% at var(--bx) var(--by)); opacity: 0.25; }
+    100% { clip-path: circle(130% at var(--bx) var(--by)); opacity: 0.25; }
+  }
+
+  /* The brain core glow — golden burst inside the bulb at ignition. */
+  .core-glow {
+    position: absolute;
+    left: var(--bx);
+    top: var(--by);
+    width: 38%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      circle,
+      rgba(255, 220, 130, 1) 0%,
+      rgba(255, 180, 60, 0.7) 16%,
+      rgba(255, 150, 30, 0.25) 36%,
+      rgba(255, 150, 30, 0)   62%
+    );
+    filter: blur(8px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    opacity: 0;
+    animation: core var(--duration) ease-in-out forwards;
+  }
+  @keyframes core {
+    0%, 4%   { opacity: 0;    transform: translate(-50%,-50%) scale(0.5); }
+    14%      { opacity: 1;    transform: translate(-50%,-50%) scale(1.0); }
+    30%      { opacity: 0.7;  transform: translate(-50%,-50%) scale(0.95); }
+    78%      { opacity: 0.85; transform: translate(-50%,-50%) scale(1.05); }
+    92%      { opacity: 0.6;  transform: translate(-50%,-50%) scale(1.0); }
+    100%     { opacity: 0.6;  transform: translate(-50%,-50%) scale(1.0); }
+  }
+
+  /* Expanding shockwave rings — make the propagation visible. */
+  .ring {
+    position: absolute;
+    left: var(--bx);
+    top: var(--by);
+    width: 6%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255, 200, 80, 0.7);
+    box-shadow:
+      0 0 24px 4px rgba(255, 180, 60, 0.45),
+      inset 0 0 24px 2px rgba(255, 200, 100, 0.35);
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: screen;
+  }
+  .ring-1 { animation: ring var(--duration) cubic-bezier(.4,.05,.3,1) forwards; }
+  .ring-2 {
+    animation: ring var(--duration) cubic-bezier(.4,.05,.3,1) forwards;
+    animation-delay: 0.9s;
+  }
+  @keyframes ring {
+    0%   { width: 6%;   opacity: 0; }
+    8%   { width: 6%;   opacity: 0; }
+    14%  { width: 14%;  opacity: 0.95; }
+    50%  { width: 90%;  opacity: 0.3; }
+    78%  { width: 160%; opacity: 0; }
+    100% { width: 160%; opacity: 0; }
+  }
+
+  /* Watermark */
+  .wm {
+    position: absolute;
+    right: 1.2vw;
+    bottom: 1.2vw;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,0.32);
+    pointer-events: none;
+    z-index: 50;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="frame">
+      <div class="layer layer-dark"></div>
+      <div class="layer layer-glow"></div>
+      <div class="layer layer-feather"></div>
+      <div class="core-glow"></div>
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+    </div>
+    <div class="wm">Created by Huashu-Design</div>
+  </div>
+</body>
+</html>
