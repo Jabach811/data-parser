@@ -1,3 +1,4 @@
+import argparse
 import json
 import re
 from pathlib import Path
@@ -9,8 +10,7 @@ except Exception as exc:
 
 
 ROOT = Path(__file__).resolve().parents[2]
-HTML_PATH = ROOT / "Main File.html"
-PDF_PATH = Path(r"C:\Users\mabac\Downloads\Record and Report Specifications.pdf")
+DEFAULT_HTML_PATH = ROOT / "Workbook Console - Source refresh.html"
 
 
 REPORT_NAMES = {
@@ -109,8 +109,8 @@ REPORT_ORDER = [
 ]
 
 
-def extract_pdf_text():
-    reader = PdfReader(str(PDF_PATH))
+def extract_pdf_text(pdf_path):
+    reader = PdfReader(str(pdf_path))
     chunks = []
     for idx, page in enumerate(reader.pages, start=1):
         chunks.append(f"\n\n===== PAGE {idx} =====\n{page.extract_text() or ''}")
@@ -173,7 +173,9 @@ def title_field_name(value):
             text = constant_match.group(2).strip()
     if not text:
         text = "Field"
-    text = text.replace("PCTG", "PCTG")
+    # NOTE: a no-op `text = text.replace("PCTG", "PCTG")` used to live here.
+    # Its intent was unclear (possibly an abandoned abbreviation expansion),
+    # so it was removed; "PCTG" tokens are title-cased to "Pctg" as before.
     def title_token(token):
         if token in {"#", "ID"}:
             return token
@@ -420,14 +422,40 @@ def extract_property_value(config_text, prop_name):
     raise RuntimeError(f"Could not extract {prop_name}")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Rebuild the Fidelity layouts in the workbook console HTML from the Fidelity record/report specification PDF."
+    )
+    parser.add_argument(
+        "pdf",
+        type=Path,
+        help="Path to the Fidelity 'Record and Report Specifications' PDF.",
+    )
+    parser.add_argument(
+        "--html",
+        type=Path,
+        default=DEFAULT_HTML_PATH,
+        help=f"HTML file to update in place (default: {DEFAULT_HTML_PATH}).",
+    )
+    return parser.parse_args()
+
+
 def main():
-    html = HTML_PATH.read_text(encoding="utf-8")
+    args = parse_args()
+    pdf_path = args.pdf
+    html_path = args.html
+    if not pdf_path.is_file():
+        raise SystemExit(f"Fidelity spec PDF not found: {pdf_path}")
+    if not html_path.is_file():
+        raise SystemExit(f"HTML file not found: {html_path}")
+
+    html = html_path.read_text(encoding="utf-8")
     start, end, config = fidelity_config_text(html)
     try:
         current_layouts = json.loads(extract_property_value(config, "layouts"))
     except Exception:
         current_layouts = {}
-    rows = parse_rows(extract_pdf_text())
+    rows = parse_rows(extract_pdf_text(pdf_path))
     tables = group_tables(rows)
     seen = {}
     layouts = {}
@@ -448,7 +476,13 @@ def main():
     config = replace_property_block(config, "reports", js_literal(REPORT_ORDER))
     config = replace_property_block(config, "reportNames", js_literal(report_names))
     config = replace_property_block(config, "layouts", js_literal(layouts))
-    HTML_PATH.write_text(html[:start] + config + html[end:], encoding="utf-8")
+
+    backup_path = html_path.with_suffix(html_path.suffix + ".bak")
+    backup_path.write_text(html, encoding="utf-8")
+    tmp_path = html_path.with_suffix(html_path.suffix + ".tmp")
+    tmp_path.write_text(html[:start] + config + html[end:], encoding="utf-8")
+    tmp_path.replace(html_path)
+    print(f"Backed up original HTML to: {backup_path}")
     print(f"Updated Fidelity reports: {len(REPORT_ORDER)}")
     print(f"Updated Fidelity layouts: {len(layouts)}")
 

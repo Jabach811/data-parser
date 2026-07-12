@@ -1,10 +1,12 @@
 # Data Parser Workspace Notes
 
-This workspace is organized around `Main File.html`, the live single-file Workbook Ingestion Console app.
+This workspace is organized around `Workbook Console - Source refresh.html`, the live single-file Workbook Ingestion Console app.
 
 ## Folder map
 
-- `../Main File.html` - current app source.
+- `../Workbook Console - Source refresh.html` - canonical editable app source.
+- `../Workbook Console - Source.html` - prior baseline kept for diffing.
+- `../Workbook Console.html` - packed build artifact (not hand-editable).
 - `operator-guides/` - user-facing procedure guide deliverables for the app.
 - `design-explorations/` - visual mockups, landing-page experiments, and generated design assets.
 - `superpowers/` - planning/spec notes from prior app work.

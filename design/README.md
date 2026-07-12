@@ -4,7 +4,7 @@ Use this folder when the goal is to polish the app, explore a different look, te
 
 The live app remains:
 
-- `../Main File.html`
+- `../Workbook Console - Source refresh.html` (canonical editable source; `../Workbook Console - Source.html` is the prior baseline kept for diffing, and `../Workbook Console.html` is the packed build artifact, not hand-editable)
 
 ## What belongs here
 
@@ -28,5 +28,5 @@ Use `../garage` for feature and structure work.
 1. Start a dated design note with `scripts/new-design-note.ps1`.
 2. Write the desired look, constraints, and what should stay unchanged.
 3. Make a copy or snapshot only when the design pass is risky.
-4. Apply the polish to `../Main File.html`.
+4. Apply the polish to `../Workbook Console - Source refresh.html`.
 5. Save final notes in `history/` so older instructions can be reused or reversed later.

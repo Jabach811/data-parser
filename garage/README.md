@@ -4,7 +4,7 @@ Use this folder when the goal is to add a feature, restructure internals, expand
 
 The live app remains:
 
-- `../Main File.html`
+- `../Workbook Console - Source refresh.html` (canonical editable source; `../Workbook Console - Source.html` is the prior baseline kept for diffing, and `../Workbook Console.html` is the packed build artifact, not hand-editable)
 
 ## What belongs here
 
@@ -29,5 +29,5 @@ Use `../design` for Studio work.
 2. Define the target behavior and the current behavior.
 3. Identify the app engine area affected.
 4. Call out risks before editing.
-5. Make focused changes to `../Main File.html`.
+5. Make focused changes to `../Workbook Console - Source refresh.html`.
 6. Record verification and follow-ups in `history/`.

@@ -13104,38 +13104,22 @@ body .breakdown-row{
 
   async function parseNationwideSummaryPdf(arrayBuffer) {
     var extractedText = await extractPdfText(arrayBuffer);
-    console.log("[Nationwide Summary] Extracted PDF text length:", extractedText.length);
-    console.log("[Nationwide Summary] First 3000 chars:\n", extractedText.substring(0, 3000));
-    console.log("[Nationwide Summary] Checking for VEHICLE LEVEL SUMMARY:", /VEHICLE\s+LEVEL\s+SUMMARY/i.test(extractedText));
-    console.log("[Nationwide Summary] Checking for MONEY TYPE TOTAL:", /MONEY\s+TYPE\s+TOTAL/i.test(extractedText));
     var result = parseNationwideSummaryText(extractedText);
     if (result) {
       result.debugText = extractedText;
       result.debugSourceTraceText = buildNationwideSourceTraceText(result.sourceTrace || []);
       result.debugParticipantSummaryText = buildNationwideParticipantSummaryText(result.participantSourceTotals || {});
     }
-    console.log("[Nationwide Summary] Parse result:", result ? ("fundTotals: " + Object.keys(result.fundTotals).length + ", sourceTotals: " + Object.keys(result.sourceTotals).length) : "null");
-    if (result && result.unmatchedSourceTotals && result.unmatchedSourceTotals.length) {
-      console.warn("[Nationwide Summary] Unmatched MONEY TYPE TOTAL blocks:", result.unmatchedSourceTotals);
-    }
     return result;
   }
 
   async function parseNewportSummaryPdf(arrayBuffer) {
     var extractedText = await extractPdfText(arrayBuffer);
-    console.log("[Newport Summary] Extracted PDF text length:", extractedText.length);
-    console.log("[Newport Summary] First 3000 chars:\n", extractedText.substring(0, 3000));
-    console.log("[Newport Summary] Checking for VEHICLE LEVEL SUMMARY:", /VEHICLE\s+LEVEL\s+SUMMARY/i.test(extractedText));
-    console.log("[Newport Summary] Checking for MONEY TYPE TOTAL:", /MONEY\s+TYPE\s+TOTAL/i.test(extractedText));
     var result = parseParticipantDrivenPlanSummaryText(extractedText, NEWPORT_PLAN_SOURCE_LABELS);
     if (result) {
       result.debugText = extractedText;
       result.debugSourceTraceText = buildNationwideSourceTraceText(result.sourceTrace || []);
       result.debugParticipantSummaryText = buildNationwideParticipantSummaryText(result.participantSourceTotals || {});
-    }
-    console.log("[Newport Summary] Parse result:", result ? ("fundTotals: " + Object.keys(result.fundTotals).length + ", sourceTotals: " + Object.keys(result.sourceTotals).length) : "null");
-    if (result && result.unmatchedSourceTotals && result.unmatchedSourceTotals.length) {
-      console.warn("[Newport Summary] Unmatched MONEY TYPE TOTAL blocks:", result.unmatchedSourceTotals);
     }
     return result;
   }

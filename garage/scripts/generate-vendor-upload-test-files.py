@@ -354,7 +354,7 @@ def write_readme():
     write_text(OUT / "README.md", [
         "# Vendor File Picker Test Files",
         "",
-        "Use these files with `Main File.html` after selecting the matching vendor.",
+        "Use these files with `Workbook Console - Source refresh.html` after selecting the matching vendor.",
         "For vendors with more than one file listed, select all listed files together in the file picker.",
         "",
         "| Vendor | Select these file(s) |",
