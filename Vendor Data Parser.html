@@ -320,6 +320,10 @@ input::placeholder{color:#988f7c}
   box-shadow:0 0 0 4px rgba(245,78,0,.1);
 }
 .source-card-select.is-empty .source-card-trigger{background:rgba(255,253,249,.72)}
+.source-card-select.is-dormant .source-card-trigger{
+  opacity:.45;cursor:default;pointer-events:none;
+}
+.source-card-select.is-dormant .source-card-caret{opacity:0}
 .source-card-select.just-selected .source-card-trigger{
   animation:selectPulse .6s ease;
 }
@@ -437,22 +441,23 @@ input::placeholder{color:#988f7c}
   border:1px solid rgba(38,37,30,.08);
 }
 .file-picker{
-  display:flex;align-items:center;gap:12px;padding:12px 14px;
-  border:1px solid rgba(38,37,30,.1);border-radius:20px;
+  display:flex;align-items:center;gap:12px;padding:26px 18px;
+  border:1px dashed rgba(38,37,30,.22);border-radius:20px;
   background:rgba(255,253,249,.88);cursor:pointer;transition:all .25s;
 }
 .file-picker:hover{
   background:#fffdf7;border-color:var(--accent);
   transform:translateY(-1px);
 }
+.file-picker.is-dragover{
+  background:#fffdf7;border-color:var(--accent);border-style:solid;
+  transform:none;
+}
 .file-picker-icon{display:flex;color:var(--text)}
-.file-button{
-  flex:0 0 auto;padding:9px 16px;
-  background:var(--text);
-  color:#fffdf7;border-radius:999px;font:700 12px/1.2 var(--font-mono);
-  letter-spacing:.1em;box-shadow:none;
-  white-space:nowrap;
-  text-transform:uppercase;
+.file-drop-prompt{
+  flex:0 0 auto;
+  color:var(--text);font:700 12px/1.2 var(--font-mono);
+  letter-spacing:.1em;white-space:nowrap;text-transform:uppercase;
 }
 .file-picker-text{
   flex:1;font-size:14px;color:var(--muted);font-family:var(--font-body);
@@ -1529,18 +1534,21 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus{
 /* ---------- FILE PICKER ---------- */
 .file-picker{
   background:#1c1c1c !important;
-  border:1px solid transparent !important;
+  border:1px dashed rgba(255,255,255,.16) !important;
   border-radius:10px !important;
-  padding:8px 8px 8px 12px !important;
+  padding:26px 16px !important;
 }
-.file-picker:hover{border-color:rgba(255,255,255,.12) !important}
+.file-picker:hover{border-color:rgba(255,255,255,.3) !important}
+.file-picker.is-dragover{
+  border-color:#fff !important; border-style:solid !important;
+  background:#232323 !important;
+}
 .file-picker-icon{color:#999 !important; background:transparent !important}
-.file-button{
-  background:#fff !important; color:#000 !important;
-  border-radius:100px !important; padding:9px 16px !important;
+.file-drop-prompt{
+  color:#fff !important;
   font-family:"Inter",sans-serif !important; font-weight:500 !important;
   font-size:14px !important; letter-spacing:-0.14px !important;
-  text-transform:none !important; border:0 !important;
+  text-transform:none !important;
 }
 .file-picker-text{
   color:#999 !important;
@@ -2434,6 +2442,13 @@ body .source-action{
     0 2px 3px rgba(0,0,0,.45),
     0 18px 34px -14px rgba(0,0,0,.78) !important;
 }
+/* drop zone reads as a target, not a raised control */
+body .file-picker{border:1px dashed rgba(255,255,255,.18) !important}
+body .file-picker:hover{border-color:rgba(255,255,255,.34) !important}
+body .file-picker.is-dragover{
+  border:1px solid var(--accent) !important;
+  background:linear-gradient(180deg,#2c2c2c 0%,#1b1b1b 100%) !important;
+}
 /* keep the input focus ring, just preserve the top bevel */
 body input[type="text"]:focus,
 body input[type="number"]:focus,
@@ -2561,16 +2576,16 @@ body .breakdown-row{
         </div>
       </div>
 
-      <div id="inputModeNote" class="input-mode-note">File picker mode is active. Choose source file(s) to parse.</div>
+      <div id="inputModeNote" class="input-mode-note">Drop mode is active. Drag source file(s) here to parse.</div>
 
       <div id="fileInputBlock" class="field-block mode-shell">
         <label for="fileInput">Select Source File(s)</label>
-        <label for="fileInput" class="file-picker">
+        <label for="fileInput" id="fileDropZone" class="file-picker">
           <span class="file-picker-icon" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           </span>
-          <span id="filePickerButtonText" class="file-button">Choose File(s)</span>
-          <span id="filePickerText" class="file-picker-text">No file chosen</span>
+          <span id="filePickerButtonText" class="file-drop-prompt">Drop file(s) here</span>
+          <span id="filePickerText" class="file-picker-text">or click to browse</span>
         </label>
         <input id="fileInput" class="file-input-native" type="file" accept=".txt,.pdf,.xlsx,.xlsm" multiple="">
       </div>
@@ -10042,7 +10057,20 @@ body .breakdown-row{
           { header: "Employee Rehire Date", start: 362, length: 10, type: "date" },
           { header: "Participant Vest Date", start: 372, length: 10, type: "date" },
           { header: "Participant Status Code", start: 382, length: 2, type: "text" },
+          { header: "Highly Compensated Employee Code", start: 384, length: 1, type: "text" },
+          { header: "Employee Family Member Code", start: 385, length: 1, type: "text" },
+          { header: "Key Employee Code", start: 386, length: 1, type: "text" },
+          { header: "Former Key Employee Code", start: 387, length: 1, type: "text" },
           { header: "Compliance Group Code", start: 388, length: 5, type: "text" },
+          { header: "Associated Highly Compensated Tax ID", start: 393, length: 9, type: "text" },
+          { header: "Employee's Relative Tax ID", start: 402, length: 9, type: "text" },
+          { header: "Participant Spouse Code", start: 411, length: 1, type: "text" },
+          { header: "Top Ten % Owner Code", start: 412, length: 1, type: "text" },
+          { header: "Employee Ownership Level Code", start: 413, length: 1, type: "text" },
+          { header: "Employee Lineal Ascendant Code", start: 414, length: 1, type: "text" },
+          { header: "Employee Lineal Descendent Code", start: 415, length: 1, type: "text" },
+          { header: "Former Highly Compensated Employee Code", start: 416, length: 1, type: "text" },
+          { header: "Marital Status", start: 417, length: 1, type: "text" },
           { header: "Plan YTD Salary Amount", start: 418, length: 17, type: "decimal" },
           { header: "Plan YTD Salary Change Date", start: 435, length: 10, type: "date" },
           { header: "Plan YTD Salary Deduction Amount", start: 445, length: 17, type: "decimal" },
@@ -10050,12 +10078,17 @@ body .breakdown-row{
           { header: "Plan YTD Employer Match Amount", start: 472, length: 17, type: "decimal" },
           { header: "Plan YTD Employer Match Date", start: 489, length: 10, type: "date" },
           { header: "Plan YTD Voluntary Money Amount", start: 499, length: 17, type: "decimal" },
+          { header: "Prior Year-to-Date Voluntary Money Date Value", start: 516, length: 10, type: "date" },
           { header: "Available Hardship Withdrawal Amount", start: 526, length: 17, type: "decimal" },
+          { header: "Hardship Suspension End Date Value", start: 543, length: 10, type: "date" },
           { header: "First Contribution Date", start: 553, length: 10, type: "date" },
           { header: "Plan YTD Roth Elective Deferral Amount", start: 563, length: 17, type: "decimal" },
           { header: "Plan YTD Roth Elective Deferral Date", start: 580, length: 10, type: "date" },
           { header: "Roth Basis Amount", start: 590, length: 17, type: "decimal" },
+          { header: "Roth Basis Total Loan Exclusion Amount", start: 607, length: 17, type: "decimal" },
           { header: "After-tax Basis Amount", start: 624, length: 17, type: "decimal" },
+          { header: "After-tax Basis Total Loan Exclusion Amount", start: 641, length: 17, type: "decimal" },
+          { header: "Pre-1987 After-tax Basis Amount", start: 658, length: 17, type: "decimal" },
           { header: "Original Participant Tax ID", start: 675, length: 9, type: "text" },
           { header: "Participant Customer Gender", start: 684, length: 1, type: "text" },
           { header: "Calendar YTD Salary Deduction Amount", start: 685, length: 17, type: "decimal" },
@@ -10081,6 +10114,9 @@ body .breakdown-row{
           { header: "Annual Interest Rate", start: 78, length: 16, type: "decimal" },
           { header: "Total Scheduled Loan Payments", start: 94, length: 7, type: "integer" },
           { header: "Loan First Payment Due Date", start: 101, length: 10, type: "date" },
+          { header: "Loan Payment Frequency Code", start: 111, length: 1, type: "text" },
+          { header: "Mortgage Loan Code", start: 112, length: 1, type: "text" },
+          { header: "Loan Deem Status Code", start: 113, length: 1, type: "text" },
           { header: "Loan Maturity Date", start: 114, length: 10, type: "date" },
           { header: "Total Loan Payments Made", start: 124, length: 7, type: "integer" },
           { header: "Date of Last Loan Payment", start: 131, length: 10, type: "date" },
@@ -10124,7 +10160,7 @@ body .breakdown-row{
           { header: "Record Code", start: 1, length: 2, type: "text" },
           { header: "Participant Tax ID", start: 3, length: 9, type: "text" },
           { header: "Money Type Code", start: 12, length: 3, type: "text" },
-          { header: "Participant Vested Percentage Rate", start: 15, length: 15, type: "decimal" },
+          { header: "Participant Vested Percentage Rate", start: 15, length: 16, type: "decimal" },
           { header: "Vested Amount", start: 31, length: 17, type: "decimal" },
           { header: "Year-to-Date Contribution Amount", start: 48, length: 17, type: "decimal" },
           { header: "Year-to-Date Distribution Amount", start: 65, length: 17, type: "decimal" },
@@ -10156,6 +10192,7 @@ body .breakdown-row{
           { header: "Pre-tax Amount", start: 54, length: 17, type: "decimal" },
           { header: "Post-tax Amount", start: 71, length: 17, type: "decimal" },
           { header: "Status Reported Date", start: 88, length: 10, type: "date" },
+          { header: "Passive Default Percentage Rate Used Code", start: 98, length: 1, type: "text" },
           { header: "Automatic Pre-tax Contribution Increase Election Code", start: 99, length: 1, type: "text" },
           { header: "Roth Elective Deferral Contribution Enrollment Rate", start: 100, length: 16, type: "decimal" },
           { header: "Roth Elective Deferral Contribution Enrollment Amount", start: 116, length: 17, type: "decimal" },
@@ -10176,15 +10213,19 @@ body .breakdown-row{
       folderModeHelpText: "Empower file picker mode is active. Select the d- data extract file(s) and the s- summary file.",
       recordStart: 1,
       recordLength: 6,
-      reports: ["SUBSET", "HOURS", "YTDDSV", "EMP", "SALARY", "DFRL", "BENE", "PYEB", "PPAY", "OWNER", "LOMNTY", "ITD", "PARTS", "LOANS", "BALANC", "ALLOC"],
+      reports: ["SUBSET", "HOURS", "YTDDSV", "EMP", "SALARY", "DFRL", "BENE", "PYEB", "PPAY", "OWNER", "LOMNTY", "LONBAL", "VEST", "ITD", "PARTS", "LOANS", "BALANC", "ALLOC"],
       reportNames: {},
       layouts: {
         SUBSET: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "BASIS", start: 136, length: 4, type: "text" },
           { header: "VALUE", start: 140, length: 9, type: "decimal" },
           { header: "EFFECTIVE DATE", start: 149, length: 8, type: "date" }
@@ -10193,29 +10234,77 @@ body .breakdown-row{
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "COMP YEAR", start: 136, length: 4, type: "integer" },
           { header: "EFFECTIVE DATE", start: 140, length: 8, type: "date" },
-          { header: "CREDITED HOURS", start: 148, length: 82, type: "decimal" }
+          { header: "CREDITED HOURS", start: 148, length: 8, type: "decimal" }
+        ],
+        YTDDSV: [
+          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
+          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
+          { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
+          { header: "LAST NAME", start: 46, length: 35, type: "text" },
+          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
+          { header: "GROUP NAME", start: 136, length: 70, type: "text" },
+          { header: "BASIS", start: 206, length: 6, type: "text" },
+          { header: "VALUE", start: 212, length: 6, type: "decimal" },
+          { header: "SSET NAME", start: 218, length: 80, type: "text" },
+          { header: "TAXABLE REASON", start: 298, length: 10, type: "text" },
+          { header: "DISB REASON", start: 308, length: 11, type: "text" },
+          { header: "DISB METHOD", start: 319, length: 8, type: "text" },
+          { header: "PROCESSED DATE", start: 327, length: 8, type: "date" },
+          { header: "EFFECTIVE DATE", start: 335, length: 8, type: "date" },
+          { header: "DISB RECEIVER", start: 343, length: 35, type: "text" },
+          { header: "FIRST_LINE_MAILING", start: 378, length: 35, type: "text" },
+          { header: "MAILING LINE 1", start: 413, length: 35, type: "text" },
+          { header: "CITY", start: 448, length: 20, type: "text" },
+          { header: "STATE", start: 468, length: 2, type: "text" },
+          { header: "ZIP CODE", start: 470, length: 10, type: "text" },
+          { header: "MONEY TYPE", start: 480, length: 5, type: "text" },
+          { header: "DISB AMOUNT", start: 485, length: 17, type: "decimal" },
+          { header: "DISB FEE", start: 502, length: 17, type: "decimal" },
+          { header: "WITHHOLDING AMOUNT", start: 519, length: 17, type: "decimal" },
+          { header: "VEST PCT", start: 536, length: 5, type: "decimal" },
+          { header: "FORFEIT AMOUNT", start: 541, length: 17, type: "decimal" },
+          { header: "CHECK AMOUNT", start: 558, length: 17, type: "decimal" }
         ],
         EMP: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "DATE OF HIRE", start: 136, length: 8, type: "date" },
           { header: "DATE OF TERMINATION", start: 144, length: 8, type: "date" },
-          { header: "EMPLOYEE ID", start: 152, length: 18, type: "text" },
-          { header: "HIGHLY COMPENSATED INDICATOR", start: 182, length: 1, type: "text" }
+          { header: "EMPLOYEE ID", start: 152, length: 30, type: "text" },
+          { header: "HIGHLY COMPENSATED INDICATOR", start: 182, length: 1, type: "text" },
+          { header: "OFFICER INDICATOR", start: 183, length: 1, type: "text" },
+          { header: "INSIDER INDICATOR", start: 184, length: 1, type: "text" },
+          { header: "SUPER OFFICER INDICATOR", start: 185, length: 1, type: "text" }
         ],
         SALARY: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "SALARY AMOUNT", start: 136, length: 18, type: "decimal" },
           { header: "SALARY AMOUNT QUALIFIER", start: 154, length: 2, type: "text" },
           { header: "EMPLOYEE TYPE CODE", start: 156, length: 1, type: "text" },
@@ -10225,86 +10314,188 @@ body .breakdown-row{
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "DEFERRAL TYPE", start: 136, length: 6, type: "text" },
+          { header: "DATA PROCESSING DATE", start: 142, length: 17, type: "text" },
           { header: "EFFECTIVE DATE", start: 159, length: 8, type: "date" },
           { header: "DEFERRAL PERCENT", start: 167, length: 9, type: "decimal" },
           { header: "DEFERRAL AMOUNT", start: 176, length: 18, type: "decimal" },
-          { header: "NEXT SCHEDULED CHANGE DATE", start: 246, length: 8, type: "date" }
-        ],
-        YTDDSV: [
-          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
-          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
-          { header: "SSN", start: 20, length: 9, type: "text" },
-          { header: "LAST NAME", start: 46, length: 35, type: "text" },
-          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
-          { header: "GROUP NAME", start: 136, length: 70, type: "text" },
-          { header: "SSET NAME", start: 218, length: 80, type: "text" },
-          { header: "PROCESSED DATE", start: 327, length: 8, type: "date" },
-          { header: "EFFECTIVE DATE", start: 335, length: 8, type: "date" },
-          { header: "DISB AMOUNT", start: 485, length: 17, type: "decimal" },
-          { header: "WITHHOLDING AMOUNT", start: 519, length: 17, type: "decimal" },
-          { header: "CHECK AMOUNT", start: 558, length: 17, type: "decimal" }
-        ],
-        PYEB: [
-          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
-          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
-          { header: "SSN", start: 20, length: 9, type: "text" },
-          { header: "LAST NAME", start: 46, length: 35, type: "text" },
-          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
-          { header: "BASIS", start: 136, length: 4, type: "text" },
-          { header: "VALUE", start: 140, length: 6, type: "decimal" },
-          { header: "MONEY TYPE", start: 146, length: 3, type: "text" },
-          { header: "SEQUENECE NUMBER", start: 149, length: 4, type: "integer" },
-          { header: "EFFECTIVE DATE", start: 153, length: 8, type: "date" },
-          { header: "BALANCE", start: 161, length: 182, type: "decimal" }
-        ],
-        PPAY: [
-          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
-          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
-          { header: "SSN", start: 20, length: 9, type: "text" },
-          { header: "LAST NAME", start: 46, length: 35, type: "text" },
-          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
-          { header: "DISB TYPE", start: 141, length: 10, type: "text" },
-          { header: "EFFDATE", start: 192, length: 8, type: "date" },
-          { header: "NEXT SCHED PAY DUE DATE", start: 200, length: 8, type: "date" },
-          { header: "EXTERNAL REQUEST ID", start: 208, length: 50, type: "text" },
-          { header: "PPAY PER PERIOD AMT", start: 264, length: 17, type: "decimal" },
-          { header: "PPAY CUR PAYMENT NUM", start: 281, length: 5, type: "integer" },
-          { header: "PPAY NUM SCHED PAYMENTS", start: 286, length: 5, type: "integer" }
+          { header: "DEFAULT INDICATOR", start: 194, length: 1, type: "text" },
+          { header: "CHANGE CODE", start: 195, length: 2, type: "text" },
+          { header: "STATUS CODE", start: 197, length: 1, type: "text" },
+          { header: "INCREASE PERCENT", start: 198, length: 8, type: "decimal" },
+          { header: "INCREASE AMOUNT", start: 206, length: 12, type: "decimal" },
+          { header: "STOP-AT PERCENT", start: 218, length: 10, type: "decimal" },
+          { header: "STOP-AT AMOUNT", start: 228, length: 18, type: "decimal" },
+          { header: "NEXT SCHEDULED CHANGE DATE", start: 246, length: 8, type: "date" },
+          { header: "FREQUENCY", start: 254, length: 7, type: "text" },
+          { header: "IRS ACCELERATED DEFERRAL END DATE", start: 269, length: 8, type: "date" },
+          { header: "MAX IRS ACCELERATED DEFERRAL AMOUNT", start: 277, length: 12, type: "decimal" }
         ],
         BENE: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "RECORDED DATE", start: 136, length: 8, type: "date" },
           { header: "BENE LAST NAME", start: 144, length: 35, type: "text" },
           { header: "BENE FIRST NAME", start: 179, length: 20, type: "text" },
+          { header: "BENE MIDDLE NAME", start: 199, length: 20, type: "text" },
           { header: "RELATIONSHIP", start: 219, length: 3, type: "text" },
           { header: "PERCENT", start: 222, length: 8, type: "decimal" },
-          { header: "BENE BIRTH DATE", start: 234, length: 8, type: "date" }
+          { header: "DESIGNATION TYPE", start: 230, length: 1, type: "text" },
+          { header: "BENEFICIARY TYPE CODE", start: 231, length: 3, type: "text" },
+          { header: "BENE BIRTH DATE", start: 234, length: 8, type: "date" },
+          { header: "BENE SSN", start: 242, length: 9, type: "text" },
+          { header: "MAILING NAME 1", start: 251, length: 35, type: "text" },
+          { header: "MAILING NAME 2", start: 286, length: 35, type: "text" },
+          { header: "MAILING NAME 3", start: 321, length: 35, type: "text" },
+          { header: "SEQUENCE NUMBER", start: 356, length: 3, type: "integer" },
+          { header: "ADDRESS LINE 1", start: 359, length: 35, type: "text" },
+          { header: "ADDRESS LINE 2", start: 394, length: 35, type: "text" },
+          { header: "CITY", start: 429, length: 20, type: "text" },
+          { header: "STATE CODE", start: 449, length: 2, type: "text" },
+          { header: "ZIP CODE", start: 451, length: 10, type: "text" },
+          { header: "COUNTRY", start: 461, length: 10, type: "text" },
+          { header: "PRIMARY RESIDENCE IND", start: 471, length: 1, type: "text" }
+        ],
+        PYEB: [
+          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
+          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
+          { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
+          { header: "LAST NAME", start: 46, length: 35, type: "text" },
+          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
+          { header: "BASIS", start: 136, length: 4, type: "text" },
+          { header: "VALUE", start: 140, length: 6, type: "decimal" },
+          { header: "MONEY TYPE", start: 146, length: 3, type: "text" },
+          { header: "SEQUENECE NUMBER", start: 149, length: 4, type: "integer" },
+          { header: "EFFECTIVE DATE", start: 153, length: 8, type: "date" },
+          { header: "BALANCE", start: 161, length: 18, type: "decimal" }
+        ],
+        PPAY: [
+          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
+          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
+          { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
+          { header: "LAST NAME", start: 46, length: 35, type: "text" },
+          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
+          { header: "IRSRL CODE", start: 136, length: 5, type: "text" },
+          { header: "DISB TYPE", start: 141, length: 10, type: "text" },
+          { header: "DSRS CODE", start: 151, length: 11, type: "text" },
+          { header: "TAX REASON CODE", start: 162, length: 10, type: "text" },
+          { header: "PPAY STD RL ID", start: 172, length: 20, type: "text" },
+          { header: "EFFDATE", start: 192, length: 8, type: "date" },
+          { header: "NEXT SCHED PAY DUE DATE", start: 200, length: 8, type: "date" },
+          { header: "EXTERNAL REQUEST ID", start: 208, length: 50, type: "text" },
+          { header: "PPAY PRORATE IND", start: 258, length: 2, type: "text" },
+          { header: "PPAY PRORATE STYLE", start: 260, length: 2, type: "text" },
+          { header: "PPAY FREQUENCY CODE", start: 262, length: 2, type: "text" },
+          { header: "PPAY PER PERIOD AMT", start: 264, length: 17, type: "decimal" },
+          { header: "PPAY CUR PAYMENT NUM", start: 281, length: 5, type: "integer" },
+          { header: "PPAY NUM SCHED PAYMENTS", start: 286, length: 5, type: "integer" },
+          { header: "SEQNBR", start: 291, length: 10, type: "integer" },
+          { header: "ACTY CODE", start: 301, length: 4, type: "text" },
+          { header: "SPECIAL HANDLING CODE", start: 305, length: 4, type: "text" },
+          { header: "RECVR TYPE", start: 309, length: 1, type: "text" },
+          { header: "FIRST LINE MAILING", start: 310, length: 35, type: "text" },
+          { header: "SCND LINE MAILING", start: 345, length: 35, type: "text" },
+          { header: "CITY", start: 380, length: 20, type: "text" },
+          { header: "STATE CODE", start: 400, length: 2, type: "text" },
+          { header: "ZIP CODE", start: 402, length: 10, type: "text" },
+          { header: "COUNTRY", start: 412, length: 10, type: "text" },
+          { header: "PAYEE BANK NAME", start: 422, length: 70, type: "text" },
+          { header: "PAYEE BANK ACCT NAME", start: 492, length: 50, type: "text" },
+          { header: "PAYEE ACCT NBR", start: 542, length: 17, type: "text" },
+          { header: "PAYEE BANK TRANSIT NBR", start: 559, length: 12, type: "text" },
+          { header: "PAYEE BANK CITY", start: 571, length: 20, type: "text" },
+          { header: "PAYEE BANK STATE", start: 591, length: 2, type: "text" },
+          { header: "SAVINGS CHECKING IND", start: 593, length: 2, type: "text" },
+          { header: "PRIMARY RES STATE", start: 595, length: 20, type: "text" },
+          { header: "IRS TXAE CODE", start: 615, length: 10, type: "text" },
+          { header: "IRS GROSS AMT", start: 625, length: 17, type: "decimal" },
+          { header: "IRS TAXABLE AMT", start: 642, length: 17, type: "decimal" },
+          { header: "IRS USER OVERRIDE", start: 659, length: 1, type: "text" },
+          { header: "IRS TAX WHLDG PROC", start: 660, length: 10, type: "text" },
+          { header: "IRS FILING STATUS", start: 670, length: 2, type: "text" },
+          { header: "IRS TAX EXEMPTIONS", start: 672, length: 2, type: "integer" },
+          { header: "IRS WHLDG AMT", start: 674, length: 17, type: "decimal" },
+          { header: "IRS WHLDG PERCENT", start: 691, length: 17, type: "decimal" },
+          { header: "IRS ADDNL WHLDG AMT", start: 708, length: 17, type: "decimal" },
+          { header: "IRS ADDNL WHLDG PERCENT", start: 725, length: 17, type: "decimal" },
+          { header: "ST TXAE CODE", start: 742, length: 10, type: "text" },
+          { header: "ST GROSS AMT", start: 752, length: 17, type: "decimal" },
+          { header: "ST TAXABLE AMT", start: 769, length: 17, type: "decimal" },
+          { header: "ST USER OVERRIDE", start: 786, length: 1, type: "text" },
+          { header: "ST TAX WHLDG PROC", start: 787, length: 10, type: "text" },
+          { header: "ST FILING STATUS", start: 797, length: 2, type: "text" },
+          { header: "ST TAX EXEMPTIONS", start: 799, length: 2, type: "integer" },
+          { header: "ST WHLDG AMT", start: 801, length: 17, type: "decimal" },
+          { header: "ST WHLDG PERCENT", start: 818, length: 12, type: "decimal" },
+          { header: "ST ADDNL WHLDG AMT", start: 830, length: 17, type: "decimal" },
+          { header: "ST ADDNL WHLDG PERCENT", start: 847, length: 17, type: "decimal" },
+          { header: "CITY TXAE CODE", start: 864, length: 10, type: "text" },
+          { header: "CITY GROSS AMT", start: 874, length: 17, type: "decimal" },
+          { header: "CITY TAXABLE AMT", start: 891, length: 17, type: "decimal" },
+          { header: "CITY USER OVERRIDE", start: 908, length: 1, type: "text" },
+          { header: "CITY FILING STATUS", start: 909, length: 2, type: "text" },
+          { header: "CITY TAX EXEMPTIONS", start: 911, length: 2, type: "integer" },
+          { header: "CITY WHLDG AMT", start: 913, length: 17, type: "decimal" },
+          { header: "CITY WHLDG PERCENT", start: 930, length: 12, type: "decimal" },
+          { header: "CITY ADDNL WHLDG AMT", start: 942, length: 17, type: "decimal" },
+          { header: "CITY ADDNL WHLDG PERCENT", start: 959, length: 17, type: "decimal" }
         ],
         OWNER: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "OWNERSHIP INDICATOR", start: 136, length: 1, type: "text" },
           { header: "SETTLEMENT DATE", start: 137, length: 8, type: "date" },
           { header: "OWNER SSN", start: 145, length: 9, type: "text" },
           { header: "OWNER LAST NAME", start: 154, length: 35, type: "text" },
-          { header: "OWNER FIRST NAME", start: 189, length: 20, type: "text" }
+          { header: "OWNER FIRST NAME", start: 189, length: 20, type: "text" },
+          { header: "OWNER MIDDLE NAME", start: 209, length: 20, type: "text" },
+          { header: "OWNER SUFFIX", start: 229, length: 15, type: "text" },
+          { header: "OWNER ADDRESS LINE 1", start: 244, length: 35, type: "text" },
+          { header: "OWNER ADDRESS LINE 2", start: 279, length: 35, type: "text" },
+          { header: "OWNER CITY", start: 314, length: 20, type: "text" },
+          { header: "OWNER STATE CODE", start: 334, length: 2, type: "text" },
+          { header: "OWNER ZIP CODE", start: 336, length: 10, type: "text" },
+          { header: "OWNER COUNTRY", start: 346, length: 10, type: "text" },
+          { header: "TAKEOVER TYPE CODE", start: 356, length: 4, type: "text" }
         ],
         LOMNTY: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "LOAN NUMBER", start: 136, length: 10, type: "text" },
           { header: "MONEY TYPE", start: 146, length: 3, type: "text" },
           { header: "SEQUENCE NUMBER", start: 149, length: 4, type: "integer" },
@@ -10312,63 +10503,181 @@ body .breakdown-row{
           { header: "EFFECTIVE DATE", start: 164, length: 8, type: "date" },
           { header: "TERMINATION DATE", start: 172, length: 8, type: "date" }
         ],
+        LONBAL: [
+          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
+          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
+          { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
+          { header: "LAST NAME", start: 46, length: 35, type: "text" },
+          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
+          { header: "LOAN NUMBER", start: 136, length: 10, type: "text" },
+          { header: "EFFECTIVE DATE LOAN BALANCE", start: 146, length: 8, type: "date" },
+          { header: "LOAN PRINCIPAL", start: 154, length: 18, type: "decimal" }
+        ],
+        VEST: [
+          { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
+          { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
+          { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
+          { header: "LAST NAME", start: 46, length: 35, type: "text" },
+          { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
+          { header: "CREDITED YEARS OF SERVICE", start: 136, length: 12, type: "decimal" },
+          { header: "CREDITED HOURS", start: 148, length: 10, type: "decimal" },
+          { header: "TOTAL COMP YTD", start: 158, length: 14, type: "decimal" },
+          { header: "PLAN COMP YTD", start: 172, length: 14, type: "decimal" },
+          { header: "PERIOD END DATE", start: 186, length: 8, type: "date" },
+          { header: "DATE OF LAST ER FORF REQ", start: 194, length: 8, type: "date" },
+          { header: "MONEY TYPE", start: 202, length: 3, type: "text" },
+          { header: "SEQUENCE NUMBER", start: 205, length: 2, type: "integer" },
+          { header: "VESTING METHOD CODE", start: 207, length: 12, type: "text" },
+          { header: "ALTERNATE VESTING DATE", start: 219, length: 8, type: "date" }
+        ],
         ITD: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "MONEY TYPE", start: 136, length: 3, type: "text" },
           { header: "SEQUENCE NUMBER", start: 139, length: 4, type: "integer" },
           { header: "FINANCIAL ACTIVITY CODE", start: 143, length: 3, type: "text" },
           { header: "DEPOSIT TYPE", start: 146, length: 3, type: "text" },
           { header: "AMOUNT", start: 149, length: 18, type: "decimal" },
-          { header: "ROTH FIRST CONTRIBUTION DATE", start: 257, length: 10, type: "date" }
+          { header: "PRE 87 AFTER-TAX AMOUNT", start: 167, length: 18, type: "decimal" },
+          { header: "POST 86 AFTER-TAX AMOUNT", start: 185, length: 18, type: "decimal" },
+          { header: "TOTAL AFTER-TAX AMOUNT", start: 203, length: 18, type: "decimal" },
+          { header: "TAX-FREE AMOUNT", start: 221, length: 18, type: "decimal" },
+          { header: "AVAILABLE HARDSHIP AMOUNT", start: 239, length: 18, type: "decimal" },
+          { header: "ROTH FIRST CONTRIBUTION DATE", start: 257, length: 8, type: "date" }
         ],
         PARTS: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "DATE OF BIRTH", start: 136, length: 8, type: "date" },
+          { header: "DATE OF FIRST CONTRIBUTION", start: 144, length: 8, type: "date" },
+          { header: "DATE LAST HARDSHIP DISB", start: 152, length: 8, type: "date" },
+          { header: "STATUS SUBCODE", start: 160, length: 3, type: "text" },
+          { header: "RESTRICTION CODE", start: 163, length: 4, type: "text" },
+          { header: "GENDER", start: 167, length: 1, type: "text" },
+          { header: "ADDRESS LINE 1", start: 168, length: 35, type: "text" },
+          { header: "ADDRESS LINE 2", start: 203, length: 35, type: "text" },
+          { header: "CITY", start: 238, length: 20, type: "text" },
+          { header: "STATE CODE", start: 258, length: 2, type: "text" },
+          { header: "ZIP CODE", start: 260, length: 10, type: "text" },
+          { header: "COUNTRY", start: 270, length: 10, type: "text" },
+          { header: "PARTICIPANT ACCOUNT STATUS CODE", start: 280, length: 2, type: "text" },
+          { header: "MARITAL STATUS", start: 282, length: 1, type: "text" },
+          { header: "HOME PHONE NUMBER", start: 283, length: 10, type: "text" },
+          { header: "WORK PHONE NUMBER", start: 293, length: 10, type: "text" },
+          { header: "WORK PHONE NUMBER EXTENSION", start: 303, length: 6, type: "text" },
+          { header: "EMPLOYEE ID", start: 309, length: 30, type: "text" },
+          { header: "ELIGIBILITY INDICATOR", start: 339, length: 1, type: "text" },
           { header: "PARTICIPATION DATE", start: 340, length: 8, type: "date" },
           { header: "EMAIL ADDRESS", start: 348, length: 80, type: "text" },
-          { header: "MAIL HOLD DATE", start: 608, length: 8, type: "date" }
+          { header: "DEATH DATE", start: 428, length: 8, type: "date" },
+          { header: "LEAVE OF ABSENCE EFFECTIVE DATE", start: 436, length: 8, type: "date" },
+          { header: "LEAVE OF ABSENCE TERMINATION DATE", start: 444, length: 8, type: "date" },
+          { header: "LEAVE OF ABSENCE REASON CODE", start: 452, length: 20, type: "text" },
+          { header: "DEFAULT DATE OF BIRTH INDICATOR", start: 472, length: 1, type: "text" },
+          { header: "DEFAULT ADDRESS INDICATOR", start: 473, length: 10, type: "text" },
+          { header: "MOBILE PHONE NUMBER", start: 483, length: 10, type: "text" },
+          { header: "INELIGIBILITY REASON CODE", start: 493, length: 10, type: "text" },
+          { header: "PARTICIPANT DISBURSEMENT HOLD CODE", start: 503, length: 1, type: "text" },
+          { header: "HIGHLY COMPENSATED INDIVIDUAL", start: 504, length: 1, type: "text" },
+          { header: "OFFICER INDICATOR", start: 505, length: 1, type: "text" },
+          { header: "INSIDER INDICATOR", start: 506, length: 1, type: "text" },
+          { header: "SUPER OFFICER INDICATOR", start: 507, length: 1, type: "text" },
+          { header: "DELIVERY METHOD", start: 508, length: 20, type: "text" },
+          { header: "WORK EMAIL", start: 528, length: 80, type: "text" },
+          { header: "MAIL HOLD DATE", start: 608, length: 8, type: "date" },
+          { header: "MANAGED ACCOUNT INDICTOR", start: 616, length: 1, type: "text" }
         ],
         LOANS: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "LOAN NUMBER", start: 136, length: 10, type: "text" },
+          { header: "LOAN REASON CODE", start: 146, length: 10, type: "text" },
+          { header: "LOAN TERM", start: 156, length: 4, type: "integer" },
+          { header: "LOAN TERM QUALIFIER", start: 160, length: 2, type: "text" },
           { header: "FIRST DUE DATE", start: 162, length: 8, type: "date" },
+          { header: "REPAY FREQUENCY", start: 170, length: 2, type: "text" },
           { header: "REPAY AMOUNT", start: 172, length: 18, type: "decimal" },
+          { header: "ORIGINAL EFFECTIVE DATE", start: 190, length: 8, type: "date" },
           { header: "ORIGINAL LOAN AMOUNT", start: 198, length: 18, type: "decimal" },
+          { header: "FIXED INTEREST RATE", start: 216, length: 14, type: "decimal" },
+          { header: "STATUS CODE", start: 230, length: 2, type: "text" },
+          { header: "STATUS CHANGE EFFECTIVE DATE", start: 232, length: 8, type: "date" },
+          { header: "DEFAULT INDICATOR", start: 240, length: 1, type: "text" },
+          { header: "DEFAULT DATE", start: 241, length: 8, type: "date" },
           { header: "OUTSTANDING PRINCIPAL", start: 249, length: 18, type: "decimal" },
           { header: "MATURITY DATE", start: 267, length: 8, type: "date" },
-          { header: "LAST REPAYMENT DATE", start: 410, length: 8, type: "date" }
+          { header: "NUMBER PAYMENTS TO DATE", start: 275, length: 10, type: "integer" },
+          { header: "TOTAL INTEREST PAID", start: 285, length: 18, type: "decimal" },
+          { header: "NEXT DUE DATE", start: 303, length: 8, type: "date" },
+          { header: "REPAY MTHD CODE", start: 311, length: 10, type: "text" },
+          { header: "BANK TRANSIT CODE", start: 321, length: 12, type: "text" },
+          { header: "BANK ACCOUNT NAME", start: 333, length: 50, type: "text" },
+          { header: "ACCT NBR", start: 383, length: 17, type: "text" },
+          { header: "SAVINGS CHECKING IND", start: 400, length: 2, type: "text" },
+          { header: "REAMORTIZATION DATE", start: 402, length: 8, type: "date" },
+          { header: "LAST REPAYMENT DATE", start: 410, length: 8, type: "date" },
+          { header: "LAST REPAYMENT PRINCIPAL AMOUNT", start: 418, length: 18, type: "decimal" },
+          { header: "LAST REPAYMENT INTEREST AMOUNT", start: 436, length: 18, type: "decimal" }
         ],
         BALANC: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "MONEY TYPE", start: 136, length: 3, type: "text" },
           { header: "SEQUENCE NUMBER", start: 139, length: 4, type: "integer" },
           { header: "INVESTMENT OPTION", start: 143, length: 7, type: "text" },
           { header: "AMOUNT", start: 150, length: 18, type: "decimal" },
-          { header: "UNITS/SHARES", start: 168, length: 54, type: "decimal" },
+          { header: "UNITS/SHARES", start: 168, length: 18, type: "decimal" },
+          { header: "ITD COST", start: 222, length: 18, type: "decimal" },
+          { header: "NET UNREALIZED APPREC", start: 240, length: 18, type: "decimal" },
+          { header: "DISBURSEMENT CHARGE", start: 258, length: 18, type: "decimal" },
           { header: "BALANCE EFFECTIVE DATE", start: 276, length: 8, type: "date" }
         ],
         ALLOC: [
           { header: "RECORD TYPE", start: 1, length: 6, type: "text" },
           { header: "GROUP ACCOUNT", start: 7, length: 13, type: "text" },
           { header: "SSN", start: 20, length: 9, type: "text" },
+          { header: "SSN EXTENSION", start: 29, length: 7, type: "integer" },
+          { header: "SSN EXTENSION REASON", start: 36, length: 10, type: "text" },
           { header: "LAST NAME", start: 46, length: 35, type: "text" },
           { header: "FIRST NAME", start: 81, length: 20, type: "text" },
+          { header: "MIDDLE NAME", start: 101, length: 20, type: "text" },
+          { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "MONEY TYPE", start: 136, length: 3, type: "text" },
           { header: "SEQUENCE NUMBER", start: 139, length: 4, type: "integer" },
           { header: "INVESTMENT OPTION", start: 143, length: 7, type: "text" },
@@ -10398,21 +10707,87 @@ body .breakdown-row{
           { header: "Date of Hire", start: 65, length: 8, type: "date" },
           { header: "Date of Plan Entry/Eligibility", start: 73, length: 8, type: "date" },
           { header: "Date of Termination", start: 81, length: 8, type: "date" },
+          { header: "Date of Suspension", start: 89, length: 8, type: "date" },
+          { header: "Date of Alternate Vesting", start: 97, length: 8, type: "date" },
           { header: "Years of Service", start: 113, length: 5, type: "decimal" },
           { header: "Current Year-to-date Hours of Service", start: 118, length: 7, type: "decimal" },
+          { header: "401(k) EE Contributions - Taxed by State - Sign", start: 125, length: 1, type: "text" },
+          { header: "401(k) EE Contributions - Taxed by State", start: 126, length: 11, type: "decimal" },
+          { header: "Eligible Rollover Distributions This Year - Sign", start: 137, length: 1, type: "text" },
+          { header: "Eligible Rollover Distributions This Year", start: 138, length: 11, type: "decimal" },
+          { header: "Vesting Override Percent", start: 157, length: 4, type: "decimal" },
+          { header: "Vesting Override Flag", start: 161, length: 1, type: "text" },
+          { header: "Location ID Number (ADP Company Code)", start: 162, length: 4, type: "text" },
+          { header: "Pre-1987 Employee After-Tax Contributions - Sign", start: 166, length: 1, type: "text" },
+          { header: "Pre-1987 Employee After-Tax Contributions", start: 167, length: 11, type: "decimal" },
+          { header: "Buy-Back Employer After-Tax Contributions - Sign", start: 178, length: 1, type: "text" },
+          { header: "Buy-Back Employer After-Tax Contributions", start: 179, length: 11, type: "decimal" },
           { header: "Participant Address - Line 1", start: 190, length: 30, type: "text" },
           { header: "Participant Address - Line 2", start: 220, length: 30, type: "text" },
           { header: "Participant Address - City", start: 250, length: 18, type: "text" },
           { header: "Participant Address - State", start: 268, length: 2, type: "text" },
           { header: "Participant Address - Zip Code", start: 270, length: 9, type: "text" },
+          { header: "Alternate State for Tax Purposes", start: 279, length: 2, type: "text" },
+          { header: "415 Contributions - Current Period - Sign", start: 281, length: 1, type: "text" },
+          { header: "415 Contributions - Current Period", start: 282, length: 11, type: "decimal" },
+          { header: "415 Contributions - Prior Period - Sign", start: 293, length: 1, type: "text" },
+          { header: "415 Contributions - Prior Period", start: 294, length: 11, type: "decimal" },
+          { header: "415 Compensation - Current Period - Sign", start: 305, length: 1, type: "text" },
+          { header: "415 Compensation - Current Period", start: 306, length: 11, type: "decimal" },
+          { header: "415 Compensation - Prior Period - Sign", start: 317, length: 1, type: "text" },
+          { header: "415 Compensation - Prior Period", start: 318, length: 11, type: "decimal" },
           { header: "Before-Tax Deferral Percent", start: 329, length: 5, type: "decimal" },
           { header: "Leave of Absence Date", start: 334, length: 8, type: "date" },
+          { header: "Protected Benefit Amount - Sign", start: 342, length: 1, type: "text" },
+          { header: "Protected Benefit Amount", start: 343, length: 11, type: "decimal" },
+          { header: "NEC Contributions - Sign", start: 354, length: 1, type: "text" },
+          { header: "NEC Contributions", start: 355, length: 11, type: "decimal" },
+          { header: "401(k) Elective Deferrals - Hardship Amount - Sign", start: 366, length: 1, type: "text" },
+          { header: "401(k) Elective Deferrals - Hardship Amount", start: 367, length: 11, type: "decimal" },
+          { header: "401(k) Before-Tax Contributions - Current Year - Sign", start: 378, length: 1, type: "text" },
+          { header: "401(k) Before-Tax Contributions - Current Year", start: 379, length: 11, type: "decimal" },
+          { header: "401(k) Before-Tax Contributions - Prior Year - Sign", start: 390, length: 1, type: "text" },
+          { header: "401(k) Before-Tax Contributions - Prior Year", start: 391, length: 11, type: "decimal" },
+          { header: "Post-1986 Employee After-Tax Contributions - Sign", start: 402, length: 1, type: "text" },
+          { header: "Post-1986 Employee After-Tax Contributions", start: 403, length: 11, type: "decimal" },
+          { header: "Insider Flag", start: 414, length: 1, type: "text" },
+          { header: "Pay Frequency", start: 415, length: 1, type: "text" },
+          { header: "Union Indicator", start: 416, length: 1, type: "text" },
+          { header: "HCE Indicator", start: 417, length: 1, type: "text" },
+          { header: "Excluded Class Indicator", start: 418, length: 1, type: "text" },
+          { header: "After-Tax Deferral Percent", start: 419, length: 5, type: "decimal" },
+          { header: "Termination Rehire Flag", start: 424, length: 2, type: "text" },
           { header: "Rehire Date", start: 426, length: 8, type: "date" },
           { header: "Employer Match Eligibility Date", start: 434, length: 8, type: "date" },
+          { header: "Key Employee Indicator", start: 442, length: 1, type: "text" },
+          { header: "QDRO Pending", start: 443, length: 1, type: "text" },
+          { header: "Beneficiary Code", start: 444, length: 1, type: "text" },
+          { header: "Rollover Acct Type", start: 445, length: 1, type: "text" },
+          { header: "Term Reason Code", start: 446, length: 1, type: "text" },
+          { header: "Disability Date", start: 447, length: 8, type: "date" },
+          { header: "Minimum Distribution Eligibility Date", start: 455, length: 8, type: "date" },
           { header: "Eligible Date", start: 463, length: 8, type: "date" },
+          { header: "Auto Rebalance Flag", start: 471, length: 1, type: "text" },
+          { header: "Before-Tax Deferral Percent Change Date", start: 472, length: 8, type: "date" },
+          { header: "Save Smart Annual Increment Percent", start: 480, length: 5, type: "decimal" },
+          { header: "Save Smart Maximum Deferral Percent", start: 485, length: 5, type: "decimal" },
+          { header: "Save Smart Month", start: 490, length: 1, type: "text" },
+          { header: "Catch-up Percent", start: 491, length: 4, type: "decimal" },
+          { header: "Catch-up Deferral Change Date", start: 495, length: 8, type: "date" },
+          { header: "Catch-up Year-to-date Sign", start: 503, length: 1, type: "text" },
+          { header: "Catch-up Year-to-date Amount", start: 504, length: 11, type: "decimal" },
+          { header: "Catch-up Prior Year-to-date Sign", start: 515, length: 1, type: "text" },
+          { header: "Catch-up Prior Year-to-date Amount", start: 516, length: 11, type: "decimal" },
+          { header: "Catch-up Contribution Per Pay Period Sign", start: 527, length: 1, type: "text" },
+          { header: "Catch-up Contribution Per Pay Period", start: 528, length: 11, type: "decimal" },
           { header: "Roth Deferral Percent", start: 539, length: 4, type: "decimal" },
           { header: "Roth First Contribution Date", start: 543, length: 8, type: "date" },
-          { header: "ROTH TAX BASIS", start: 563, length: 11, type: "decimal" }
+          { header: "Roth Last Deferral Change Date", start: 551, length: 8, type: "date" },
+          { header: "Roth Catch-up Deferral Percentage", start: 559, length: 4, type: "decimal" },
+          { header: "ROTH TAX BASIS", start: 563, length: 11, type: "decimal" },
+          { header: "Before Tax Contribution Amount", start: 574, length: 5, type: "decimal" },
+          { header: "Roth Contribution Amount", start: 579, length: 5, type: "decimal" },
+          { header: "Roth Catch-up Amount", start: 584, length: 5, type: "decimal" }
         ],
         PF: [
           { header: "Record ID", start: 1, length: 2, type: "text" },
@@ -10420,9 +10795,13 @@ body .breakdown-row{
           { header: "Fund ID", start: 12, length: 2, type: "text" },
           { header: "Source ID", start: 14, length: 1, type: "text" },
           { header: "Contribution Allocation Percent", start: 15, length: 4, type: "decimal" },
+          { header: "Gross Contributions Year-to-date - Sign", start: 19, length: 1, type: "text" },
           { header: "Gross Contributions Year-to-date", start: 20, length: 11, type: "decimal" },
+          { header: "Conversion Balance-Market Value - Sign", start: 31, length: 1, type: "text" },
           { header: "Conversion Balance-Market Value", start: 32, length: 11, type: "decimal" },
+          { header: "Cost Balance - Sign", start: 43, length: 1, type: "text" },
           { header: "Cost Balance", start: 44, length: 11, type: "decimal" },
+          { header: "Share Balance - Sign", start: 55, length: 1, type: "text" },
           { header: "Share Balance", start: 56, length: 13, type: "decimal" },
           { header: "Vested Percent", start: 69, length: 4, type: "decimal" }
         ],
@@ -10436,15 +10815,30 @@ body .breakdown-row{
           { header: "Maximum Number of Payments", start: 37, length: 3, type: "integer" },
           { header: "Number of Payments-to-date", start: 40, length: 3, type: "integer" },
           { header: "Method", start: 43, length: 1, type: "text" },
+          { header: "Exclusion Amount Sign", start: 44, length: 1, type: "text" },
           { header: "Exclusion Amount", start: 45, length: 13, type: "decimal" },
+          { header: "Exclusion Ratio Sign", start: 58, length: 1, type: "text" },
+          { header: "Exclusion Ratio", start: 59, length: 4, type: "decimal" },
+          { header: "Eligible Rollover Distribution Indicator", start: 63, length: 1, type: "text" },
+          { header: "Installment Amount or Percent Sign", start: 64, length: 1, type: "text" },
           { header: "Installment Amount or Percent", start: 65, length: 11, type: "decimal" },
+          { header: "State Withholding Flag", start: 76, length: 1, type: "text" },
+          { header: "State Withholding Method", start: 77, length: 1, type: "text" },
+          { header: "State Withholding Amount Sign", start: 78, length: 1, type: "text" },
           { header: "State Withholding Amount", start: 79, length: 11, type: "decimal" },
-          { header: "Federal Withholding Amount", start: 99, length: 11, type: "decimal" }
+          { header: "State Withholding Percent Sign", start: 90, length: 1, type: "text" },
+          { header: "State Withholding Percent", start: 91, length: 5, type: "decimal" },
+          { header: "Federal Withholding Flag", start: 96, length: 1, type: "text" },
+          { header: "Federal Withholding Method", start: 97, length: 1, type: "text" },
+          { header: "Federal Withholding Amount Sign", start: 98, length: 1, type: "text" },
+          { header: "Federal Withholding Amount", start: 99, length: 11, type: "decimal" },
+          { header: "Federal Withholding Percent Sign", start: 110, length: 1, type: "text" },
+          { header: "Federal Withholding Percent", start: 111, length: 4, type: "decimal" }
         ],
         LH: [
           { header: "Record ID", start: 1, length: 2, type: "text" },
           { header: "Social Security Number", start: 3, length: 9, type: "text" },
-          { header: "Loan Number", start: 12, length: 3, type: "integer" },
+          { header: "Loan Number", start: 12, length: 3, type: "text" },
           { header: "Date of Loan Issue Date", start: 15, length: 8, type: "date" },
           { header: "Date of Next Loan Payment", start: 23, length: 8, type: "date" },
           { header: "Date of Previous Loan Payment", start: 31, length: 8, type: "date" },
@@ -10452,20 +10846,32 @@ body .breakdown-row{
           { header: "Loan Balance Current", start: 50, length: 11, type: "decimal" },
           { header: "Loan Interest Rate", start: 61, length: 7, type: "decimal" },
           { header: "Loan Payment Amount", start: 68, length: 11, type: "decimal" },
+          { header: "Loan Payment Frequency", start: 79, length: 1, type: "text" },
           { header: "Loan Payoff Date", start: 80, length: 8, type: "date" },
+          { header: "Loan Use Indicator", start: 88, length: 1, type: "text" },
           { header: "Principal in Arrears", start: 90, length: 11, type: "decimal" },
           { header: "Interest in Arrears", start: 101, length: 11, type: "decimal" },
           { header: "Loan Total Expected Interest", start: 112, length: 11, type: "decimal" },
-          { header: "Loan Total Interest Paid to Date", start: 127, length: 11, type: "decimal" }
+          { header: "Loan Original Number of Payments", start: 123, length: 4, type: "integer" },
+          { header: "Loan Total Interest Paid to Date", start: 127, length: 11, type: "decimal" },
+          { header: "Deemed Distributed Loan Indicator", start: 138, length: 1, type: "text" },
+          { header: "Payroll Loan Number", start: 139, length: 10, type: "text" },
+          { header: "Loan Inactive Date", start: 149, length: 8, type: "date" },
+          { header: "Loan Inactive Flag", start: 157, length: 1, type: "text" },
+          { header: "Refinance Date", start: 158, length: 8, type: "date" },
+          { header: "Next Periodic Interest Date", start: 166, length: 8, type: "date" }
         ],
         LF: [
           { header: "Record ID", start: 1, length: 2, type: "text" },
           { header: "Social Security Number", start: 3, length: 9, type: "text" },
           { header: "Fund ID", start: 12, length: 2, type: "text" },
           { header: "Source ID", start: 14, length: 1, type: "text" },
-          { header: "Loan Number", start: 15, length: 3, type: "integer" },
+          { header: "Loan Number", start: 15, length: 3, type: "text" },
+          { header: "Original Loan Amount Sign", start: 18, length: 1, type: "text" },
           { header: "Original Loan Amount", start: 19, length: 11, type: "decimal" },
+          { header: "Principal Amount Repaid Sign", start: 30, length: 1, type: "text" },
           { header: "Principal Amount Repaid", start: 31, length: 11, type: "decimal" },
+          { header: "Interest Amount Repaid Sign", start: 42, length: 1, type: "text" },
           { header: "Interest Amount Repaid", start: 43, length: 9, type: "decimal" }
         ],
         BR: [
@@ -10477,6 +10883,673 @@ body .breakdown-row{
       }
     }
   };
+
+  /* ---------- VOYA 957 VALUATION REPORT + SUMMARY OF PARTICIPANT ACCOUNTS ----------
+     Two Voya deliverables that are not fixed-width extracts: the RPT-957 participant
+     valuation summary (a column-positioned text report) and the Summary of Participant
+     Accounts (a PDF). Both are folded into the VOYA source as their own report codes. */
+
+  var VOYA_957_DETAIL_REPORT = "R957";
+  var VOYA_957_PARTICIPANT_REPORT = "R957PART";
+  var VOYA_SUMMARY_REPORT = "SUMMARY";
+  var VOYA_957_COLS = ["beg", "contrib", "earnings", "payments", "loans", "other", "end"];
+  var VOYA_957_COL_LABELS = ["Beg Bal", "Contrib", "Earnings", "Payments", "Loans", "Other", "End Bal"];
+  var VOYA_957_SSN_RE = /^\s{0,10}(\d{3}-\d{2}-\d{4})(\s|$)/;
+  var VOYA_957_STATUS_RE = /STATUS:\s+(\S+)/;
+  var VOYA_957_EE_RE = /401K EE:\s*([\d,]+\.\d{2})/;
+  var VOYA_957_MONEY_RE = /^(\d[\d,]*\.\d+|\.\d+)(-)?([A-Z])?$/;
+  var VOYA_957_CODE_RE = /^[A-Z]$/;
+  var VOYA_SUMMARY_SSN_RE = /^(.+?)\s+(\d{3}-\d{2}-\d{4})\s*$/;
+  var VOYA_SUMMARY_SOURCE_RE = /^(.*?)\s*-\s*\d+(?:\.\d+)?\s*%/;
+  var VOYA_SUMMARY_MONEY_RE = /^\(?\$?-?[\d,]+\.\d{2}\)?$/;
+  var VOYA_SUMMARY_SKIP_RES = [
+    /Summary of Participant Accounts/i,
+    /Retirement Plan/i,
+    /^From \d/i,
+    /^Participant Name/i,
+    /^Accounts\s*[-–]\s*Allocation/i,
+    /^Page \d+/i,
+    /^\d{1,2}\/\d{1,2}\/\d{2,4}$/,
+    /Contributions|Forfeitures|Gains\s*\/\s*Losses|Distributions|Transfers/i,
+    /^Beginning$|^Balance$|^Ending$|^CSV\/?$|^Premium\/?$|^Vested\b/i,
+    /^Compensation/i,
+    /^Current .*suspense/i,
+    /^Total all accounts/i,
+    /^Total Account Balances/i
+  ];
+
+  function buildVoya957DetailLayout() {
+    var fields = [
+      { header: "SSN", type: "text" },
+      { header: "Participant", type: "text" },
+      { header: "Status", type: "text" },
+      { header: "Section", type: "text" },
+      { header: "Description", type: "text" },
+      { header: "Source ID", type: "text" },
+      { header: "Fund ID", type: "text" },
+      { header: "Alloc %", type: "text" }
+    ];
+    for (var i = 0; i < VOYA_957_COL_LABELS.length; i += 1) {
+      fields.push({ header: VOYA_957_COL_LABELS[i], type: "decimal" });
+    }
+    return fields;
+  }
+
+  function buildVoya957ParticipantLayout() {
+    return [
+      { header: "SSN", type: "text" },
+      { header: "Participant", type: "text" },
+      { header: "Status", type: "text" },
+      { header: "401K EE", type: "decimal" },
+      { header: "End Bal", type: "decimal" }
+    ];
+  }
+
+  function buildVoyaSummaryLayout() {
+    return [
+      { header: "SSN", type: "text" },
+      { header: "Participant", type: "text" },
+      { header: "Source", type: "text" },
+      { header: "Source Type", type: "text" },
+      { header: "Fund", type: "text" },
+      { header: "Total Dollars", type: "decimal" }
+    ];
+  }
+
+  function voya957MoneyTokens(line) {
+    var out = [];
+    var re = /\S+/g;
+    var prev = null;
+    var m;
+    while ((m = re.exec(line)) !== null) {
+      var tok = m[0];
+      var mm = tok.match(VOYA_957_MONEY_RE);
+      if (mm) {
+        prev = {
+          value: parseFloat(mm[1].replace(/,/g, "")) * (mm[2] ? -1 : 1),
+          start: m.index,
+          right: m.index + tok.length
+        };
+        out.push(prev);
+      } else if (prev && VOYA_957_CODE_RE.test(tok) && m.index - prev.right <= 3) {
+        prev = null;
+      } else {
+        prev = null;
+      }
+    }
+    return out;
+  }
+
+  function looksLikeVoya957Text(text) {
+    return /RPT-957|PARTICIPANT VALUATION SUMMARY/i.test(String(text || ""));
+  }
+
+  function parseVoya957Text(text) {
+    var rows = [];
+    var participants = [];
+    var planTotal = null;
+    var planCounts = [];
+    var lines = String(text || "").split(/\r?\n/);
+    var anchors = null;
+    var p = null;
+    var planMode = false;
+    var section = "Allocation";
+    var pendingRow = null;
+    var expectName = false;
+    var kwAnchors = null;
+    var lastDates = null;
+    var diag = { lines: lines.length, ssnLines: 0, headerLines: 0, anchorsSet: 0, dataLines: 0, noAnchorSkips: 0 };
+
+    function flushParticipant() {
+      if (p) { participants.push(p); }
+      p = null;
+    }
+
+    function assign(row, toks) {
+      for (var ti = 0; ti < toks.length; ti += 1) {
+        var tk = toks[ti];
+        var best = 0;
+        var bestD = Infinity;
+        for (var ci = 0; ci < 7; ci += 1) {
+          var d = Math.abs(tk.right - anchors[ci]);
+          if (d < bestD) { bestD = d; best = ci; }
+        }
+        row[VOYA_957_COLS[best]] += tk.value;
+      }
+    }
+
+    for (var li = 0; li < lines.length; li += 1) {
+      var line = lines[li].replace(/\f/g, " ");
+      if (!line.trim()) { continue; }
+      var t = line.trim();
+
+      var dates = [];
+      var dateRe = /\d{4}\/\d{2}\/\d{2}/g;
+      var dm;
+      while ((dm = dateRe.exec(line)) !== null) { dates.push(dm.index); }
+      var dateEnds = dates.length >= 2 ? [dates[0] + 10, dates[dates.length - 1] + 10] : null;
+
+      if (/CONTRIB/.test(line) && /EARNINGS/.test(line)) {
+        diag.headerLines += 1;
+        var kw = ["CONTRIB", "EARNINGS", "PAYMENTS", "LOANS", "OTHER"].map(function (word) {
+          return line.indexOf(word) + word.length;
+        });
+        var dref = dateEnds || lastDates;
+        if (dref) {
+          anchors = [dref[0]].concat(kw, [dref[1]]);
+          kwAnchors = null;
+          diag.anchorsSet += 1;
+        } else {
+          kwAnchors = kw;
+        }
+        pendingRow = null;
+        continue;
+      }
+      if (dateEnds) {
+        lastDates = dateEnds;
+        if (kwAnchors) {
+          anchors = [dateEnds[0]].concat(kwAnchors, [dateEnds[1]]);
+          kwAnchors = null;
+          diag.anchorsSet += 1;
+          pendingRow = null;
+          continue;
+        }
+      }
+
+      var ssnM = line.match(VOYA_957_SSN_RE);
+      if (ssnM && !/CONTINUATION/.test(line)) {
+        diag.ssnLines += 1;
+        flushParticipant();
+        planMode = false;
+        p = { ssn: ssnM[1], name: "", status: "", ee: null, endBal: null };
+        var sm0 = line.match(VOYA_957_STATUS_RE);
+        if (sm0) { p.status = sm0[1]; }
+        section = "Allocation";
+        pendingRow = null;
+        expectName = true;
+        continue;
+      }
+      if (expectName && t.indexOf("=>") === 0) {
+        var nm = t.slice(2).split(/\s{3,}/)[0].trim();
+        if (nm === "PLAN TOTALS") {
+          flushParticipant();
+          planMode = true;
+          section = "Allocation";
+        } else if (p) {
+          p.name = nm;
+          var sm1 = t.match(VOYA_957_STATUS_RE);
+          if (sm1) { p.status = sm1[1]; }
+          var em1 = t.match(VOYA_957_EE_RE);
+          if (em1) { p.ee = parseFloat(em1[1].replace(/,/g, "")); }
+        }
+        expectName = false;
+        pendingRow = null;
+        continue;
+      }
+      if (t.indexOf("=>PLAN TOTALS") === 0) {
+        flushParticipant();
+        planMode = true;
+        section = "Allocation";
+        pendingRow = null;
+        continue;
+      }
+
+      if (/STATUS:/.test(t) && !/[\d,]+\.\d{2}/.test(t)) {
+        if (p) {
+          var sm2 = t.match(VOYA_957_STATUS_RE);
+          if (sm2) { p.status = sm2[1]; }
+        }
+        pendingRow = null;
+        continue;
+      }
+      if (/401K EE:/.test(t)) {
+        if (p) {
+          var em2 = t.match(VOYA_957_EE_RE);
+          if (em2) { p.ee = parseFloat(em2[1].replace(/,/g, "")); }
+        }
+        pendingRow = null;
+        continue;
+      }
+      if (/^\*{5}\s*INVESTMENTS/.test(t)) { section = "Investment"; pendingRow = null; continue; }
+      if (/^\*{5}\s*SOURCES/.test(t)) { section = "Source"; pendingRow = null; continue; }
+      if (/^\*{4}\s*CONTINUATION/.test(t)) { pendingRow = null; continue; }
+
+      if (/PARTICIPANT COUNTS:/.test(t) || (planMode && /:\s+[\d,]+\s*($|[A-Z])/.test(t) && !/[\d,]+\.\d/.test(t))) {
+        var countRe = /([A-Z][A-Z0-9 ,]*?):\s+([\d,]+)/g;
+        var cm;
+        while ((cm = countRe.exec(t)) !== null) {
+          var label = cm[1].trim();
+          if (label === "STATUS" || label === "LOCATION") { continue; }
+          planCounts.push([label, parseInt(cm[2].replace(/,/g, ""), 10)]);
+        }
+        pendingRow = null;
+        continue;
+      }
+
+      if (/RPT-957|OP-0|PARTICIPANT VALUATION SUMMARY|ACTIVITY FILTERED|INFORMATION LOG|EDIT INPUT LOG|^PLAN\s+\d|^F-FORF|^Y-PLAN|A C T I V I T Y|^DESCRIPTION\b|^PAGE\b|ALLOC\s*$|BEG BAL/.test(t)) {
+        pendingRow = null;
+        continue;
+      }
+
+      if (!anchors) { diag.noAnchorSkips += 1; continue; }
+      var toks = voya957MoneyTokens(line);
+      if (!toks.length) { pendingRow = null; continue; }
+      diag.dataLines += 1;
+
+      var prefix = line.slice(0, toks[0].start).trim();
+      var prefixText = prefix.replace(/[\s*%.\d-]/g, "");
+
+      if (prefixText) {
+        var ptoks = prefix.split(/\s+/);
+        var desc;
+        var id = "";
+        var alloc = "";
+        if (/^\*\*\s*TOTAL/.test(prefix)) {
+          desc = "TOTAL";
+        } else {
+          if (ptoks.length && /^[\d.]+%$/.test(ptoks[ptoks.length - 1])) { alloc = ptoks.pop(); }
+          if (ptoks.length > 1 && /^[A-Z0-9*]{2,4}$/i.test(ptoks[ptoks.length - 1])) { id = ptoks.pop(); }
+          desc = ptoks.join(" ");
+        }
+        var row = {
+          ssn: p ? p.ssn : "",
+          name: p ? p.name : (planMode ? "PLAN TOTALS" : ""),
+          status: p ? p.status : "",
+          section: desc === "TOTAL" ? "Total" : section,
+          desc: desc,
+          id: id,
+          alloc: alloc,
+          beg: 0, contrib: 0, earnings: 0, payments: 0, loans: 0, other: 0, end: 0
+        };
+        assign(row, toks);
+        if (planMode) {
+          if (desc === "TOTAL") { planTotal = row.end; }
+          pendingRow = row;
+        } else if (p) {
+          rows.push(row);
+          pendingRow = row;
+          if (desc === "TOTAL") { p.endBal = row.end; }
+        } else {
+          pendingRow = null;
+        }
+      } else if (pendingRow) {
+        var before = pendingRow.end;
+        assign(pendingRow, toks);
+        if (planMode && pendingRow.desc === "TOTAL" && pendingRow.end !== before) { planTotal = pendingRow.end; }
+        if (p && pendingRow.desc === "TOTAL") { p.endBal = pendingRow.end; }
+      }
+    }
+    flushParticipant();
+
+    for (var ri = 0; ri < rows.length; ri += 1) {
+      for (var ci2 = 0; ci2 < VOYA_957_COLS.length; ci2 += 1) {
+        rows[ri][VOYA_957_COLS[ci2]] = Math.round(rows[ri][VOYA_957_COLS[ci2]] * 100) / 100;
+      }
+    }
+    if (planTotal !== null) { planTotal = Math.round(planTotal * 100) / 100; }
+    for (var pi = 0; pi < participants.length; pi += 1) {
+      if (participants[pi].endBal !== null) {
+        participants[pi].endBal = Math.round(participants[pi].endBal * 100) / 100;
+      }
+    }
+
+    return { rows: rows, participants: participants, planTotal: planTotal, planCounts: planCounts, diag: diag };
+  }
+
+  // Fund rows carry a 3-character source+fund id; anything else is a subtotal line.
+  function voya957MainRows(rows) {
+    return rows.filter(function (r) {
+      return r.id.length === 3 && r.id.indexOf("*") === -1;
+    });
+  }
+
+  function formatVoyaAmount(value) {
+    return Number(value || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function maskVoyaSsn(value) {
+    return "***-**-" + String(value || "").slice(-4);
+  }
+
+  // Says WHERE a plan-total mismatch comes from instead of leaving the user to read the raw report.
+  function buildVoya957ReconMessages(parsed) {
+    var messages = [];
+    var main = voya957MainRows(parsed.rows);
+    var allocBy = {};
+    var seen = {};
+    var i;
+    for (i = 0; i < main.length; i += 1) {
+      allocBy[main[i].ssn] = (allocBy[main[i].ssn] || 0) + main[i].end;
+    }
+    for (i = 0; i < parsed.participants.length; i += 1) {
+      seen[parsed.participants[i].ssn] = (seen[parsed.participants[i].ssn] || 0) + 1;
+    }
+    var dupes = Object.keys(seen).filter(function (ssn) { return seen[ssn] > 1; });
+    var noTotal = [];
+    var mismatch = [];
+    for (i = 0; i < parsed.participants.length; i += 1) {
+      var pp = parsed.participants[i];
+      var alloc = Math.round((allocBy[pp.ssn] || 0) * 100) / 100;
+      if (pp.endBal === null || pp.endBal === undefined) {
+        noTotal.push([pp.ssn, alloc]);
+      } else if (dupes.indexOf(pp.ssn) === -1 && Math.abs(alloc - pp.endBal) > 0.05) {
+        mismatch.push(pp.ssn);
+      }
+    }
+
+    function listOf(ssns) {
+      var shown = ssns.slice(0, 20).map(maskVoyaSsn).join(", ");
+      return shown + (ssns.length > 20 ? " …and " + (ssns.length - 20) + " more" : "");
+    }
+
+    var sumOfTotals = 0;
+    for (i = 0; i < parsed.participants.length; i += 1) {
+      sumOfTotals += parsed.participants[i].endBal || 0;
+    }
+    sumOfTotals = Math.round(sumOfTotals * 100) / 100;
+
+    if (parsed.planTotal === null) {
+      messages.push("957 report: no Plan Totals line was found to check against. Participant totals add up to $" + formatVoyaAmount(sumOfTotals) + ".");
+    } else if (Math.abs(sumOfTotals - parsed.planTotal) < 0.05) {
+      messages.push("957 report: check passed. Participant totals add up to $" + formatVoyaAmount(sumOfTotals) + ", matching the report's Plan Totals.");
+      return messages;
+    } else {
+      messages.push("957 report: participant totals add up to $" + formatVoyaAmount(sumOfTotals) + " but the report's Plan Total is $" + formatVoyaAmount(parsed.planTotal) + " (difference $" + formatVoyaAmount(sumOfTotals - parsed.planTotal) + ").");
+    }
+
+    if (noTotal.length) {
+      var lost = 0;
+      for (i = 0; i < noTotal.length; i += 1) { lost += noTotal[i][1]; }
+      messages.push(noTotal.length + " participant(s) have no \"** TOTAL\" line, so they counted as $0. Their fund rows add up to $" + formatVoyaAmount(Math.round(lost * 100) / 100) + ". IDs: " + listOf(noTotal.map(function (e) { return e[0]; })));
+    }
+    if (mismatch.length) {
+      messages.push(mismatch.length + " participant(s) whose fund rows do not match their own total line. IDs: " + listOf(mismatch));
+    }
+    if (dupes.length) {
+      messages.push(dupes.length + " ID(s) appear as more than one block (counted twice): " + listOf(dupes));
+    }
+    if (!noTotal.length && !mismatch.length && !dupes.length && parsed.planTotal !== null) {
+      messages.push("Every participant's own total was read cleanly, so nothing was dropped in the reading. The gap is in the report itself — usually money not held under a participant ID (forfeiture, suspense, or a plan-level holding account).");
+    }
+    return messages;
+  }
+
+  // The console's shared PDF reader keeps document order; this report needs items
+  // re-sorted by position, so it gets its own line builder.
+  async function extractVoyaSummaryPdfLines(arrayBuffer) {
+    var pdfjsLib = await loadPdfJsLibrary();
+    var pdf = await pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true, useSystemFonts: true }).promise;
+    var lines = [];
+    var pageNumber;
+    for (pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      var page = await pdf.getPage(pageNumber);
+      var viewport = page.getViewport({ scale: 1 });
+      var content = await page.getTextContent();
+      var placed = [];
+      var i;
+      for (i = 0; i < content.items.length; i += 1) {
+        var item = content.items[i];
+        if (!item || !item.str || !item.str.trim()) { continue; }
+        var transformed = pdfjsLib.Util.transform(viewport.transform, item.transform);
+        placed.push({ x: transformed[4], y: transformed[5], str: item.str.trim() });
+      }
+      placed.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+      var groups = [];
+      for (i = 0; i < placed.length; i += 1) {
+        var last = groups.length ? groups[groups.length - 1] : null;
+        if (last && Math.abs(last.y - placed[i].y) <= 3) {
+          last.items.push(placed[i]);
+        } else {
+          groups.push({ y: placed[i].y, items: [placed[i]] });
+        }
+      }
+      for (i = 0; i < groups.length; i += 1) {
+        groups[i].items.sort(function (a, b) { return a.x - b.x; });
+        lines.push(groups[i].items.map(function (it) { return it.str; }).join(" ").replace(/\s+/g, " ").trim());
+      }
+      page.cleanup();
+    }
+    return lines;
+  }
+
+  function parseVoyaSummaryMoney(token) {
+    var negative = token.indexOf("(") === 0;
+    var value = parseFloat(token.replace(/[$(),]/g, ""));
+    return negative ? -value : value;
+  }
+
+  function parseVoyaSummaryLines(lines) {
+    var rows = [];
+    var grandTotal = null;
+    var st = { name: null, ssn: null, source: null, stype: null, fund: null, candidate: null };
+
+    function moneyTokens(line) {
+      return line.split(" ").filter(function (token) { return VOYA_SUMMARY_MONEY_RE.test(token); });
+    }
+
+    for (var i = 0; i < lines.length; i += 1) {
+      var line = lines[i];
+      if (/^Grand Total Account Balances/i.test(line)) {
+        var totals = moneyTokens(line);
+        if (totals.length) { grandTotal = parseVoyaSummaryMoney(totals[totals.length - 1]); }
+        continue;
+      }
+
+      var skipped = false;
+      for (var s = 0; s < VOYA_SUMMARY_SKIP_RES.length; s += 1) {
+        if (VOYA_SUMMARY_SKIP_RES[s].test(line)) { skipped = true; break; }
+      }
+      if (skipped) { continue; }
+
+      var ssnMatch = line.match(VOYA_SUMMARY_SSN_RE);
+      if (ssnMatch && !/^Total\b/i.test(line)) {
+        st.name = ssnMatch[1].trim();
+        st.ssn = ssnMatch[2];
+        st.candidate = null;
+        continue;
+      }
+
+      if (/^Total\s+\$/.test(line)) {
+        var nums = moneyTokens(line);
+        if (nums.length && st.ssn && st.fund) {
+          rows.push({
+            ssn: st.ssn,
+            name: st.name,
+            source: st.source || "",
+            stype: st.stype || "",
+            fund: st.fund,
+            total: parseVoyaSummaryMoney(nums[nums.length - 1])
+          });
+        }
+        continue;
+      }
+      if (/^Total\b/i.test(line)) { continue; }
+
+      var srcMatch = line.match(VOYA_SUMMARY_SOURCE_RE);
+      if (srcMatch && /[A-Za-z]/.test(srcMatch[1])) {
+        if (st.candidate) { st.source = st.candidate; }
+        var tokens = srcMatch[1].trim().split(/\s+/);
+        st.fund = tokens.pop();
+        st.stype = tokens.join(" ");
+        st.candidate = null;
+        continue;
+      }
+
+      if (/^[$(\d]/.test(line)) { continue; }
+      if (!/[A-Za-z]/.test(line)) { continue; }
+
+      st.candidate = line;
+    }
+
+    return { rows: rows, grandTotal: grandTotal };
+  }
+
+  function buildVoyaSummaryReconMessages(parsed) {
+    var sum = 0;
+    for (var i = 0; i < parsed.rows.length; i += 1) { sum += parsed.rows[i].total; }
+    sum = Math.round(sum * 100) / 100;
+    if (parsed.grandTotal === null) {
+      return ["Summary of Participant Accounts: no Grand Total line was found to check against. Rows add up to $" + formatVoyaAmount(sum) + "."];
+    }
+    if (Math.abs(sum - parsed.grandTotal) < 0.02) {
+      return ["Summary of Participant Accounts: check passed. " + parsed.rows.length + " rows add up to $" + formatVoyaAmount(sum) + ", matching the Grand Total on the last page."];
+    }
+    return ["Summary of Participant Accounts: rows add up to $" + formatVoyaAmount(sum) + " but the report's Grand Total is $" + formatVoyaAmount(parsed.grandTotal) + " (difference $" + formatVoyaAmount(sum - parsed.grandTotal) + "). Some rows may be missing or doubled."];
+  }
+
+  async function parseVoyaFolderSource(source, files, runId) {
+    var grouped = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var errors = [];
+    var matchedFiles = 0;
+    var skippedFiles = 0;
+    var totalLines = 0;
+    var acceptedLines = 0;
+    var discardedLines = 0;
+
+    function pushRows(reportCode, rows) {
+      if (!rows.length) { return; }
+      if (!grouped[reportCode]) {
+        grouped[reportCode] = [];
+        foundReports.push(reportCode);
+      }
+      for (var i = 0; i < rows.length; i += 1) {
+        grouped[reportCode].push(rows[i]);
+        acceptedLines += 1;
+      }
+    }
+
+    function readText(file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function (event) { resolve(String(event.target.result || "")); };
+        reader.onerror = function () { reject(new Error("Unable to read " + file.name)); };
+        reader.readAsText(file);
+      });
+    }
+
+    for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({
+        active: true,
+        complete: false,
+        percent: 5 + ((fileIndex / files.length) * 90),
+        title: "Parsing Files",
+        note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")."
+      });
+
+      if (/\.pdf$/i.test(fileName)) {
+        try {
+          var buffer = await file.arrayBuffer();
+          var pdfLines = await extractVoyaSummaryPdfLines(buffer);
+          var summaryParsed = parseVoyaSummaryLines(pdfLines);
+          if (!summaryParsed.rows.length) {
+            skippedFiles += 1;
+            discardReasons.push({ type: "message", label: "No Summary of Participant Accounts rows were found in " + fileName + "." });
+            continue;
+          }
+          matchedFiles += 1;
+          totalLines += pdfLines.length;
+          pushRows(VOYA_SUMMARY_REPORT, summaryParsed.rows.map(function (r) {
+            return [r.ssn, r.name, r.source, r.stype, r.fund, r.total.toFixed(2)];
+          }));
+          var summaryMessages = buildVoyaSummaryReconMessages(summaryParsed);
+          for (var sm = 0; sm < summaryMessages.length; sm += 1) {
+            discardReasons.push({ type: "message", label: summaryMessages[sm] });
+          }
+        } catch (err) {
+          errors.push(err.message);
+        }
+        continue;
+      }
+
+      var text;
+      try {
+        text = await readText(file);
+      } catch (err2) {
+        errors.push(err2.message);
+        continue;
+      }
+
+      if (looksLikeVoya957Text(text)) {
+        matchedFiles += 1;
+        var parsed957 = parseVoya957Text(text);
+        totalLines += parsed957.diag.lines;
+        var detailRows = voya957MainRows(parsed957.rows);
+        discardedLines += parsed957.rows.length - detailRows.length;
+        pushRows(VOYA_957_DETAIL_REPORT, detailRows.map(function (r) {
+          return [r.ssn, r.name, r.status, r.section, r.desc, r.id.slice(0, 2), r.id.slice(2), r.alloc]
+            .concat(VOYA_957_COLS.map(function (c) { return r[c].toFixed(2); }));
+        }));
+        pushRows(VOYA_957_PARTICIPANT_REPORT, parsed957.participants.map(function (pp) {
+          return [pp.ssn, pp.name, pp.status, (pp.ee || 0).toFixed(2), (pp.endBal || 0).toFixed(2)];
+        }));
+        if (!detailRows.length) {
+          discardReasons.push({ type: "message", label: "957 report: no participant fund rows were found. Lines read " + parsed957.diag.lines + ", participant ID lines " + parsed957.diag.ssnLines + ", column headers locked on " + parsed957.diag.anchorsSet + ", money lines parsed " + parsed957.diag.dataLines + "." });
+        } else {
+          var reconMessages = buildVoya957ReconMessages(parsed957);
+          for (var rm = 0; rm < reconMessages.length; rm += 1) {
+            discardReasons.push({ type: "message", label: reconMessages[rm] });
+          }
+        }
+        continue;
+      }
+
+      var match = source.folderPattern.exec(fileName);
+      if (!match) {
+        skippedFiles += 1;
+        discardReasons.push({ type: "message", label: "Skipped file: " + fileName });
+        continue;
+      }
+      var reportCode = match[1].toUpperCase();
+      if (source.reports.indexOf(reportCode) === -1 || !source.layouts[reportCode]) {
+        skippedFiles += 1;
+        discardReasons.push({ type: "message", label: "Unsupported extract code: " + reportCode + " (" + fileName + ")" });
+        continue;
+      }
+      matchedFiles += 1;
+      var extractLines = text.split(/\r\n|\n|\r/);
+      var rule = source.recordRules[reportCode];
+      var layouts = source.layouts[reportCode];
+      for (var lineIndex = 0; lineIndex < extractLines.length; lineIndex += 1) {
+        var line = extractLines[lineIndex];
+        if (!trimValue(line)) { continue; }
+        totalLines += 1;
+        if (rule) {
+          var rec = trimValue(line.substring(rule.start - 1, rule.start - 1 + rule.length)).toUpperCase();
+          if (rec && rec !== reportCode) {
+            discardedLines += 1;
+            continue;
+          }
+        }
+        var row = [];
+        for (var f = 0; f < layouts.length; f += 1) {
+          row.push(formatValue(line.substring(layouts[f].start - 1, layouts[f].start - 1 + layouts[f].length), layouts[f].type, layouts[f]));
+        }
+        pushRows(reportCode, [row]);
+      }
+    }
+
+    return {
+      totalLines: totalLines,
+      acceptedLines: acceptedLines,
+      discardedLines: discardedLines,
+      foundReports: foundReports.sort(),
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      layoutsByReport: source.layouts,
+      errors: errors,
+      loadingNote: "Parsed " + matchedFiles + " Voya file(s); skipped " + skippedFiles + "."
+    };
+  }
 
   function buildVoyaSourceConfig(layoutLibrary) {
     var reports = [];
@@ -10493,6 +11566,16 @@ body .breakdown-row{
       }
     }
     reports.sort();
+    reports.push(VOYA_957_DETAIL_REPORT, VOYA_957_PARTICIPANT_REPORT, VOYA_SUMMARY_REPORT);
+    reportNames[VOYA_957_DETAIL_REPORT] = "957 Valuation Detail";
+    reportNames[VOYA_957_PARTICIPANT_REPORT] = "957 Participant Totals";
+    reportNames[VOYA_SUMMARY_REPORT] = "Summary of Participant Accounts";
+    layouts[VOYA_957_DETAIL_REPORT] = buildVoya957DetailLayout();
+    layouts[VOYA_957_PARTICIPANT_REPORT] = buildVoya957ParticipantLayout();
+    layouts[VOYA_SUMMARY_REPORT] = buildVoyaSummaryLayout();
+    recordRules[VOYA_957_DETAIL_REPORT] = null;
+    recordRules[VOYA_957_PARTICIPANT_REPORT] = null;
+    recordRules[VOYA_SUMMARY_REPORT] = null;
     return {
       label: "VOYA",
       mode: "folder",
@@ -10500,11 +11583,14 @@ body .breakdown-row{
       supportsBreakdown: false,
       recordStart: 1,
       recordLength: 2,
+      fileAccept: ".txt,.text,.prn,.rpt,.pdf",
+      folderModeHelpText: "Voya file picker mode is active. Select the EXTRACT_XX_nnn.TXT files, the 957 valuation report text file, and/or the Summary of Participant Accounts PDF. The app classifies them automatically.",
       folderPattern: /^EXTRACT_([A-Z0-9]{2})_([0-9]+)\.TXT$/i,
       reports: reports,
       reportNames: reportNames,
       layouts: layouts,
-      recordRules: recordRules
+      recordRules: recordRules,
+      customFolderParser: parseVoyaFolderSource
     };
   }
 
@@ -10657,6 +11743,7 @@ body .breakdown-row{
 
   var paychexTextParser = createTextParsingToolkit({
     trailingMinus: true,
+    parenthesesAreNegative: true,
     stripPattern: /,/g,
     otherValuePattern: /^([0-9,.\-]+)(?:-([A-Z]))?$/,
     normalizeDate: function (value) {
@@ -11326,6 +12413,7 @@ body .breakdown-row{
 
   var oneAmericaTextParser = createTextParsingToolkit({
     parenthesesAreNegative: true,
+    trailingMinus: true,
     stripPattern: /[$,]/g,
     otherValuePattern: /^([0-9,$.\-]+)(?:-([A-Z]))?$/,
     normalizeDate: function (value) {
@@ -11940,8 +13028,7 @@ body .breakdown-row{
   }
 
   function parseVanguardPercent(raw, scale) {
-    var value = parseVanguardScaled(raw, scale);
-    return value > 0 && value <= 1 ? value * 100 : value;
+    return parseVanguardScaled(raw, scale);
   }
 
   function parseVanguardFileDate(fileName) {
@@ -13808,15 +14895,9 @@ body .breakdown-row{
 
   function getSourceFilePickerHelpText(source) {
     if (!source) {
-      return "Select a data source to enable file input.";
+      return "Drop the vendor file(s) below. The source is detected automatically.";
     }
-    if (source.filePickerHelpText) {
-      return source.filePickerHelpText;
-    }
-    if (usesSelectedFileSet(source)) {
-      return source.label + " file picker mode is active. Select the required source file(s); use multi-select when the vendor has companion files.";
-    }
-    return "File picker mode is active. Choose a single text file to parse for the selected data source.";
+    return "Detected " + source.label + ". Drop a different file set to switch sources.";
   }
 
   function summarizeSelectedFiles(files) {
@@ -13854,6 +14935,10 @@ body .breakdown-row{
     var source = getSelectedSource();
     var meta = getSourceCardMeta(source ? source.key : "EMPOWER");
     dataSourceCardSelect.classList.toggle("is-empty", !source);
+    dataSourceCardSelect.classList.toggle("is-dormant", !source);
+    if (dataSourceCardTrigger) {
+      dataSourceCardTrigger.disabled = !source;
+    }
     dataSourceCardSelect.style.setProperty("--source-accent", meta.accent);
     dataSourceCardSelect.style.setProperty("--source-accent-strong", meta.accentStrong);
     dataSourceCardSelect.style.setProperty("--source-accent-soft", meta.accentSoft);
@@ -13863,12 +14948,12 @@ body .breakdown-row{
       dataSourceCardIcon.innerHTML = source ? meta.icon : "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"12\" cy=\"5\" rx=\"7\" ry=\"3\"></ellipse><path d=\"M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5\"></path><path d=\"M5 12v7c0 1.7 3.1 3 7 3s7-1.3 7-3v-7\"></path></svg>";
     }
     if (dataSourceCardTitle) {
-      dataSourceCardTitle.textContent = source ? source.label : "Select a Data Source";
+      dataSourceCardTitle.textContent = source ? source.label : "Waiting for a File";
     }
     if (dataSourceCardMeta) {
       dataSourceCardMeta.textContent = source ?
-        meta.note + " · File picker" :
-        "Click to view available data sources.";
+        meta.note + " · Detected from file" :
+        "Drop a file below and the vendor lights up here.";
     }
     var badge = document.getElementById("dataSourceCardBadge");
     if (badge) {
@@ -13970,7 +15055,7 @@ body .breakdown-row{
 
   function updateFileText() {
     if (filePickerText) {
-      filePickerText.innerHTML = currentFileName ? escapeHtml(currentFileName) : "No file chosen";
+      filePickerText.innerHTML = currentFileName ? escapeHtml(currentFileName) : "or click to browse";
     }
   }
 
@@ -14507,15 +15592,15 @@ body .breakdown-row{
     var source = getSelectedSource();
     var hasSource = !!source;
     if (fileInputBlock) {
-      fileInputBlock.classList.toggle("is-inactive", !hasSource);
+      fileInputBlock.classList.remove("is-inactive");
     }
     if (fileInput) {
-      fileInput.disabled = !hasSource;
-      fileInput.multiple = hasSource && usesSelectedFileSet(source);
-      fileInput.accept = getFileAcceptForSource(source);
+      fileInput.disabled = false;
+      fileInput.multiple = true;
+      fileInput.accept = ".txt,.pdf,.xlsx,.xlsm";
     }
     if (filePickerButtonText) {
-      filePickerButtonText.textContent = hasSource && usesSelectedFileSet(source) ? "Choose File(s)" : "Choose File";
+      filePickerButtonText.textContent = "Drop file(s) here";
     }
     if (exportBtn) {
       exportBtn.disabled = true;
@@ -15806,8 +16891,8 @@ body .breakdown-row{
   }
 
   function normalizeWorkbookAmount(value) {
-    var amount = parseAmountValue(value);
-    return amount ? String(amount) : "";
+    var amount = parseAmountToken(value);
+    return amount === null ? "" : String(amount);
   }
 
   function buildPrincipalSummary(rows) {
@@ -16210,10 +17295,38 @@ body .breakdown-row{
     return index > -1 ? trimValue(row[index] || "") : "";
   }
 
-  function parseAmountValue(raw) {
-    var clean = trimValue(raw || "").replace(/,/g, "");
+  function parseAmountToken(raw) {
+    var clean = trimValue(raw == null ? "" : raw);
+    var negative = false;
+    if (!clean) {
+      return null;
+    }
+    if (clean.charAt(0) === "(" && clean.charAt(clean.length - 1) === ")") {
+      negative = true;
+      clean = clean.substring(1, clean.length - 1);
+    }
+    clean = clean.replace(/[$,\s]/g, "");
+    if (/-$/.test(clean)) {
+      negative = true;
+      clean = clean.slice(0, -1);
+    }
+    if (clean.charAt(0) === "-") {
+      negative = true;
+      clean = clean.substring(1);
+    }
+    if (!/^\d+(?:\.\d+)?$|^\.\d+$/.test(clean)) {
+      return null;
+    }
     var value = Number(clean);
-    return isNaN(value) ? 0 : value;
+    if (isNaN(value)) {
+      return null;
+    }
+    return negative ? -value : value;
+  }
+
+  function parseAmountValue(raw) {
+    var value = parseAmountToken(raw);
+    return value === null ? 0 : value;
   }
 
   function normalizeEmpowerSummaryCode(value, type) {
@@ -19431,10 +20544,10 @@ body .breakdown-row{
       return;
     }
     var caseState = validateAndFormatCaseNumber(true);
-    if (!caseState.valid || caseState.empty) {
-      setCaseMessage("Enter a valid case number before exporting.", true);
+    if (!caseState.valid) {
+      setCaseMessage("Fix the case number or clear it to export with a placeholder.", true);
       if (caseNumberInput) {
-      caseNumberInput.focus();
+        caseNumberInput.focus();
       }
       return;
     }
@@ -19458,12 +20571,12 @@ body .breakdown-row{
     downloadWorkbookForReports([reportCode], safeFilePart(reportCode, "Report") + " Report");
   }
 
-  fileInput.onchange = function () {
+  function runParseForFiles(fileList) {
     var source = getSelectedSource();
     if (!source) {
       return;
     }
-    var files = Array.prototype.slice.call(fileInput.files || []);
+    var files = Array.prototype.slice.call(fileList || []);
     if (usesSelectedFileSet(source)) {
       currentPayloadText = "";
       payloadInput.value = "";
@@ -19518,6 +20631,233 @@ body .breakdown-row{
     };
     reader.readAsText(file);
   };
+
+  /* ---------- VENDOR AUTO-DETECTION ----------
+     Each vendor names its files a specific way. A dropped set is only accepted
+     when every file matches one and the same vendor. Anything else is rejected. */
+  var VENDOR_FILE_SIGNATURES = [
+    { key: "VOYA", patterns: [/^EXTRACT_[A-Z0-9]{2}_\d+\.TXT$/i] },
+    { key: "EMPOWER", patterns: [/^d\d{6}(?:$|[^0-9])/i, /^s\d{6}(?:$|[^0-9])/i] },
+    { key: "ADP", patterns: [/^\d{6}_EXTRAC(?:$|[^A-Z0-9])/i, /^\d{6}_REPORT(?:$|[^A-Z0-9])/i] },
+    { key: "NATIONWIDE", patterns: [/^NWI/i, /^\d{5}\s*-\s*Plan Summary Report\.pdf$/i] },
+    { key: "NEWPORT", patterns: [/^['’]?PME/i, /Liquidation Report.*\.pdf$/i] },
+    { key: "PAYCHEX", patterns: [/^\d{6}(?:M|LN)\.txt$/i] },
+    { key: "ONEAMERICA", patterns: [/^[A-Z]\d{5}(?:PV|LN)\.TXT$/i] },
+    { key: "VANGUARD", patterns: [/^ENTJ767.*\.txt$/i, /^ENTJ768.*-PAYROLL-PART\.txt$/i] },
+    { key: "PRINCIPAL", patterns: [/^\d-\d{5}\b.*\.(?:xlsx|xlsm)$/i] }
+  ];
+
+  function vendorKeysForFileName(name) {
+    var fileName = String(name || "");
+    var keys = [];
+    for (var i = 0; i < VENDOR_FILE_SIGNATURES.length; i += 1) {
+      var signature = VENDOR_FILE_SIGNATURES[i];
+      if (!CONFIG[signature.key]) {
+        continue;
+      }
+      for (var p = 0; p < signature.patterns.length; p += 1) {
+        if (signature.patterns[p].test(fileName)) {
+          keys.push(signature.key);
+          break;
+        }
+      }
+    }
+    return keys;
+  }
+
+  // Fidelity extracts carry no naming rule: their shape is the record code in columns 30-31.
+  function looksLikeFidelityText(text) {
+    var config = CONFIG.FIDELITY;
+    if (!config) {
+      return false;
+    }
+    var expected = {};
+    for (var r = 0; r < config.reports.length; r += 1) {
+      expected[config.reports[r]] = true;
+    }
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var checked = 0;
+    for (var i = 0; i < lines.length && checked < 200; i += 1) {
+      var line = normalizeLineForSource(lines[i], config);
+      if (!trimValue(line)) {
+        continue;
+      }
+      checked += 1;
+      var code = trimValue(line.substring(config.recordStart - 1, config.recordStart - 1 + config.recordLength)).toUpperCase();
+      if (!expected[code]) {
+        return false;
+      }
+    }
+    return checked > 0;
+  }
+
+  function readFileHead(file) {
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.onload = function (event) { resolve(String(event.target.result || "")); };
+      reader.onerror = function () { resolve(""); };
+      reader.readAsText(file.slice ? file.slice(0, 262144) : file);
+    });
+  }
+
+  async function detectVendorKey(files) {
+    var shared = null;
+    for (var i = 0; i < files.length; i += 1) {
+      var keys = vendorKeysForFileName(files[i].name);
+      if (!keys.length) {
+        shared = null;
+        break;
+      }
+      shared = shared === null ? keys : shared.filter(function (key) { return keys.indexOf(key) !== -1; });
+      if (!shared.length) {
+        shared = null;
+        break;
+      }
+    }
+    if (shared && shared.length === 1) {
+      return shared[0];
+    }
+    if (await looksLikeVoyaFileSet(files)) {
+      return "VOYA";
+    }
+    if (files.length === 1 && /\.txt$/i.test(files[0].name || "")) {
+      var head = await readFileHead(files[0]);
+      if (looksLikeFidelityText(head)) {
+        return "FIDELITY";
+      }
+    }
+    return "";
+  }
+
+  /* The 957 report and the Summary of Participant Accounts carry no naming rule,
+     so they are recognised by what is inside them. */
+  async function looksLikeVoyaFileSet(files) {
+    if (!CONFIG.VOYA || !files.length) {
+      return false;
+    }
+    var extractPattern = CONFIG.VOYA.folderPattern;
+    var contentHits = 0;
+    for (var i = 0; i < files.length; i += 1) {
+      var file = files[i];
+      var fileName = file.name || "";
+      if (extractPattern.test(fileName)) {
+        continue;
+      }
+      if (/\.pdf$/i.test(fileName)) {
+        try {
+          var pdfLines = await extractVoyaSummaryPdfLines(await file.arrayBuffer());
+          if (!pdfLines.some(function (line) { return /Summary of Participant Accounts/i.test(line); })) {
+            return false;
+          }
+          contentHits += 1;
+          continue;
+        } catch (err) {
+          return false;
+        }
+      }
+      if (!/\.(?:txt|text|prn|rpt)$/i.test(fileName)) {
+        return false;
+      }
+      if (!looksLikeVoya957Text(await readFileHead(file))) {
+        return false;
+      }
+      contentHits += 1;
+    }
+    return contentHits > 0;
+  }
+
+  function rejectUnknownVendor(files) {
+    var names = files.map(function (file) { return file.name; }).join(", ");
+    dataSourceSelect.value = "";
+    if (dataSourceCardSelect) {
+      dataSourceCardSelect.classList.remove("just-selected");
+    }
+    syncSourceCardUi();
+    updateInputModeUi();
+    currentFileName = "";
+    currentFolderName = "";
+    updateFileText();
+    clearResults({ preserveLoading: true });
+    errorText.innerHTML = "<div class=\"error-box\">Could not tell which vendor these file(s) came from: " +
+      escapeHtml(names) + ". Drop a complete, unmodified vendor extract, or pick the source manually.</div>";
+    setLoadingState({
+      active: true,
+      complete: false,
+      percent: 100,
+      title: "Vendor Not Recognized",
+      note: "The file name(s) and layout did not fully match any known vendor."
+    });
+  }
+
+  async function handleIncomingFiles(fileList) {
+    var files = Array.prototype.slice.call(fileList || []);
+    if (!files.length) {
+      return;
+    }
+    setLoadingState({
+      active: true,
+      complete: false,
+      percent: 2,
+      title: "Identifying Vendor",
+      note: "Checking " + files.length + " file(s) against known vendor formats."
+    });
+    var detected = await detectVendorKey(files);
+    if (!detected) {
+      rejectUnknownVendor(files);
+      return;
+    }
+    if (getSelectedSourceKey() !== detected) {
+      dataSourceSelect.value = detected;
+      dataSourceSelect.onchange();
+    }
+    if (dataSourceCardSelect) {
+      dataSourceCardSelect.classList.remove("just-selected");
+      void dataSourceCardSelect.offsetWidth;
+      dataSourceCardSelect.classList.add("just-selected");
+    }
+    runParseForFiles(files);
+  }
+
+  fileInput.onchange = function () {
+    handleIncomingFiles(fileInput.files);
+  };
+
+  // stop the browser opening a file dropped outside the zone
+  window.addEventListener("dragover", function (event) { event.preventDefault(); });
+  window.addEventListener("drop", function (event) { event.preventDefault(); });
+
+  var fileDropZone = document.getElementById("fileDropZone");
+  if (fileDropZone) {
+    var dropDepth = 0;
+    var setDragOver = function (on) {
+      fileDropZone.classList.toggle("is-dragover", !!on);
+    };
+    fileDropZone.addEventListener("dragenter", function (event) {
+      event.preventDefault();
+      dropDepth += 1;
+      setDragOver(true);
+    });
+    fileDropZone.addEventListener("dragover", function (event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+    });
+    fileDropZone.addEventListener("dragleave", function () {
+      dropDepth = Math.max(0, dropDepth - 1);
+      if (!dropDepth) {
+        setDragOver(false);
+      }
+    });
+    fileDropZone.addEventListener("drop", function (event) {
+      event.preventDefault();
+      dropDepth = 0;
+      setDragOver(false);
+      var dropped = event.dataTransfer && event.dataTransfer.files;
+      if (!dropped || !dropped.length) {
+        return;
+      }
+      handleIncomingFiles(dropped);
+    });
+  }
 
   dataSourceSelect.onchange = function () {
     var source = getSelectedSource();
