@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parser Redesign — Round 2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Libre+Caslon+Text:wght@400;700&family=Archivo:wght@400;500;600;700&display=swap');
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#dfe1e4;font-family:"IBM Plex Sans",sans-serif;color:#1d1f21;padding:48px 24px 120px}
+  .intro{max-width:920px;margin:0 auto 56px}
+  .intro h1{font-size:22px;font-weight:600;letter-spacing:-0.3px}
+  .intro p{margin-top:6px;color:#55585c;font-size:14px;max-width:62ch}
+  .opt-label{max-width:1160px;margin:72px auto 14px;display:flex;align-items:baseline;gap:12px}
+  .opt-label .tag{font-family:"IBM Plex Mono",monospace;font-size:12px;background:#1d1f21;color:#fff;padding:3px 8px;border-radius:3px}
+  .opt-label h2{font-size:16px;font-weight:600}
+  .opt-label span{color:#6a6d71;font-size:13px}
+  .frame{max-width:1160px;margin:0 auto;border:1px solid #c3c6ca;border-radius:6px;overflow:hidden;box-shadow:0 12px 32px rgba(29,31,33,0.10)}
+
+  /* ============ OPTION E — BROADSHEET ============ */
+  .e{background:#f2f0ec;color:#211f1c;padding:0 0 60px;font-family:"Archivo",sans-serif}
+  .e .e-wrap{max-width:1020px;margin:0 auto;padding:0 44px}
+  .e .e-mast{display:flex;justify-content:space-between;align-items:baseline;padding:26px 0 12px;border-bottom:3px double #211f1c}
+  .e .e-mast .e-name{font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase}
+  .e .e-mast .e-issue{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:#8b867c}
+  .e .e-hero{display:grid;grid-template-columns:1.5fr 1fr;gap:48px;padding:40px 0 36px;border-bottom:1px solid #d8d3c9}
+  .e .e-hero .e-kicker{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#8b867c;margin-bottom:10px}
+  .e .e-hero .e-big{font-family:"Libre Caslon Text",serif;font-size:64px;font-weight:700;letter-spacing:-1.5px;line-height:1.02}
+  .e .e-hero .e-sub{margin-top:12px;font-size:14.5px;color:#57534b}
+  .e .e-hero .e-sub b{font-weight:600;color:#211f1c}
+  .e .e-herofigs{border-left:1px solid #d8d3c9;padding-left:40px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+  .e .e-fig label{display:block;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#8b867c}
+  .e .e-fig b{font-family:"Libre Caslon Text",serif;font-size:26px;font-weight:700;letter-spacing:-0.3px}
+  .e .e-fig b i{font-style:normal;color:#8f3d33}
+  .e .e-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:44px;padding:34px 0}
+  .e .e-col h4{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding-bottom:9px;border-bottom:2px solid #211f1c;margin-bottom:4px;display:flex;justify-content:space-between}
+  .e .e-col h4 span{color:#8b867c;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:0}
+  .e .e-li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e3dfd6;font-size:13.5px}
+  .e .e-li b{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .e .e-li .e-warn{color:#8f3d33;font-weight:500}
+  .e .e-setupbar{display:flex;gap:26px;align-items:center;background:#211f1c;color:#efece6;padding:15px 24px;border-radius:4px;margin-top:10px;font-size:13.5px}
+  .e .e-setupbar .e-sb{display:flex;gap:8px;align-items:baseline}
+  .e .e-setupbar label{font-size:10.5px;letter-spacing:0.09em;text-transform:uppercase;color:#97928a}
+  .e .e-setupbar b{font-weight:500}
+  .e .e-setupbar .e-go{margin-left:auto;background:#efece6;color:#211f1c;border:none;font:inherit;font-size:13px;font-weight:600;padding:8px 18px;border-radius:3px;cursor:pointer}
+
+  /* ============ OPTION F — SPLIT MIRROR ============ */
+  .f{display:grid;grid-template-columns:1fr 1fr;min-height:720px;background:#fff;color:#24262a;position:relative}
+  .f::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#d7dade}
+  .f .f-half{padding:44px 48px}
+  .f .f-half.f-in{background:#f4f5f6}
+  .f .f-htitle{font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8e94;margin-bottom:30px;display:flex;justify-content:space-between;align-items:baseline}
+  .f .f-htitle b{color:#24262a;font-size:15px;font-weight:600;letter-spacing:-0.2px;text-transform:none;display:block}
+  .f label{display:block;font-size:12px;color:#8a8e94;margin:20px 0 6px}
+  .f .f-ctl{background:#fff;border:1px solid #d7dade;border-radius:6px;padding:11px 14px;font-size:14px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+  .f .f-ctl i{font-style:normal;color:#9ba0a6;font-size:11px}
+  .f input.f-ctl{width:100%;font:inherit;font-size:14px}
+  .f .f-dropzone{margin-top:28px;border:1.5px dashed #c3c7cc;border-radius:8px;padding:34px;text-align:center;color:#8a8e94;font-size:13.5px}
+  .f .f-dropzone b{color:#24262a;font-weight:500}
+  .f .f-filerow{display:flex;justify-content:space-between;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#5a5e64;padding:9px 14px;background:#fff;border:1px solid #e2e4e8;border-radius:6px}
+  .f .f-filerow em{font-style:normal;color:#31694e}
+  .f .f-grand{margin:6px 0 26px}
+  .f .f-grand label{margin:0 0 4px}
+  .f .f-grand b{font-family:"IBM Plex Mono",monospace;font-size:34px;font-weight:500;letter-spacing:-0.5px;font-variant-numeric:tabular-nums}
+  .f .f-mrow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eef0f2;font-size:13.5px}
+  .f .f-mrow b{font-family:"IBM Plex Mono",monospace;font-weight:500;font-variant-numeric:tabular-nums}
+  .f .f-mrow .f-bad{color:#9c4130}
+  .f .f-outsec{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#8a8e94;margin:30px 0 4px}
+  .f .f-report{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef0f2;font-size:14px}
+  .f .f-report a{color:#31558c;font-size:13px;font-weight:500;text-decoration:none}
+  .f .f-exp{margin-top:34px;width:100%;background:#31558c;color:#fff;border:none;font:inherit;font-size:14px;font-weight:600;padding:13px;border-radius:6px;cursor:pointer}
+
+  /* ============ OPTION G — STAGEBOARD ============ */
+  .g{background:#eceef0;min-height:700px;color:#23262a;padding:26px}
+  .g .g-top{display:flex;align-items:baseline;gap:18px;padding:4px 8px 22px}
+  .g .g-top .g-brand{font-size:15px;font-weight:600;letter-spacing:-0.2px}
+  .g .g-top .g-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;color:#7a7e84}
+  .g .g-top .g-total{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:500}
+  .g .g-top .g-total small{font-family:"IBM Plex Sans",sans-serif;color:#7a7e84;font-weight:400;font-size:12px;margin-right:8px}
+  .g .g-board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start}
+  .g .g-colhead{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px 10px}
+  .g .g-colhead b{font-size:13px;font-weight:600}
+  .g .g-colhead span{font-family:"IBM Plex Mono",monospace;font-size:11px;color:#7a7e84}
+  .g .g-colhead .g-state{font-size:11px;font-weight:500;color:#33705b}
+  .g .g-colhead .g-state.g-wait{color:#a8acb1}
+  .g .g-colhead .g-state.g-attn{color:#a4571c}
+  .g .g-card{background:#fff;border:1px solid #dcdfe2;border-radius:7px;padding:14px 16px;margin-bottom:10px;font-size:13.5px}
+  .g .g-card label{display:block;font-size:11px;color:#8a8e93;margin-bottom:3px}
+  .g .g-card b.g-v{font-weight:500}
+  .g .g-card.g-dim{opacity:0.55}
+  .g .g-kv{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:#5a5e63}
+  .g .g-kv b{font-family:"IBM Plex Mono",monospace;font-weight:500;color:#23262a;font-variant-numeric:tabular-nums}
+  .g .g-kv .g-bad{color:#9c4130}
+  .g .g-file{font-family:"IBM Plex Mono",monospace;font-size:12px;color:#5a5e63;display:flex;justify-content:space-between;padding:3px 0}
+  .g .g-file em{font-style:normal;color:#33705b}
+  .g .g-flagcard{border-left:3px solid #a4571c}
+  .g .g-btn{width:100%;background:#23262a;color:#fff;border:none;font:inherit;font-size:13px;font-weight:500;padding:10px;border-radius:6px;cursor:pointer}
+  .g .g-btn[disabled]{background:#c9ccd0;cursor:default}
+  .g .g-ghost{width:100%;background:none;border:1px solid #c9ccd0;color:#23262a;font:inherit;font-size:13px;font-weight:500;padding:9px;border-radius:6px;cursor:pointer;margin-bottom:8px}
+
+  /* ============ OPTION H — FOCUS FLOW ============ */
+  .h{background:#fcfcfb;min-height:680px;color:#26282b;display:flex;flex-direction:column}
+  .h .h-progress{height:3px;background:#e9eae8;position:relative}
+  .h .h-progress i{position:absolute;left:0;top:0;bottom:0;width:52%;background:#3d6a9e}
+  .h .h-top{display:flex;justify-content:space-between;padding:18px 28px;font-size:12.5px;color:#94979b}
+  .h .h-top b{color:#26282b;font-weight:500}
+  .h .h-top .h-crumb i{font-style:normal;color:#3d6a9e;font-weight:600}
+  .h .h-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px 60px}
+  .h .h-stage .h-stepno{font-family:"IBM Plex Mono",monospace;font-size:12px;color:#94979b;letter-spacing:0.12em}
+  .h .h-stage h3{font-size:30px;font-weight:600;letter-spacing:-0.6px;margin:14px 0 6px}
+  .h .h-stage .h-hint{color:#7c7f84;font-size:14.5px;max-width:46ch}
+  .h .h-bignum{font-family:"IBM Plex Mono",monospace;font-size:56px;font-weight:500;letter-spacing:-1.5px;margin:34px 0 6px;font-variant-numeric:tabular-nums}
+  .h .h-bignum small{font-size:20px;color:#94979b}
+  .h .h-underfigs{display:flex;gap:44px;margin-top:30px}
+  .h .h-uf{font-size:13px;color:#94979b}
+  .h .h-uf b{display:block;font-family:"IBM Plex Mono",monospace;font-size:19px;color:#26282b;font-weight:500;margin-bottom:2px}
+  .h .h-uf b.h-red{color:#a1382c}
+  .h .h-navrow{display:flex;gap:12px;margin-top:44px}
+  .h .h-next{background:#3d6a9e;color:#fff;border:none;font:inherit;font-size:14.5px;font-weight:600;padding:13px 34px;border-radius:6px;cursor:pointer}
+  .h .h-back{background:none;border:none;color:#94979b;font:inherit;font-size:14px;cursor:pointer;padding:13px 10px}
+  .h .h-foot{display:flex;justify-content:center;gap:34px;padding:0 0 26px;font-size:12px;color:#b0b3b6}
+  .h .h-foot span b{color:#7c7f84;font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Parser redesign — round 2</h1>
+  <p>Four more directions, no repeats from round 1. Same functionality underneath: source + case + plan, file drop, parse totals, source/fund breakdowns, mapping flags, reports, workbook export.</p>
+</div>
+
+<!-- ================= OPTION E ================= -->
+<div class="opt-label"><span class="tag">E</span><h2>Broadsheet</h2><span>annual-report editorial — the grand total is the headline, breakdowns read as newspaper columns</span></div>
+<div class="frame"><div class="e"><div class="e-wrap">
+  <div class="e-mast">
+    <div class="e-name">Vendor Data Parser</div>
+    <div class="e-issue">RUN NO. 114 · 08-14-2026</div>
+  </div>
+  <div class="e-hero">
+    <div>
+      <div class="e-kicker">Riverside Manufacturing 401(k) · Case 402117 · OMNI</div>
+      <div class="e-big">$4,182,067.55</div>
+      <div class="e-sub">Across <b>312 participants</b> from <b>2 source files</b>. 5,111 of 5,204 lines accepted; <b>93 discarded</b> pending review.</div>
+    </div>
+    <div class="e-herofigs">
+      <div class="e-fig"><label>Participants</label><b>312</b></div>
+      <div class="e-fig"><label>Accepted lines</label><b>5,111</b></div>
+      <div class="e-fig"><label>Discarded</label><b><i>93</i></b></div>
+    </div>
+  </div>
+  <div class="e-cols">
+    <div class="e-col">
+      <h4>Sources <span>8</span></h4>
+      <div class="e-li"><span>EMPLOYEE PRE-TAX DEFE</span><b>2,104,338.12</b></div>
+      <div class="e-li"><span>SAFE HARBOR MATCH</span><b>988,240.40</b></div>
+      <div class="e-li"><span>ROTH CONTRIBUTION</span><b>412,551.03</b></div>
+      <div class="e-li"><span>ROLLOVER</span><b>676,938.00</b></div>
+    </div>
+    <div class="e-col">
+      <h4>Funds <span>24</span></h4>
+      <div class="e-li"><span>VG TARGET RET 2045</span><b>1,522,904.88</b></div>
+      <div class="e-li"><span>AM BALANCED R6</span><b>830,112.34</b></div>
+      <div class="e-li"><span>STABLE VALUE FD</span><b>641,559.20</b></div>
+      <div class="e-li"><span>INTL GROWTH IDX</span><b>402,881.11</b></div>
+    </div>
+    <div class="e-col">
+      <h4>Mapping &amp; reports</h4>
+      <div class="e-li"><span>Fund codes matched</span><b>22 / 24</b></div>
+      <div class="e-li"><span>ROLLOVER</span><span class="e-warn">no match</span></div>
+      <div class="e-li"><span>STABLE VALUE FD</span><span class="e-warn">no match</span></div>
+      <div class="e-li"><span>Participant Accounts</span><b>ready</b></div>
+      <div class="e-li"><span>Source Balance Report</span><b>ready</b></div>
+    </div>
+  </div>
+  <div class="e-setupbar">
+    <div class="e-sb"><label>Source</label><b>OMNI ▾</b></div>
+    <div class="e-sb"><label>Case</label><b>402117</b></div>
+    <div class="e-sb"><label>Plan</label><b>Riverside Manufacturing 401(k)</b></div>
+    <div class="e-sb"><label>Files</label><b>2 loaded</b></div>
+    <button class="e-go">Export Workbook</button>
+  </div>
+</div></div></div>
+
+<!-- ================= OPTION F ================= -->
+<div class="opt-label"><span class="tag">F</span><h2>Split Mirror</h2><span>two equal halves — everything you put in on the left, everything you get out on the right</span></div>
+<div class="frame"><div class="f">
+  <div class="f-half f-in">
+    <div class="f-htitle"><div>Input<b>What you load</b></div></div>
+    <label>Data source</label>
+    <div class="f-ctl">OMNI <i>▾</i></div>
+    <label>Case number</label>
+    <input class="f-ctl" value="402117">
+    <label>Plan name</label>
+    <input class="f-ctl" value="Riverside Manufacturing 401(k)">
+    <div class="f-dropzone">Drop source files anywhere on this half<br><b>or browse</b></div>
+    <div class="f-filerow">OMNI_402117_0813.txt <em>parsed · 4,890 lines</em></div>
+    <div class="f-filerow">OMNI_402117_957.txt <em>parsed · 314 lines</em></div>
+  </div>
+  <div class="f-half">
+    <div class="f-htitle"><div>Output<b>What it produced</b></div></div>
+    <div class="f-grand"><label>Grand total</label><b>$4,182,067.55</b></div>
+    <div class="f-mrow"><span>Participants</span><b>312</b></div>
+    <div class="f-mrow"><span>Accepted lines</span><b>5,111</b></div>
+    <div class="f-mrow"><span>Discarded lines</span><b class="f-bad">93</b></div>
+    <div class="f-mrow"><span>Sources / funds</span><b>8 / 24</b></div>
+    <div class="f-mrow"><span>Mapping</span><b class="f-bad">2 unmatched</b></div>
+    <div class="f-outsec">Reports</div>
+    <div class="f-report"><span>Summary of Participant Accounts</span><a href="#">Download</a></div>
+    <div class="f-report"><span>Source Balance Report</span><a href="#">Download</a></div>
+    <div class="f-report"><span>Fund Balance Report</span><a href="#">Download</a></div>
+    <button class="f-exp">Export Workbook</button>
+  </div>
+</div></div>
+
+<!-- ================= OPTION G ================= -->
+<div class="opt-label"><span class="tag">G</span><h2>Stageboard</h2><span>the whole run on one screen — four columns, left to right, nothing hidden behind steps</span></div>
+<div class="frame"><div class="g">
+  <div class="g-top">
+    <div class="g-brand">Vendor Data Parser</div>
+    <div class="g-meta">OMNI · 402117 · RIVERSIDE MFG 401(K)</div>
+    <div class="g-total"><small>Grand total</small>$4,182,067.55</div>
+  </div>
+  <div class="g-board">
+    <div>
+      <div class="g-colhead"><b>Load</b><span class="g-state">done</span></div>
+      <div class="g-card">
+        <label>Data source</label><b class="g-v">OMNI ▾</b>
+      </div>
+      <div class="g-card">
+        <label>Case · Plan</label><b class="g-v">402117 — Riverside Manufacturing 401(k)</b>
+      </div>
+      <div class="g-card">
+        <label>Files</label>
+        <div class="g-file">OMNI_402117_0813.txt <em>ok</em></div>
+        <div class="g-file">OMNI_402117_957.txt <em>ok</em></div>
+      </div>
+    </div>
+    <div>
+      <div class="g-colhead"><b>Parse</b><span class="g-state">done</span></div>
+      <div class="g-card">
+        <div class="g-kv"><span>Lines read</span><b>5,204</b></div>
+        <div class="g-kv"><span>Accepted</span><b>5,111</b></div>
+        <div class="g-kv"><span>Discarded</span><b class="g-bad">93</b></div>
+        <div class="g-kv"><span>Participants</span><b>312</b></div>
+      </div>
+      <div class="g-card">
+        <div class="g-kv"><span>Sources</span><b>8</b></div>
+        <div class="g-kv"><span>Funds</span><b>24</b></div>
+      </div>
+    </div>
+    <div>
+      <div class="g-colhead"><b>Map</b><span class="g-state g-attn">2 flags</span></div>
+      <div class="g-card">
+        <div class="g-kv"><span>Fund codes matched</span><b>22 / 24</b></div>
+      </div>
+      <div class="g-card g-flagcard">
+        <label>Needs a match</label>
+        <div class="g-kv"><span>ROLLOVER</span><b class="g-bad">?</b></div>
+        <div class="g-kv"><span>STABLE VALUE FD</span><b class="g-bad">?</b></div>
+      </div>
+      <div class="g-card g-dim">
+        <label>Mapping workbook</label><b class="g-v">mapping.xlsx · loaded</b>
+      </div>
+    </div>
+    <div>
+      <div class="g-colhead"><b>Export</b><span class="g-state g-wait">waiting</span></div>
+      <div class="g-card">
+        <div class="g-kv"><span>Participant Accounts</span><b>ready</b></div>
+        <div class="g-kv"><span>Source Balance</span><b>ready</b></div>
+        <div class="g-kv"><span>Fund Balance</span><b>ready</b></div>
+      </div>
+      <button class="g-ghost">Download Reports</button>
+      <button class="g-btn" disabled>Export Workbook — clear 2 flags</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- ================= OPTION H ================= -->
+<div class="opt-label"><span class="tag">H</span><h2>Focus Flow</h2><span>one thing on screen at a time — each stage gets the whole viewport, numbers get to be huge</span></div>
+<div class="frame"><div class="h">
+  <div class="h-progress"><i></i></div>
+  <div class="h-top">
+    <div class="h-crumb">Load · Parse · <i>Review</i> · Map · Export</div>
+    <div>OMNI · <b>402117</b> · Riverside Manufacturing 401(k)</div>
+  </div>
+  <div class="h-stage">
+    <div class="h-stepno">STEP 3 OF 5</div>
+    <h3>Parse looks clean.</h3>
+    <div class="h-hint">5,111 of 5,204 lines accepted. 93 discarded lines are held for review — none affect the balance below.</div>
+    <div class="h-bignum">$4,182,067.55</div>
+    <div class="h-underfigs">
+      <div class="h-uf"><b>312</b>participants</div>
+      <div class="h-uf"><b>8</b>sources</div>
+      <div class="h-uf"><b>24</b>funds</div>
+      <div class="h-uf"><b class="h-red">93</b>discarded</div>
+    </div>
+    <div class="h-navrow">
+      <button class="h-back">Back</button>
+      <button class="h-next">Continue to Mapping</button>
+    </div>
+  </div>
+  <div class="h-foot">
+    <span>Files <b>2</b></span>
+    <span>Mapping <b>not loaded</b></span>
+    <span>Reports <b>3 ready</b></span>
+  </div>
+</div></div>
+
+</body>
+</html>
