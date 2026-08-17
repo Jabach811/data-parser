@@ -2587,7 +2587,7 @@ body .breakdown-row{
           <span id="filePickerButtonText" class="file-drop-prompt">Drop file(s) here</span>
           <span id="filePickerText" class="file-picker-text">or click to browse</span>
         </label>
-        <input id="fileInput" class="file-input-native" type="file" accept=".txt,.pdf,.xlsx,.xlsm" multiple="">
+        <input id="fileInput" class="file-input-native" type="file" accept=".txt,.pdf,.xlsx,.xlsm,.docx" multiple="">
       </div>
 
       <div id="loadingBox" class="loading-box" aria-live="polite">
@@ -2764,6 +2764,9 @@ body .breakdown-row{
 (function () {
   window.FIDELITY_SOURCE_CONFIG = {
     label: "FIDELITY",
+    mode: "folder",
+    summaryIncluded: true,
+    folderModeHelpText: "Fidelity file picker mode is active. Select the extract text file(s), any [plan]report.TXT printed report, and any Fidelity de-conversion PDF.",
     recordStart: 30,
     recordLength: 2,
     reports: [
@@ -9637,6 +9640,46 @@ body .breakdown-row{
     icon: "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 4h9l5 5v11H5z\"></path><path d=\"M14 4v5h5\"></path><path d=\"M8.5 13h7\"></path><path d=\"M8.5 16.5h7\"></path></svg>"
   };
 
+  SOURCE_CARD_META.ALERUS = {
+    accent: "#2f6b98",
+    accentStrong: "#5f9dc6",
+    accentSoft: "rgba(47,107,152,.18)",
+    glassTop: "rgba(247,251,255,.86)",
+    glassBottom: "rgba(226,239,249,.78)",
+    note: "Alerus service termination profile",
+    icon: "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 19V6\"></path><path d=\"M4 6h7l2 2h7v11z\"></path><path d=\"M9 13h6\"></path></svg>"
+  };
+
+  SOURCE_CARD_META.AMERITAS = {
+    accent: "#0f6b5c",
+    accentStrong: "#43a08f",
+    accentSoft: "rgba(15,107,92,.18)",
+    glassTop: "rgba(245,252,250,.86)",
+    glassBottom: "rgba(223,241,236,.78)",
+    note: "Ameritas printed report profile",
+    icon: "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 3h9l3 3v15H6z\"></path><path d=\"M9 9h6\"></path><path d=\"M9 13h6\"></path><path d=\"M9 17h4\"></path></svg>"
+  };
+
+  SOURCE_CARD_META.PLANDOCS = {
+    accent: "#6b3f8f",
+    accentStrong: "#9c74bd",
+    accentSoft: "rgba(107,63,143,.18)",
+    glassTop: "rgba(250,246,253,.86)",
+    glassBottom: "rgba(235,226,245,.78)",
+    note: "Onboarding, PRD and merger documents",
+    icon: "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 2h8l4 4v16H8z\"></path><path d=\"M4 6v16h12\"></path><path d=\"M11 11h6\"></path><path d=\"M11 15h6\"></path></svg>"
+  };
+
+  SOURCE_CARD_META.BASEREMIT = {
+    accent: "#1f6f5c",
+    accentStrong: "#42a58a",
+    accentSoft: "rgba(31,111,92,.18)",
+    glassTop: "rgba(244,252,249,.86)",
+    glassBottom: "rgba(224,242,236,.78)",
+    note: "Base and payroll template check",
+    icon: "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 11l3 3 6-6\"></path><path d=\"M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9\"></path></svg>"
+  };
+
   SOURCE_CARD_META.AMERICANFUNDS = {
     accent: "#1c4f8b",
     accentStrong: "#4d86c4",
@@ -9674,12 +9717,19 @@ body .breakdown-row{
     },
     FIDELITY: {
       cardMeta: SOURCE_CARD_META.FIDELITY,
-      fileAccept: ".txt",
-      filePickerHelpText: "File picker mode is active. Choose a single text file to parse for Fidelity.",
+      fileAccept: ".txt,.pdf",
+      filePickerHelpText: "File picker mode is active. Choose the Fidelity extract file(s), any [plan]report.TXT printed report, and any Fidelity de-conversion PDF.",
       normalizers: {
         line: function (line) {
           var text = String(line || "");
           return text.indexOf("\t") !== -1 ? text.split("\t").pop() : text;
+        },
+        summaryCode: function (value, type) {
+          var clean = String(value || "").trim();
+          if (type === "source" && /^\d{1,2}$/.test(clean)) {
+            return ("0" + clean).slice(-2);
+          }
+          return clean.toUpperCase();
         }
       }
     },
@@ -9722,14 +9772,38 @@ body .breakdown-row{
   };
   SOURCE_RUNTIME_CONFIG.JOHNHANCOCK = {
     cardMeta: SOURCE_CARD_META.JOHNHANCOCK,
-    fileAccept: ".xlsx,.xlsm,.csv",
-    filePickerHelpText: "John Hancock mode is active. Drop either the single Discontinuance File workbook or the per-report file set (AC, AI, BD, DP, ID, IE, IW, RM, VI, YT). Set files can arrive in batches.",
+    fileAccept: ".xlsx,.xlsm,.csv,.sdf,.txt",
+    filePickerHelpText: "John Hancock mode is active. Drop either the single Discontinuance File workbook or the deconversion file set (ID, DP, AI, VI, AC, MV, IE, YT, IW, RM, BD) plus the Administrative Report. Set files can arrive in batches.",
     normalizers: {}
   };
   SOURCE_RUNTIME_CONFIG.TIAA = {
     cardMeta: SOURCE_CARD_META.TIAA,
-    fileAccept: ".csv",
-    filePickerHelpText: "TIAA mode is active. Drop the DCNV de-conversion files. They can arrive in batches and the app keeps track of which ones are still outstanding.",
+    fileAccept: ".csv,.xlsx,.xlsm",
+    filePickerHelpText: "TIAA mode is active. Drop the DCNV de-conversion files and, if you have it, the FUND_TOT_RPT workbook. They can arrive in batches and the app keeps track of which ones are still outstanding.",
+    normalizers: {}
+  };
+  SOURCE_RUNTIME_CONFIG.ALERUS = {
+    cardMeta: SOURCE_CARD_META.ALERUS,
+    fileAccept: ".xlsx,.xlsm,.pdf",
+    filePickerHelpText: "Alerus mode is active. Drop the service termination workbooks and, if you have it, the Participant Valuation Summary PDF. They can arrive in batches.",
+    normalizers: {}
+  };
+  SOURCE_RUNTIME_CONFIG.AMERITAS = {
+    cardMeta: SOURCE_CARD_META.AMERITAS,
+    fileAccept: ".txt,.text",
+    filePickerHelpText: "Ameritas mode is active. Drop the Participant Valuation Summary print file and the Roth print file. They can arrive in batches.",
+    normalizers: {}
+  };
+  SOURCE_RUNTIME_CONFIG.PLANDOCS = {
+    cardMeta: SOURCE_CARD_META.PLANDOCS,
+    fileAccept: ".xlsx,.xlsm,.docx,.pdf",
+    filePickerHelpText: "Plan document mode is active. Drop one document: the Onboarding Package workbook, the Plan Review Document (PRD), or the Merger Comparison PDF. A plan only ever has one of the three.",
+    normalizers: {}
+  };
+  SOURCE_RUNTIME_CONFIG.BASEREMIT = {
+    cardMeta: SOURCE_CARD_META.BASEREMIT,
+    fileAccept: ".txt,.text,.dat",
+    filePickerHelpText: "Template validation is active. Drop the fixed-width Base Data file (773 characters per line) or the Remittance / Payroll Data file (553 characters per line). The layout is picked automatically from the line length.",
     normalizers: {}
   };
   SOURCE_RUNTIME_CONFIG.AMERICANFUNDS = {
@@ -9817,11 +9891,34 @@ body .breakdown-row{
     amountHeaders: ["Ending Balance"]
   };
   SUMMARY_RULES.JOHNHANCOCK = {
-    reportCode: "BRKDWN",
+    reportCode: ["BRKDWN", "MV", "ADMIN"],
+    participantHeaders: ["SSN"],
+    sourceHeaders: ["Money Type", "Portion Code", "Portion"],
+    fundHeaders: ["Fund ID", "Fund Cusip", "Fund"],
+    amountHeaders: ["Amount", "Ending Balance"]
+  };
+  SUMMARY_RULES.ALERUS = {
+    reportCode: "BALALLOC",
     participantHeaders: ["SSN"],
     sourceHeaders: ["Money Type"],
-    fundHeaders: ["Fund ID"],
-    amountHeaders: ["Amount"]
+    fundHeaders: ["Fund Name"],
+    amountHeaders: ["Mkt Val"]
+  };
+
+  SUMMARY_RULES.AMERITAS = {
+    reportCode: "BAL",
+    participantHeaders: ["SSN"],
+    sourceHeaders: ["Source Name"],
+    fundHeaders: ["Fund Name"],
+    amountHeaders: ["End Bal"]
+  };
+
+  SUMMARY_RULES.TIAA = {
+    reportCode: "SRCE1231",
+    participantHeaders: ["PARTICIPANT"],
+    sourceHeaders: ["SOURCE"],
+    fundHeaders: ["FUND"],
+    amountHeaders: ["FULL"]
   };
   SUMMARY_RULES.AMERICANFUNDS = {
     reportCode: "VA",
@@ -9949,19 +10046,79 @@ body .breakdown-row{
     amountHeaders: ["End Balance", "Balance"]
   };
   CIT_ELECTION_RULES.JOHNHANCOCK = {
-    reportCode: "ENROLL",
+    reportCode: ["ENROLL", "IE"],
     participantHeaders: ["SSN"],
-    sourceHeaders: ["Regular / Rollover Instructions"],
-    fundHeaders: ["Investment Fund"],
-    percentHeaders: ["Allocation %"]
+    sourceHeaders: ["Regular / Rollover Instructions", "Election Set"],
+    fundHeaders: ["Investment Fund", "Fund Name"],
+    percentHeaders: ["Allocation %", "Fund Percentage"]
   };
   CIT_BALANCE_RULES.JOHNHANCOCK = {
-    reportCode: "BRKDWN",
+    reportCode: ["BRKDWN", "MV", "ADMIN"],
+    participantHeaders: ["SSN"],
+    sourceHeaders: ["Money Type", "Portion Code", "Portion"],
+    fundHeaders: ["Fund ID", "Fund Cusip", "Fund"],
+    amountHeaders: ["Amount", "Ending Balance"]
+  };
+  CIT_BALANCE_RULES.ALERUS = {
+    reportCode: "BALALLOC",
     participantHeaders: ["SSN"],
     sourceHeaders: ["Money Type"],
-    fundHeaders: ["Fund ID"],
-    amountHeaders: ["Amount"]
+    fundHeaders: ["Fund Name"],
+    amountHeaders: ["Mkt Val"]
   };
+
+  CIT_ELECTION_RULES.ALERUS = {
+    reportCode: "BALALLOC",
+    participantHeaders: ["SSN"],
+    sourceHeaders: ["Money Type"],
+    fundHeaders: ["Fund Name"],
+    percentHeaders: ["Allocation%"]
+  };
+
+  CIT_BALANCE_RULES.AMERITAS = {
+    reportCode: "BAL",
+    participantHeaders: ["SSN"],
+    sourceHeaders: ["Source Name"],
+    fundHeaders: ["Fund Name"],
+    amountHeaders: ["End Bal"]
+  };
+
+  CIT_ELECTION_RULES.AMERITAS = {
+    reportCode: "BAL",
+    participantHeaders: ["SSN"],
+    sourceHeaders: ["Source Name"],
+    fundHeaders: ["Fund Name"],
+    percentHeaders: ["Alloc Pcnt"]
+  };
+
+  CIT_BALANCE_RULES.TIAA = {
+    reportCode: "SRCE1231",
+    participantHeaders: ["PARTICIPANT"],
+    sourceHeaders: ["SOURCE"],
+    fundHeaders: ["FUND"],
+    amountHeaders: ["FULL"]
+  };
+
+  function resolveRuleReportCode(rule, layoutsByReport, grouped) {
+    var codes;
+    var code;
+    var i;
+    if (!rule) {
+      return "";
+    }
+    codes = [].concat(rule.reportCode || []);
+    for (i = 0; i < codes.length; i += 1) {
+      code = codes[i];
+      if (!code || !layoutsByReport || !layoutsByReport[code]) {
+        continue;
+      }
+      if (grouped && !(grouped[code] && grouped[code].length)) {
+        continue;
+      }
+      return code;
+    }
+    return "";
+  }
 
   // To add a source: create one CONFIG block with label, input mode, file picker settings, card metadata, normalizers, reports, layouts, and any custom parser.
   var CONFIG = {
@@ -13880,8 +14037,146 @@ body .breakdown-row{
     CASH: "John Hancock Cash Account"
   };
 
-  // Layouts for these per-report file sets are not documented yet, so the app
-  // only takes the files in and reports what is still outstanding.
+  /* ---------- JOHN HANCOCK DECONVERSION FILE SET ----------
+     From the John Hancock "File Specifications for Deconversion Program" document.
+     Most members are fixed width .SDF with 1-based positions; MV is comma
+     delimited, BD is an Excel sheet, and the Administrative Report is a CSV whose
+     columns are read from its own header row. */
+
+  function jhField(header, start, length, type) {
+    return { header: header, start: start, length: length, type: type || "text" };
+  }
+
+  function jhPortionFields(prefix, firstStart, count) {
+    var fields = [];
+    var i;
+    for (i = 0; i < count; i += 1) {
+      fields.push(jhField(prefix + " Portion " + (i + 1), firstStart + (i * 12), 12, "decimal"));
+    }
+    return fields;
+  }
+
+  var JOHN_HANCOCK_SDF_LAYOUTS = {
+    ID: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("Employee Number", 48, 10),
+      jhField("Gender", 58, 1),
+      jhField("Address 1", 59, 30),
+      jhField("Address 2", 89, 30),
+      jhField("Address 3", 119, 30),
+      jhField("Address 4", 149, 30),
+      jhField("City", 179, 30),
+      jhField("State", 209, 2),
+      jhField("Foreign State Name", 211, 30),
+      jhField("Country", 241, 30),
+      jhField("Zip Code", 271, 15),
+      jhField("Birth Date", 286, 10, "date"),
+      jhField("Hire Date", 296, 10, "date"),
+      jhField("Participation Date", 306, 10, "date"),
+      jhField("Vesting Date", 316, 10, "date"),
+      jhField("Termination Date", 326, 10, "date"),
+      jhField("Rehire Date", 336, 10, "date"),
+      jhField("Suspension Date", 346, 10, "date"),
+      jhField("Status Code", 356, 34),
+      jhField("Payroll Frequency", 390, 2),
+      jhField("Payroll Code", 392, 4),
+      jhField("Pending QDRO Code", 396, 1),
+      jhField("Email Address", 400, 61),
+      jhField("Enrollment Code", 461, 1),
+      jhField("Deceased Date", 462, 11, "date"),
+      jhField("Benefactor SSN", 473, 23),
+      jhField("Division", 496, 30)
+    ],
+    DP: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("Pre Tax Deferral Percentage", 48, 14, "decimal"),
+      jhField("After Tax Deferral Percentage", 62, 14, "decimal"),
+      jhField("Catch-up Deferral Percentage", 76, 14, "decimal")
+    ],
+    AI: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("Managed Savings Increase Code", 48, 4),
+      jhField("Managed Savings Start Date", 52, 10, "date"),
+      jhField("Managed Savings Increase Percentage", 62, 14, "decimal"),
+      jhField("Auto Enrollment Admin", 76, 10),
+      jhField("Auto Enrollment Code", 86, 1),
+      jhField("Defaulted Participant", 87, 1),
+      jhField("Auto Enrollment Status Description", 88, 36)
+    ],
+    VI: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("Vesting Status Description", 48, 30),
+      jhField("Vesting Date", 78, 15, "date"),
+      jhField("YTD Hours", 93, 7, "decimal"),
+      jhField("ER Match Vested Percent", 100, 12, "decimal"),
+      jhField("ER Match Vested Years of Service", 112, 12, "decimal")
+    ],
+    AC: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("Hardship Accumulator Net Value", 50, 12, "decimal"),
+      jhField("Pre-87 After Tax Accumulator Net Value", 62, 14, "decimal"),
+      jhField("Post-86 After Tax Accumulator Net Value", 76, 14, "decimal")
+    ],
+    IE: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("Status", 48, 30),
+      jhField("Election Set", 78, 10),
+      jhField("Fund Name", 88, 50),
+      jhField("Fund Percentage", 138, 6, "decimal"),
+      jhField("Defaulted Participant Code", 144, 1)
+    ],
+    YT: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("YTD Contributions All Funds", 48, 12, "decimal")
+    ].concat(jhPortionFields("YTD Contributions", 60, 12)),
+    IW: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("Inception To Date Withdrawals All Funds", 48, 12, "decimal")
+    ].concat(jhPortionFields("Inception To Date Withdrawals", 60, 12)),
+    RM: [
+      jhField("SSN", 1, 11),
+      jhField("Name", 12, 36),
+      jhField("RMD Status Description", 48, 31),
+      jhField("Birth Date", 79, 10, "date"),
+      jhField("Term Date", 89, 10, "date"),
+      jhField("Beginning Market Value", 99, 12, "decimal"),
+      jhField("Ending Market Value", 111, 12, "decimal"),
+      jhField("Market Value Activity", 123, 12, "decimal"),
+      jhField("Beginning Market Value Roth", 135, 12, "decimal"),
+      jhField("Ending Market Value Roth Rollover", 147, 12, "decimal")
+    ]
+  };
+
+  var JOHN_HANCOCK_MV_LAYOUT = [
+    { header: "Account ID", type: "text" },
+    { header: "SSN", type: "text" },
+    { header: "Fund Cusip", type: "text" },
+    { header: "Portion Code", type: "text" },
+    { header: "Ending Balance", type: "decimal" },
+    { header: "Shares", type: "decimal", decimalPlaces: 4 },
+    { header: "Special Code", type: "text" }
+  ];
+
+  var JOHN_HANCOCK_BD_LAYOUT = [
+    { header: "Full Name", type: "text" },
+    { header: "SSN", type: "text" },
+    { header: "Set Number", type: "text" },
+    { header: "Account Id", type: "text" },
+    { header: "Beneficiary SSN", type: "text" },
+    { header: "Beneficiary Name", type: "text" },
+    { header: "Beneficiary DOB", type: "date" },
+    { header: "Beneficiary Type", type: "text" },
+    { header: "Beneficiary Percent", type: "decimal" }
+  ];
+
   var TIAA_FILE_SET = {
     label: "TIAA",
     match: /^DCNV\.([A-Z0-9]+)\.CSV$/i,
@@ -13898,27 +14193,30 @@ body .breakdown-row{
 
   var JOHN_HANCOCK_FILE_SET = {
     label: "John Hancock",
-    match: /^[A-Za-z0-9_-]*?([A-Z]{2})\.CSV$/i,
+    match: /^[A-Za-z0-9_ -]*?(AC|AI|BD|DP|ID|IE|IW|MV|RM|VI|YT)\.(?:SDF|CSV|TXT|XLS|XLSX)$/i,
     members: [
-      { code: "AC", name: "John Hancock AC File" },
-      { code: "AI", name: "John Hancock AI File" },
-      { code: "BD", name: "John Hancock BD File" },
-      { code: "DP", name: "John Hancock DP File" },
-      { code: "ID", name: "John Hancock ID File" },
-      { code: "IE", name: "John Hancock IE File" },
-      { code: "IW", name: "John Hancock IW File" },
-      { code: "RM", name: "John Hancock RM File" },
-      { code: "VI", name: "John Hancock VI File" },
-      { code: "YT", name: "John Hancock YT File" }
+      { code: "ID", name: "John Hancock Census Data" },
+      { code: "DP", name: "John Hancock Deferral Percentages" },
+      { code: "AI", name: "John Hancock Automatic Increase and Auto Enrollment" },
+      { code: "VI", name: "John Hancock Vesting Information" },
+      { code: "AC", name: "John Hancock Pre and After Tax Accumulators" },
+      { code: "MV", name: "John Hancock Market Value" },
+      { code: "IE", name: "John Hancock Participant Investment Elections" },
+      { code: "YT", name: "John Hancock Year To Date Contributions" },
+      { code: "IW", name: "John Hancock Inception To Date Withdrawals" },
+      { code: "RM", name: "John Hancock Required Minimum Distributions" },
+      { code: "BD", name: "John Hancock Beneficiary Data" }
     ]
   };
 
-  function addFileSetToSourceConfig(config, fileSet) {
+  var JOHN_HANCOCK_ADMIN_PATTERN = /ADMINISTRATIVE[ _-]*REPORT.*\.(?:csv|xls|xlsx)$/i;
+
+  function addFileSetToSourceConfig(config, fileSet, layouts) {
     for (var i = 0; i < fileSet.members.length; i += 1) {
       var member = fileSet.members[i];
       config.reports.push(member.code);
       config.reportNames[member.code] = member.name;
-      config.layouts[member.code] = [{ header: "SSN", type: "text" }];
+      config.layouts[member.code] = (layouts && layouts[member.code]) || [{ header: "SSN", type: "text" }];
     }
   }
 
@@ -13936,22 +14234,13 @@ body .breakdown-row{
     return "";
   }
 
-  function fileSetFilesPresent(fileSet, files) {
-    for (var i = 0; i < files.length; i += 1) {
-      if (fileSetCodeForName(fileSet, files[i].name)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   function buildJohnHancockSourceConfig() {
     return {
       label: "JOHN HANCOCK",
       mode: "folder",
       supportsExport: true,
       supportsBreakdown: true,
-      folderModeHelpText: "John Hancock workbook mode is active. Drop the single Discontinuance File workbook (.xlsx) and each participant tab becomes its own report.",
+      folderModeHelpText: "John Hancock mode is active. Drop either the single Discontinuance File workbook (.xlsx), or the deconversion file set (ID, DP, AI, VI, AC, MV, IE, YT, IW, RM, BD) plus the Administrative Report .csv. The file set can arrive in batches and the app tracks which ones are still outstanding.",
       reports: ["CENSUS", "ENROLL", "BRKDWN", "LOANSUM", "LOANXFR", "BENE", "CASH"],
       reportNames: JOHN_HANCOCK_REPORT_NAMES,
       layouts: {
@@ -13975,7 +14264,21 @@ body .breakdown-row{
   }
 
   CONFIG.JOHNHANCOCK = buildJohnHancockSourceConfig();
-  addFileSetToSourceConfig(CONFIG.JOHNHANCOCK, JOHN_HANCOCK_FILE_SET);
+  (function () {
+    var layouts = {};
+    var code;
+    for (code in JOHN_HANCOCK_SDF_LAYOUTS) {
+      if (JOHN_HANCOCK_SDF_LAYOUTS.hasOwnProperty(code)) {
+        layouts[code] = JOHN_HANCOCK_SDF_LAYOUTS[code];
+      }
+    }
+    layouts.MV = JOHN_HANCOCK_MV_LAYOUT;
+    layouts.BD = JOHN_HANCOCK_BD_LAYOUT;
+    addFileSetToSourceConfig(CONFIG.JOHNHANCOCK, JOHN_HANCOCK_FILE_SET, layouts);
+    CONFIG.JOHNHANCOCK.reports.push("ADMIN");
+    CONFIG.JOHNHANCOCK.reportNames.ADMIN = "John Hancock Administrative Report";
+    CONFIG.JOHNHANCOCK.layouts.ADMIN = [{ header: "SSN", type: "text" }];
+  }());
 
   function buildTiaaSourceConfig() {
     var config = {
@@ -13983,7 +14286,8 @@ body .breakdown-row{
       mode: "folder",
       supportsExport: true,
       supportsBreakdown: true,
-      folderModeHelpText: "TIAA mode is active. Drop the DCNV de-conversion files. They can arrive in batches, and the app tracks which ones are still outstanding.",
+      summaryIncluded: true,
+      folderModeHelpText: "TIAA mode is active. Drop the DCNV de-conversion files and the FUND_TOT_RPT workbook. They can arrive in batches, and the app tracks which ones are still outstanding.",
       reports: [],
       reportNames: {},
       layouts: {},
@@ -13995,6 +14299,373 @@ body .breakdown-row{
   }
 
   CONFIG.TIAA = buildTiaaSourceConfig();
+
+  /* ---------- ALERUS SERVICE TERMINATION FILE SET ----------
+     One .xlsx per report, single tab, header on its own row. Names are
+     SERVICETERM<code> or SERVTRM<code> followed by plan number and run date.
+     BALALLOC can arrive split across PART1, PART2, ... and the parts are
+     appended to one report. The Participant Valuation Summary PDF is the plan
+     summary report and is held for reference, not parsed. */
+
+  var ALERUS_FILE_SET = {
+    label: "Alerus",
+    match: /^(?:SERVICETERM|SERVTRM)(BALALLOC|CONTRIB|DISBSC|DISB|LPMT|HILN|LN|PT)\b.*\.(?:xlsx|xlsm)$/i,
+    members: [
+      { code: "PT", name: "Alerus Participant Census" },
+      { code: "BALALLOC", name: "Alerus Balances and Allocations" },
+      { code: "CONTRIB", name: "Alerus Contributions" },
+      { code: "DISB", name: "Alerus Disbursements" },
+      { code: "DISBSC", name: "Alerus Distributions by Source" },
+      { code: "LN", name: "Alerus Loans" },
+      { code: "LPMT", name: "Alerus Loan Payments" },
+      { code: "HILN", name: "Alerus Highest Loan Balance" }
+    ]
+  };
+
+  var ALERUS_SUMMARY_PATTERN = /PARTICIPANT[ _-]*VALUATION[ _-]*SUMMARY.*\.pdf$/i;
+  var ALERUS_SSN_KEYS = ["ssn"];
+  var ALERUS_DECIMAL_HINTS = /(amt|amount|balance|mktval|principal|interest|rate|contributions|distributed|month|pre87|post86|hardship|rothdeferrals|allocation|vested)/;
+
+  function buildAlerusSourceConfig() {
+    var config = {
+      label: "ALERUS",
+      mode: "folder",
+      supportsExport: true,
+      supportsBreakdown: true,
+      folderModeHelpText: "Alerus mode is active. Drop the service termination workbooks (PT, BALALLOC, CONTRIB, DISB, DISBSC, LN, LPMT, HILN). They can arrive in batches, split BALALLOC parts are joined, and the app tracks which ones are still outstanding.",
+      reports: [],
+      reportNames: {},
+      layouts: {},
+      customFolderParser: parseAlerusFileSet,
+      accumulateFiles: true
+    };
+    addFileSetToSourceConfig(config, ALERUS_FILE_SET);
+    return config;
+  }
+
+  CONFIG.ALERUS = buildAlerusSourceConfig();
+
+  var AMERITAS_LAYOUTS = {
+    BAL: [
+      { header: "SSN", type: "text" }, { header: "Description", type: "text" },
+      { header: "ID", type: "text" }, { header: "Fund Code", type: "text" },
+      { header: "Fund Name", type: "text" }, { header: "Source Code", type: "text" },
+      { header: "Source Name", type: "text" }, { header: "Alloc Pcnt", type: "text" },
+      { header: "Beg Bal", type: "text" }, { header: "Contrib", type: "text" },
+      { header: "Earnings", type: "text" }, { header: "Payments", type: "text" },
+      { header: "Loans", type: "text" }, { header: "Other", type: "text" },
+      { header: "End Bal", type: "text" }
+    ],
+    FUNDBAL: [
+      { header: "SSN", type: "text" }, { header: "Fund Name", type: "text" },
+      { header: "Fund Code", type: "text" }, { header: "Alloc Pcnt", type: "text" },
+      { header: "Beg Bal", type: "text" }, { header: "Contrib", type: "text" },
+      { header: "Earnings", type: "text" }, { header: "Payments", type: "text" },
+      { header: "Loans", type: "text" }, { header: "Other", type: "text" },
+      { header: "End Bal", type: "text" }
+    ],
+    SRCBAL: [
+      { header: "SSN", type: "text" }, { header: "Source Name", type: "text" },
+      { header: "Source Code", type: "text" },
+      { header: "Beg Bal", type: "text" }, { header: "Contrib", type: "text" },
+      { header: "Earnings", type: "text" }, { header: "Payments", type: "text" },
+      { header: "Loans", type: "text" }, { header: "Other", type: "text" },
+      { header: "End Bal", type: "text" }
+    ],
+    CENSUS: [
+      { header: "SSN", type: "text" }, { header: "Name", type: "text" },
+      { header: "Address", type: "text" }, { header: "City State Zip", type: "text" },
+      { header: "Status", type: "text" }, { header: "Location", type: "text" },
+      { header: "Birth", type: "text" }, { header: "Hire", type: "text" },
+      { header: "Entry", type: "text" }, { header: "Vest", type: "text" },
+      { header: "Cntb", type: "text" }, { header: "Term", type: "text" },
+      { header: "Trnf", type: "text" }, { header: "401K EE Comp", type: "text" },
+      { header: "Total Vested Balance", type: "text" }
+    ],
+    VEST: [
+      { header: "SSN", type: "text" }, { header: "Source Name", type: "text" },
+      { header: "Source Code", type: "text" }, { header: "Vested Pct", type: "text" },
+      { header: "Vested Amt", type: "text" }
+    ],
+    ROTH: [
+      { header: "SSN", type: "text" }, { header: "Name", type: "text" },
+      { header: "Roth Contribution", type: "text" }, { header: "First Roth Date", type: "text" }
+    ]
+  };
+
+  var AMERITAS_REPORT_NAMES = {
+    BAL: "Ameritas Balances by Fund and Source",
+    FUNDBAL: "Ameritas Balances by Fund",
+    SRCBAL: "Ameritas Balances by Source",
+    CENSUS: "Ameritas Participant Census",
+    VEST: "Ameritas Vesting Information",
+    ROTH: "Ameritas Roth Report"
+  };
+
+  function buildAmeritasSourceConfig() {
+    var config = {
+      label: "AMERITAS",
+      mode: "folder",
+      supportsExport: true,
+      supportsBreakdown: true,
+      summaryIncluded: true,
+      folderModeHelpText: "Ameritas mode is active. Drop the Participant Valuation Summary print file (Valuation.txt) and the Roth print file (Roth.txt). They can arrive in batches.",
+      reports: [],
+      reportNames: {},
+      layouts: {},
+      customFolderParser: parseAmeritasReports,
+      accumulateFiles: true
+    };
+    var order = ["CENSUS", "BAL", "FUNDBAL", "SRCBAL", "VEST", "ROTH"];
+    for (var i = 0; i < order.length; i += 1) {
+      config.reports.push(order[i]);
+      config.reportNames[order[i]] = AMERITAS_REPORT_NAMES[order[i]];
+      config.layouts[order[i]] = AMERITAS_LAYOUTS[order[i]];
+    }
+    return config;
+  }
+
+  CONFIG.AMERITAS = buildAmeritasSourceConfig();
+
+  /* ---------- PLAN SETUP DOCUMENTS ----------
+     Three documents that arrive with a conversion but carry no participant data:
+     the Onboarding Package workbook, the Plan Review Document (a .docx), and the
+     Merger Comparison Document (a signed PDF). They are reduced to the handful of
+     tables a de-conversion consultant actually works from rather than dumped whole. */
+  var PLANDOCS_LAYOUTS = {
+    PLANFACTS: [
+      { header: "Document", type: "text" }, { header: "Tab", type: "text" },
+      { header: "Row", type: "text" }, { header: "Item", type: "text" },
+      { header: "Value", type: "text" }, { header: "Detail", type: "text" },
+      { header: "Extra", type: "text" }
+    ],
+    SRCMAP: [
+      { header: "Document", type: "text" }, { header: "Current Source", type: "text" },
+      { header: "Current W/D Rules", type: "text" }, { header: "Current Vesting", type: "text" },
+      { header: "TA Statement Name", type: "text" }, { header: "New W/D Rules", type: "text" },
+      { header: "New Vesting", type: "text" }, { header: "Contribution Frequency", type: "text" },
+      { header: "Active or Frozen", type: "text" }
+    ],
+    PROVISIONS: [
+      { header: "Document", type: "text" }, { header: "Section", type: "text" },
+      { header: "Row", type: "text" }, { header: "Item", type: "text" },
+      { header: "Provision", type: "text" }, { header: "Cite", type: "text" },
+      { header: "Reference", type: "text" }, { header: "Prior Plan Election", type: "text" },
+      { header: "Transamerica Election", type: "text" }, { header: "Notes", type: "text" }
+    ],
+    MERGERCMP: [
+      { header: "Page", type: "text" }, { header: "Provision", type: "text" },
+      { header: "Surviving Plan", type: "text" }, { header: "Comments", type: "text" }
+    ],
+    CHECKLIST: [
+      { header: "Document", type: "text" }, { header: "Tab", type: "text" },
+      { header: "Row", type: "text" }, { header: "Question", type: "text" },
+      { header: "Answer", type: "text" }, { header: "Comments", type: "text" },
+      { header: "Detail", type: "text" }
+    ]
+  };
+
+  var PLANDOCS_REPORT_NAMES = {
+    PLANFACTS: "Plan Facts and Conversion Details",
+    SRCMAP: "Source Mapping",
+    PROVISIONS: "Plan Provisions",
+    MERGERCMP: "Merger Comparison",
+    CHECKLIST: "Questionnaires and Service Elections"
+  };
+
+  function buildPlanDocsSourceConfig() {
+    var config = {
+      label: "PLAN DOCUMENTS",
+      mode: "folder",
+      supportsExport: true,
+      supportsBreakdown: false,
+      summaryIncluded: false,
+      folderModeHelpText: "Plan document mode is active. Drop one document: the Onboarding Package workbook, the Plan Review Document (PRD), or the Merger Comparison PDF. A plan only ever has one of the three.",
+      reports: [],
+      reportNames: {},
+      layouts: {},
+      customFolderParser: parsePlanDocuments
+    };
+    var order = ["PLANFACTS", "SRCMAP", "PROVISIONS", "MERGERCMP", "CHECKLIST"];
+    for (var i = 0; i < order.length; i += 1) {
+      config.reports.push(order[i]);
+      config.reportNames[order[i]] = PLANDOCS_REPORT_NAMES[order[i]];
+      config.layouts[order[i]] = PLANDOCS_LAYOUTS[order[i]];
+    }
+    return config;
+  }
+
+  CONFIG.PLANDOCS = buildPlanDocsSourceConfig();
+
+  /* ---------- BASE / REMITTANCE TEMPLATE VALIDATOR ----------
+     The two inbound fixed-width templates from the TRS Base and Remit Layout
+     workbook. Positions 1-358 are identical on both, then Base Data carries the
+     year-to-date and eligibility block out to 773 and Remittance - Payroll Data
+     carries the current-payroll block out to 553. Each field is checked for the
+     value shape the layout sheet calls for; nothing is transformed. */
+
+  function baseRemitField(name, start, len, type, opts) {
+    var field = opts ? Object.assign({}, opts) : {};
+    field.name = name;
+    field.start = start;
+    field.len = len;
+    field.type = type;
+    return field;
+  }
+
+  var BASEREMIT_YN = ["Y", "N"];
+
+  // Positions 1-358, shared by both templates.
+  var BASEREMIT_SHARED_FIELDS = [
+    baseRemitField("Account Number", 1, 13, "account", { req: true }),
+    baseRemitField("Social Security Number", 14, 11, "ssn", { fatal: true }),
+    baseRemitField("Employee Number", 25, 10, "text"),
+    baseRemitField("Employee Division/Location Code", 35, 4, "division"),
+    baseRemitField("Class Code", 39, 10, "text", { req: true }),
+    baseRemitField("Employee Last Name", 49, 30, "text", { req: true }),
+    baseRemitField("Employee Last Name Suffix", 79, 5, "text"),
+    baseRemitField("Employee First Name", 84, 20, "text", { req: true }),
+    baseRemitField("Employee Middle Initial", 104, 1, "text"),
+    baseRemitField("Birth Date", 105, 10, "date", { fatal: true }),
+    baseRemitField("Hire Date", 115, 10, "date", { fatal: true }),
+    baseRemitField("Adjusted Service Date", 125, 10, "date"),
+    baseRemitField("Termination Date", 135, 10, "date"),
+    baseRemitField("Rehire Date", 145, 10, "date"),
+    baseRemitField("Street Address Line 1", 155, 30, "text", { req: true }),
+    baseRemitField("Street Address Line 2", 185, 30, "text"),
+    baseRemitField("City Name", 215, 20, "text", { req: true }),
+    baseRemitField("State Code", 235, 2, "text"),
+    baseRemitField("Zip Code", 237, 10, "text", { req: true }),
+    baseRemitField("E-mail Address", 247, 50, "text"),
+    baseRemitField("Daytime/Work Phone Number", 297, 10, "text"),
+    baseRemitField("Evening/Home Phone Number", 307, 10, "text"),
+    baseRemitField("Mobile Phone Number", 317, 10, "text"),
+    baseRemitField("Single Sign On Eligibility Code", 327, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Single Sign On Id", 328, 30, "text"),
+    baseRemitField("Marital Status Code", 358, 1, "code", { values: ["S", "M", "D", "W"] })
+  ];
+
+  var BASEREMIT_BASE_FIELDS = BASEREMIT_SHARED_FIELDS.concat([
+    baseRemitField("Employee Payroll Frequency", 359, 2, "code", { values: ["12", "24", "26", "52"] }),
+    baseRemitField("Gender", 361, 1, "code", { values: ["M", "F"], req: true }),
+    baseRemitField("Employee Highly Comp Code", 362, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Insider Investor Code", 363, 1, "code", { values: ["1", "2", "3"] }),
+    baseRemitField("Language Code", 364, 2, "code", { values: ["00", "01"] }),
+    baseRemitField("Termination Reason Code", 366, 1, "code", { values: ["0", "1", "2", "3"] }),
+    baseRemitField("YTD Non Elective Contribution", 367, 12, "num"),
+    baseRemitField("YTD After Tax Contribution", 379, 12, "num"),
+    baseRemitField("YTD Pre-Tax Deferrals", 391, 12, "num"),
+    baseRemitField("YTD Roth Contribution", 403, 12, "num"),
+    baseRemitField("YTD Match Contribution", 415, 12, "num"),
+    baseRemitField("YTD Safe Harbor Match Contribution", 427, 12, "num"),
+    baseRemitField("YTD Additional Source 1 Contribution", 439, 12, "num"),
+    baseRemitField("YTD Additional Source 2 Contribution", 451, 12, "num"),
+    baseRemitField("YTD Hours Paid", 463, 10, "num"),
+    baseRemitField("Prior Year Hours Paid", 473, 10, "num"),
+    baseRemitField("Years of Service", 483, 2, "num"),
+    baseRemitField("YTD Gross Compensation", 485, 12, "num"),
+    baseRemitField("YTD Plan Compensation", 497, 12, "num"),
+    baseRemitField("YTD Additional Compensation 1", 509, 12, "num"),
+    baseRemitField("YTD Additional Compensation 2", 521, 12, "num"),
+    baseRemitField("Prior Year Gross Compensation", 533, 12, "num", { req: true }),
+    baseRemitField("Employee After-tax Contribution Dollar Amt", 545, 10, "num", { pair: "After-tax", side: "amount" }),
+    baseRemitField("Employee After-tax Contribution Percent", 555, 6, "num", { pair: "After-tax", side: "percent" }),
+    baseRemitField("Employee Pre Tax Contribution Dollar Amt", 561, 10, "num", { pair: "Pre-Tax", side: "amount" }),
+    baseRemitField("Employee Pre Tax Contribution Percent", 571, 6, "num", { pair: "Pre-Tax", side: "percent" }),
+    baseRemitField("Employee Roth Contribution Dollar Amt", 577, 10, "num", { pair: "Roth", side: "amount" }),
+    baseRemitField("Employee Roth Contribution Percent", 587, 6, "num", { pair: "Roth", side: "percent" }),
+    baseRemitField("Additional Source 1 Contribution Dollar Amt", 593, 10, "num", { pair: "Additional Source 1", side: "amount" }),
+    baseRemitField("Additional Source 1 Contribution Percent", 603, 6, "num", { pair: "Additional Source 1", side: "percent" }),
+    baseRemitField("Additional Source 2 Contribution Dollar Amt", 609, 10, "num", { pair: "Additional Source 2", side: "amount" }),
+    baseRemitField("Additional Source 2 Contribution Percent", 619, 6, "num", { pair: "Additional Source 2", side: "percent" }),
+    baseRemitField("Auto Enroll Indicator", 625, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Auto Enroll Date", 626, 10, "date"),
+    baseRemitField("Employer Non-elective Eligibility Status", 636, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Employer Non-elective Eligibility Date", 637, 10, "date"),
+    baseRemitField("Employer Non-elective Plan Entry Date", 647, 10, "date"),
+    baseRemitField("Employee Pre Tax Eligibility Status", 657, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Employee Pre Tax Eligibility Date", 658, 10, "date"),
+    baseRemitField("Employee Pre Tax Plan Entry Date", 668, 10, "date"),
+    baseRemitField("Employer Match Eligibility Status", 678, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Employer Match Eligibility Date", 679, 10, "date"),
+    baseRemitField("Employer Match Plan Entry Date", 689, 10, "date"),
+    baseRemitField("Employer Match Eligibility Status (2)", 699, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Employer Match Eligibility Date (2)", 700, 10, "date"),
+    baseRemitField("Employer Match Plan Entry Date (2)", 710, 10, "date"),
+    baseRemitField("Additional Source 1 Eligibility Status", 720, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Additional Source 1 Eligibility Date", 721, 10, "date"),
+    baseRemitField("Additional Source 1 Plan Entry Date", 731, 10, "date"),
+    baseRemitField("Additional Source 2 Eligibility Status", 741, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Additional Source 2 Eligibility Date", 742, 10, "date"),
+    baseRemitField("Additional Source 2 Plan Entry Date", 752, 10, "date"),
+    baseRemitField("Department Code", 762, 12, "text")
+  ]);
+
+  // The Remittance sheet gives Language Code a single position rather than the two
+  // its width column claims, and every field after it follows from that.
+  var BASEREMIT_REMIT_FIELDS = BASEREMIT_SHARED_FIELDS.concat([
+    baseRemitField("Employee Payroll Frequency", 359, 2, "code", { values: ["12", "24", "26", "52"] }),
+    baseRemitField("Gender", 361, 1, "code", { values: ["M", "F"], req: true }),
+    baseRemitField("Employee Highly Comp Code", 362, 1, "code", { values: BASEREMIT_YN }),
+    baseRemitField("Insider Investor Code", 363, 1, "code", { values: ["1", "2", "3"] }),
+    baseRemitField("Language Code", 364, 1, "code", { values: ["0", "1"] }),
+    baseRemitField("Termination Reason Code", 365, 1, "code", { values: ["0", "1", "2", "3"] }),
+    baseRemitField("Current Hours Paid", 366, 8, "num"),
+    baseRemitField("Employer Non-elective Contribution Amount", 374, 10, "num"),
+    baseRemitField("Employee After-tax Contribution Amount", 384, 10, "num"),
+    baseRemitField("Employee Pre Tax Contribution Amount", 394, 10, "num"),
+    baseRemitField("Employee Roth Contribution Amount", 404, 10, "num"),
+    baseRemitField("Employer Match Contribution Amount", 414, 10, "num"),
+    baseRemitField("Safe Harbor Match Contribution Amount", 424, 10, "num"),
+    baseRemitField("Employee Loan Repayment", 434, 10, "num"),
+    baseRemitField("Additional Source 1 Contribution Amount", 444, 10, "num"),
+    baseRemitField("Additional Source 2 Contribution Amount", 454, 10, "num"),
+    baseRemitField("Current Gross Compensation", 464, 12, "num"),
+    baseRemitField("Current Plan Compensation", 476, 12, "num"),
+    baseRemitField("Additional Compensation 1", 488, 12, "num"),
+    baseRemitField("Additional Compensation 2", 500, 12, "num"),
+    baseRemitField("Payroll Period Start Date", 512, 10, "date", { req: true }),
+    baseRemitField("Payroll Period End Date", 522, 10, "date", { req: true }),
+    baseRemitField("Paycheck Date", 532, 10, "date", { req: true }),
+    baseRemitField("Department", 542, 12, "text")
+  ]);
+
+  var BASEREMIT_TEMPLATES = [
+    { code: "BASE", label: "Base Data", length: 773, fields: BASEREMIT_BASE_FIELDS, namePattern: /base/i },
+    { code: "REMIT", label: "Remittance - Payroll Data", length: 553, fields: BASEREMIT_REMIT_FIELDS, namePattern: /remit|payroll/i }
+  ];
+
+  var BASEREMIT_LAYOUTS = {
+    RESULT: [
+      { header: "File", type: "text" }, { header: "Layout", type: "text" },
+      { header: "Record Length", type: "text" }, { header: "Records", type: "text" },
+      { header: "Fatal", type: "text" }, { header: "Errors", type: "text" },
+      { header: "Warnings", type: "text" }, { header: "Result", type: "text" }
+    ],
+    ISSUES: [
+      { header: "Line", type: "text" }, { header: "Severity", type: "text" },
+      { header: "SSN", type: "text" }, { header: "Field", type: "text" },
+      { header: "Position", type: "text" }, { header: "Problem", type: "text" },
+      { header: "Value Found", type: "text" }
+    ]
+  };
+
+  function buildBaseRemitSourceConfig() {
+    return {
+      label: "BASE / PAYROLL VALIDATOR",
+      mode: "folder",
+      supportsExport: true,
+      supportsBreakdown: false,
+      summaryIncluded: false,
+      folderModeHelpText: "Template validation is active. Drop the fixed-width Base Data file (773 characters per line) or the Remittance / Payroll Data file (553 characters per line). The layout is picked automatically from the line length.",
+      reports: ["RESULT", "ISSUES"],
+      reportNames: { RESULT: "Validation Result", ISSUES: "Problems Found" },
+      layouts: { RESULT: BASEREMIT_LAYOUTS.RESULT, ISSUES: BASEREMIT_LAYOUTS.ISSUES },
+      customFolderParser: parseBaseRemitTemplates
+    };
+  }
+
+  CONFIG.BASEREMIT = buildBaseRemitSourceConfig();
 
   /* ---------- AMERICAN FUNDS ZTR051 DE-CONVERSION TRANSMISSION ----------
      Fixed width, every record 750 bytes, record code in positions 1-2. Dates are
@@ -15706,8 +16377,291 @@ body .breakdown-row{
     };
   }
 
+  var FIDELITY_PRINTED_PROGRAMS = {
+    PSHB920: "Balances and Other Financials Report",
+    PSHB921: "Withdrawal Restriction & Net Contribution Report",
+    PSHB922: "Participant Identification Report",
+    PSHB924: "MRD / SWIP / EFT / Beneficiary / Flex WD Report",
+    PSHB925: "Service Unit History Report",
+    PSPB52M: "ESOP Report",
+    PSPB52N: "Participant Loan Delinquency Report"
+  };
+
+  function looksLikeFidelityPrintedReport(text) {
+    return /FIDELITY\s+PARTICIPANT\s+RECORDKEEPING\s+SYSTEM/i.test(String(text || ""));
+  }
+
+  function parseFidelityPrintedAmount(token) {
+    var clean = trimValue(token || "").replace(/,/g, "");
+    var negative = /-$/.test(clean) || /^\(.*\)$/.test(clean);
+    clean = clean.replace(/^\(|\)$|-$/g, "");
+    if (!/^\d*\.?\d+$/.test(clean)) {
+      return null;
+    }
+    var value = parseFloat(clean);
+    return negative ? -value : value;
+  }
+
+  /* The [plan]report.TXT bundle is a stack of printed COBOL reports, not fixed-width
+     data. Only the PSHB920 summary page carries plan totals worth reconciling. */
+  function parseFidelityPrintedReport(text) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var fundTotals = {};
+    var sourceTotals = {};
+    var programs = {};
+    var plans = {};
+    var bypassedPlans = {};
+    var inSummary = false;
+    var grid = "";
+    var pendingLabels = null;
+
+    for (var i = 0; i < lines.length; i += 1) {
+      var raw = lines[i];
+      var line = trimValue(raw);
+      if (!line) { continue; }
+
+      var programMatch = line.match(/PROGRAM:\s*([A-Z0-9]+)/i);
+      if (programMatch) {
+        var code = programMatch[1].toUpperCase();
+        programs[code] = (programs[code] || 0) + 1;
+        pendingLabels = null;
+        continue;
+      }
+      var planMatch = line.match(/PLAN:\s*(\d{4,6})\s+(\d{2})\s+(.+?)(?:\s{2,}|$)/i);
+      if (planMatch) {
+        plans[planMatch[1] + " " + planMatch[2]] = trimValue(planMatch[3]);
+        continue;
+      }
+      if (/PLAN NOT ON FILE/i.test(line)) {
+        var bypassMatch = line.match(/(\d{4,6})/);
+        if (bypassMatch) { bypassedPlans[bypassMatch[1]] = true; }
+        continue;
+      }
+      if (/^S\s*U\s*M\s*M\s*A\s*R\s*Y\s+P\s*A\s*G\s*E$/i.test(line.replace(/\s{2,}/g, " "))) {
+        inSummary = true;
+        grid = "";
+        pendingLabels = null;
+        continue;
+      }
+      if (!inSummary) { continue; }
+
+      if (!pendingLabels && /^[A-Z][A-Z \/&().-]*$/.test(line) && !/^(?:WDRL|FORF)\b/.test(line) && !/^TOTAL/.test(line)) {
+        grid = line.replace(/\s{2,}/g, " ").toUpperCase();
+        pendingLabels = null;
+        continue;
+      }
+
+      if (/^FUND\b/.test(line) && /SOURCE\s+\d/.test(line)) {
+        pendingLabels = [];
+        var labelPattern = /SOURCE\s+(\d{1,2})|(\bTOTAL\b)/g;
+        var labelMatch;
+        while ((labelMatch = labelPattern.exec(line)) !== null) {
+          pendingLabels.push(labelMatch[1] ? ("0" + labelMatch[1]).slice(-2) : "TOTAL");
+        }
+        continue;
+      }
+
+      if (pendingLabels && grid === "MARKET VALUE") {
+        var tokens = line.split(/\s+/);
+        var fundCode = tokens.shift();
+        if (/^[A-Z0-9]{2,6}$/i.test(fundCode) && tokens.length === pendingLabels.length) {
+          for (var t = 0; t < tokens.length; t += 1) {
+            var amount = parseFidelityPrintedAmount(tokens[t]);
+            if (amount === null) { continue; }
+            if (pendingLabels[t] === "TOTAL") {
+              fundTotals[fundCode] = (fundTotals[fundCode] || 0) + amount;
+            } else {
+              sourceTotals[pendingLabels[t]] = (sourceTotals[pendingLabels[t]] || 0) + amount;
+            }
+          }
+        }
+        pendingLabels = null;
+      }
+    }
+
+    var programList = Object.keys(programs).sort().map(function (code) {
+      return { code: code, title: FIDELITY_PRINTED_PROGRAMS[code] || "Printed report", pages: programs[code] };
+    });
+    if (!programList.length) {
+      return null;
+    }
+    return {
+      fundTotals: fundTotals,
+      sourceTotals: sourceTotals,
+      programs: programList,
+      plans: plans,
+      bypassedPlans: Object.keys(bypassedPlans).sort()
+    };
+  }
+
+  async function parseFidelityFolderSource(source, files, runId) {
+    var grouped = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var errors = [];
+    var matchedFiles = 0;
+    var skippedFiles = 0;
+    var totalLines = 0;
+    var acceptedLines = 0;
+    var discardedLines = 0;
+    var supplementalSummary = null;
+    var printedNotes = [];
+    var summaryState = createSummaryAccumulator(source, source.layouts);
+
+    for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({ active: true, complete: false, percent: 5 + ((fileIndex / files.length) * 90), title: "Parsing Files", note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")." });
+
+      if (/\.pdf$/i.test(fileName)) {
+        try {
+          var pdfBuffer = file.arrayBuffer ? await file.arrayBuffer() : await new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function (event) { resolve(event.target.result); };
+            reader.onerror = function () { reject(new Error("Unable to read " + fileName)); };
+            reader.readAsArrayBuffer(file);
+          });
+          var pdfText = await extractPdfText(pdfBuffer);
+          var pdfSummary = parseFidelityPrintedReport(pdfText);
+          if (pdfSummary) {
+            supplementalSummary = mergeFidelityPrintedSummary(supplementalSummary, pdfSummary);
+            printedNotes.push(describeFidelityPrintedReport(fileName, pdfSummary));
+            matchedFiles += 1;
+          } else if (/RECORD\s+(?:SPECIFICATIONS|LAYOUT)/i.test(pdfText) || /SIGNED\s+FIELDS/i.test(pdfText)) {
+            matchedFiles += 1;
+            discardReasons.push({ type: "message", label: fileName + ": Fidelity record layout specification. Reference only, so there are no plan totals to reconcile." });
+          } else {
+            skippedFiles += 1;
+            discardReasons.push({ type: "message", label: "Read " + fileName + " but found no Fidelity printed report sections in it." });
+          }
+        } catch (err) {
+          errors.push(err.message);
+        }
+        continue;
+      }
+
+      try {
+        var text = await new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function (event) { resolve(String(event.target.result || "")); };
+          reader.onerror = function () { reject(new Error("Unable to read " + fileName)); };
+          reader.readAsText(file);
+        });
+
+        if (looksLikeFidelityPrintedReport(text)) {
+          var printed = parseFidelityPrintedReport(text);
+          if (printed) {
+            supplementalSummary = mergeFidelityPrintedSummary(supplementalSummary, printed);
+            printedNotes.push(describeFidelityPrintedReport(fileName, printed));
+            matchedFiles += 1;
+          } else {
+            skippedFiles += 1;
+            discardReasons.push({ type: "message", label: "Skipped file: " + fileName });
+          }
+          continue;
+        }
+
+        var dataLines = text.split(/\r\n|\n|\r/);
+        var fileAccepted = 0;
+        for (var lineIndex = 0; lineIndex < dataLines.length; lineIndex += 1) {
+          var line = normalizeLineForSource(dataLines[lineIndex], source);
+          if (!trimValue(line)) { continue; }
+          totalLines += 1;
+          var record = resolveRecordForSource(line, source);
+          if (source.reports.indexOf(record) === -1 || !source.layouts[record]) {
+            discardedLines += 1;
+            continue;
+          }
+          if (!grouped[record]) {
+            grouped[record] = [];
+            foundReports.push(record);
+          }
+          var fields = source.layouts[record];
+          var row = [];
+          for (var k = 0; k < fields.length; k += 1) {
+            var field = fields[k];
+            row.push(formatCleanValue(trimValue(line.substring(field.start - 1, field.start - 1 + field.length)), field.type, field));
+          }
+          grouped[record].push(row);
+          acceptedLines += 1;
+          fileAccepted += 1;
+          accumulateSummaryRow(summaryState, record, row);
+        }
+        if (fileAccepted > 0) {
+          matchedFiles += 1;
+        } else {
+          skippedFiles += 1;
+          discardReasons.push({ type: "message", label: "Skipped file: " + fileName });
+        }
+      } catch (err) {
+        errors.push(err.message);
+      }
+    }
+
+    for (var n = 0; n < printedNotes.length; n += 1) {
+      discardReasons.push({ type: "message", label: printedNotes[n] });
+    }
+
+    return {
+      totalLines: totalLines,
+      acceptedLines: acceptedLines,
+      discardedLines: discardedLines,
+      foundReports: foundReports.sort(),
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: finalizeSummaryAccumulator(summaryState),
+      layoutsByReport: source.layouts,
+      errors: errors,
+      supplementalSummary: supplementalSummary,
+      loadingNote: "Parsed " + matchedFiles + " Fidelity file(s); skipped " + skippedFiles + "."
+    };
+  }
+
+  function mergeFidelityPrintedSummary(existing, next) {
+    if (!existing) {
+      return next;
+    }
+    var key;
+    for (key in next.fundTotals) {
+      if (next.fundTotals.hasOwnProperty(key)) {
+        existing.fundTotals[key] = (existing.fundTotals[key] || 0) + next.fundTotals[key];
+      }
+    }
+    for (key in next.sourceTotals) {
+      if (next.sourceTotals.hasOwnProperty(key)) {
+        existing.sourceTotals[key] = (existing.sourceTotals[key] || 0) + next.sourceTotals[key];
+      }
+    }
+    existing.programs = existing.programs.concat(next.programs.filter(function (program) {
+      return !existing.programs.some(function (seen) { return seen.code === program.code; });
+    }));
+    return existing;
+  }
+
+  function describeFidelityPrintedReport(fileName, printed) {
+    var planNumbers = Object.keys(printed.plans);
+    var parts = [fileName + ": printed report bundle with " + printed.programs.length + " report type(s) — " +
+      printed.programs.map(function (program) { return program.code + " " + program.title; }).join("; ")];
+    if (planNumbers.length) {
+      parts.push("Plans in file: " + planNumbers.join(", ") + ".");
+    }
+    if (printed.bypassedPlans.length) {
+      parts.push("Bypassed (not on file): " + printed.bypassedPlans.join(", ") + ".");
+    }
+    if (!Object.keys(printed.fundTotals).length) {
+      parts.push("No summary page market values were found, so there is nothing to reconcile against.");
+    }
+    return parts.join(" ");
+  }
+
   CONFIG.NATIONWIDE.customFolderParser = parseNationwideFolderSource;
   CONFIG.NEWPORT.customFolderParser = parseNewportFolderSource;
+  CONFIG.FIDELITY.customFolderParser = parseFidelityFolderSource;
   CONFIG.EMPOWER.customFolderParser = parseEmpowerFolderSource;
   CONFIG.ADP.customFolderParser = parseAdpFolderSource;
   CONFIG.PAYCHEX = buildPaychexSourceConfig();
@@ -19081,69 +20035,1957 @@ body .breakdown-row{
   }
 
 
-  function buildFileSetIntakeResult(source, files, fileSet) {
-    var seen = {};
-    var have = [];
-    var missing = [];
-    var unmatched = [];
-    var grouped = {};
-    var i;
+  function readFileAsText(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function (event) { resolve(String(event.target.result || "")); };
+      reader.onerror = function () { reject(new Error("Unable to read " + file.name + ".")); };
+      reader.readAsText(file);
+    });
+  }
 
-    for (i = 0; i < files.length; i += 1) {
-      var code = fileSetCodeForName(fileSet, files[i].name);
-      if (!code) {
-        unmatched.push(files[i].name);
+  function splitDelimitedLine(line) {
+    var out = [];
+    var current = "";
+    var inQuotes = false;
+    var i;
+    var ch;
+    for (i = 0; i < line.length; i += 1) {
+      ch = line.charAt(i);
+      if (inQuotes) {
+        if (ch === "\"") {
+          if (line.charAt(i + 1) === "\"") {
+            current += "\"";
+            i += 1;
+          } else {
+            inQuotes = false;
+          }
+        } else {
+          current += ch;
+        }
+      } else if (ch === "\"") {
+        inQuotes = true;
+      } else if (ch === ",") {
+        out.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    out.push(current);
+    return out;
+  }
+
+  function splitDelimitedText(text) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var rows = [];
+    var i;
+    for (i = 0; i < lines.length; i += 1) {
+      if (!trimValue(lines[i])) {
         continue;
       }
-      seen[code] = true;
+      rows.push(splitDelimitedLine(lines[i]));
     }
-    for (i = 0; i < fileSet.members.length; i += 1) {
-      var member = fileSet.members[i];
-      grouped[member.code] = [];
-      if (seen[member.code]) {
-        have.push(member.code);
-      } else {
-        missing.push(member.code);
+    return rows;
+  }
+
+  function buildHeaderColumns(headerCells, ssnKeys, decimalTest, dateTest) {
+    var columns = [];
+    var i;
+    var header;
+    var key;
+    for (i = 0; i < headerCells.length; i += 1) {
+      header = trimValue(headerCells[i]).replace(/\s+/g, " ");
+      if (!header) {
+        continue;
+      }
+      key = normalizeWorkbookHeaderLabel(header);
+      columns.push({
+        index: i,
+        header: header,
+        isSsn: ssnKeys.indexOf(key) !== -1,
+        type: (dateTest && dateTest.test(key)) ? "date" : ((decimalTest && decimalTest.test(key)) ? "decimal" : "text")
+      });
+    }
+    return columns;
+  }
+
+  function columnsToLayout(columns) {
+    var layout = [];
+    var i;
+    for (i = 0; i < columns.length; i += 1) {
+      layout.push({ header: columns[i].header, type: columns[i].type });
+    }
+    return layout;
+  }
+
+  function rowFromColumns(cells, columns) {
+    var out = [];
+    var i;
+    var raw;
+    for (i = 0; i < columns.length; i += 1) {
+      raw = trimValue(cells[columns[i].index]);
+      if (columns[i].isSsn) {
+        raw = raw.replace(/[^0-9]/g, "");
+      }
+      out.push(formatCleanValue(raw, columns[i].type, columns[i]));
+    }
+    return out;
+  }
+
+  function rowFromFixedLayout(line, fields) {
+    var out = [];
+    var i;
+    var raw;
+    for (i = 0; i < fields.length; i += 1) {
+      raw = trimValue(line.substring(fields[i].start - 1, fields[i].start - 1 + fields[i].length));
+      if (fields[i].header === "SSN") {
+        raw = raw.replace(/[^0-9]/g, "");
+      }
+      out.push(formatCleanValue(raw, fields[i].type, fields[i]));
+    }
+    return out;
+  }
+
+  var TIAA_SSN_KEYS = ["participant", "ssn", "participantid"];
+  var TIAA_DECIMAL_HEADERS = /^(full|fullshr|schg|xfer|tiaa|tiaashr|shares|units)$/;
+  var TIAA_DECIMAL_HINTS = /(amt|amount|balance|cntrb|ctrb|contrib|rollover|comp|hours)/;
+
+  function tiaaHeaderRows(code, rows) {
+    var merged;
+    var i;
+    if (code !== "INDIC" || rows.length < 3) {
+      return { header: rows[0] || [], dataStart: 1 };
+    }
+    merged = [];
+    for (i = 0; i < Math.max(rows[0].length, rows[1].length); i += 1) {
+      merged.push(trimValue(rows[0][i]) || trimValue(rows[1][i]));
+    }
+    return { header: merged, dataStart: 2 };
+  }
+
+  async function parseTiaaFundTotalsWorkbook(file) {
+    var entries = await readZipEntries(await readFileAsArrayBuffer(file));
+    var sharedStrings = parseSharedStrings(decodeZipText(entries["xl/sharedStrings.xml"]));
+    var sheets = parseWorkbookSheets(decodeZipText(entries["xl/workbook.xml"]), decodeZipText(entries["xl/_rels/workbook.xml.rels"]));
+    if (!sheets.length || !entries[sheets[0].path]) {
+      throw new Error(file.name + ": no readable worksheet was found.");
+    }
+    var rows = parseWorksheetRows(decodeZipText(entries[sheets[0].path]), sharedStrings);
+    var headerIndex = detectPrincipalHeaderRow(rows);
+    if (headerIndex === -1) {
+      throw new Error(file.name + ": could not find the header row.");
+    }
+    var columns = buildHeaderColumns(rows[headerIndex] || [], [], /^(disbamt)$/, null);
+    var fundIndex = -1;
+    var amountIndex = -1;
+    var i;
+    var key;
+    for (i = 0; i < (rows[headerIndex] || []).length; i += 1) {
+      key = normalizeWorkbookHeaderLabel(trimValue(rows[headerIndex][i]));
+      if (fundIndex === -1 && (key === "investment" || key === "ticker")) {
+        fundIndex = i;
+      }
+      if (amountIndex === -1 && key === "disbamt") {
+        amountIndex = i;
+      }
+    }
+    if (fundIndex === -1 || amountIndex === -1) {
+      throw new Error(file.name + ": expected INVESTMENT and DISB AMT columns.");
+    }
+    var fundTotals = {};
+    var cursor;
+    for (cursor = headerIndex + 1; cursor < rows.length; cursor += 1) {
+      var fundKey = trimValue((rows[cursor] || [])[fundIndex]);
+      if (!fundKey) {
+        continue;
+      }
+      fundTotals[fundKey] = (fundTotals[fundKey] || 0) + parseAmountValue((rows[cursor] || [])[amountIndex]);
+    }
+    return { fundTotals: fundTotals, sourceTotals: {}, sourceComparable: false };
+  }
+
+  async function parseTiaaFileSet(source, files, runId) {
+    var grouped = {};
+    var layoutsByReport = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var errors = [];
+    var totalLines = 0;
+    var acceptedLines = 0;
+    var discardedLines = 0;
+    var supplementalSummary = null;
+    var unmatched = [];
+    var fileIndex;
+
+    for (fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({ active: true, complete: false, percent: 5 + ((fileIndex / files.length) * 90), title: "Parsing Files", note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")." });
+
+      if (/^FUND_TOT_RPT.*\.(?:xlsx|xlsm)$/i.test(fileName)) {
+        try {
+          supplementalSummary = await parseTiaaFundTotalsWorkbook(file);
+        } catch (err) {
+          errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
+        }
+        continue;
+      }
+
+      var code = fileSetCodeForName(TIAA_FILE_SET, fileName);
+      if (!code) {
+        unmatched.push(fileName);
+        continue;
+      }
+
+      try {
+        var rows = splitDelimitedText(await readFileAsText(file));
+        if (!rows.length) {
+          discardReasons.push({ type: "message", label: fileName + " is empty." });
+          continue;
+        }
+        var headerInfo = tiaaHeaderRows(code, rows);
+        var columns = buildHeaderColumns(headerInfo.header, TIAA_SSN_KEYS, TIAA_DECIMAL_HEADERS, null);
+        var c;
+        for (c = 0; c < columns.length; c += 1) {
+          if (columns[c].type === "text") {
+            var normalizedKey = normalizeWorkbookHeaderLabel(columns[c].header);
+            if (TIAA_DECIMAL_HINTS.test(normalizedKey)) {
+              columns[c].type = "decimal";
+            }
+          }
+        }
+        if (!columns.length) {
+          errors.push(fileName + ": no column headers were found on the first row.");
+          continue;
+        }
+        var outRows = [];
+        var cursor;
+        for (cursor = headerInfo.dataStart; cursor < rows.length; cursor += 1) {
+          totalLines += 1;
+          var built = rowFromColumns(rows[cursor], columns);
+          var hasValue = false;
+          var v;
+          for (v = 0; v < built.length; v += 1) {
+            if (trimValue(built[v])) { hasValue = true; break; }
+          }
+          if (!hasValue) {
+            discardedLines += 1;
+            continue;
+          }
+          outRows.push(built);
+          acceptedLines += 1;
+        }
+        grouped[code] = outRows;
+        layoutsByReport[code] = columnsToLayout(columns);
+        foundReports.push(code);
+      } catch (err) {
+        errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
       }
     }
 
-    var note = "Holding " + have.length + " of " + fileSet.members.length + " " + fileSet.label + " files: " + have.join(", ") + ".";
-    note += missing.length
-      ? " Still outstanding: " + missing.join(", ") + ". Drop them as they arrive and they will be added to this set."
-      : " The set is complete.";
-    note += " Their contents are not read yet — the layouts are still to come.";
+    var missing = [];
+    var m;
+    for (m = 0; m < TIAA_FILE_SET.members.length; m += 1) {
+      if (foundReports.indexOf(TIAA_FILE_SET.members[m].code) === -1) {
+        missing.push(TIAA_FILE_SET.members[m].code);
+      }
+    }
+    var note = "Read " + foundReports.length + " of " + TIAA_FILE_SET.members.length + " TIAA files.";
+    note += missing.length ? " Still outstanding: " + missing.join(", ") + "." : " The set is complete.";
+    if (supplementalSummary) {
+      note += " Fund totals report loaded for reconciliation.";
+    }
     if (unmatched.length) {
       note += " Ignored: " + unmatched.join(", ") + ".";
+      discardReasons.push({ type: "message", label: "Ignored: " + unmatched.join(", ") + "." });
     }
 
     return {
-      totalLines: 0,
-      acceptedLines: 0,
-      discardedLines: 0,
-      foundReports: have.slice(),
-      discardReasons: [{ type: "message", label: note }],
+      totalLines: totalLines,
+      acceptedLines: acceptedLines,
+      discardedLines: discardedLines,
+      foundReports: foundReports.sort(),
+      discardReasons: discardReasons,
       grouped: grouped,
       sourceLabel: source.label,
       currentFileName: currentFolderName,
       caseNumber: validateAndFormatCaseNumber(true).formatted,
       planName: planNameInput ? trimValue(planNameInput.value) : "",
       summaryTotals: null,
-      layoutsByReport: source.layouts,
-      errors: [],
+      layoutsByReport: layoutsByReport,
+      supplementalSummary: supplementalSummary,
+      errors: errors,
       loadingNote: note
     };
   }
 
-  async function parseTiaaFileSet(source, files) {
-    return buildFileSetIntakeResult(source, files, TIAA_FILE_SET);
+  async function parseAlerusFileSet(source, files, runId) {
+    var grouped = {};
+    var layoutsByReport = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var errors = [];
+    var totalLines = 0;
+    var acceptedLines = 0;
+    var discardedLines = 0;
+    var unmatched = [];
+    var summaryHeld = "";
+    var fileIndex;
+
+    for (fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({ active: true, complete: false, percent: 5 + ((fileIndex / files.length) * 90), title: "Parsing Files", note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")." });
+
+      if (ALERUS_SUMMARY_PATTERN.test(fileName)) {
+        summaryHeld = fileName;
+        continue;
+      }
+
+      var code = fileSetCodeForName(ALERUS_FILE_SET, fileName);
+      if (!code) {
+        unmatched.push(fileName);
+        continue;
+      }
+
+      try {
+        var rows = await readFirstSheetRows(file);
+        var headerIndex = detectPrincipalHeaderRow(rows);
+        if (headerIndex === -1) {
+          errors.push(fileName + ": could not find the header row.");
+          continue;
+        }
+        var columns = buildHeaderColumns(rows[headerIndex], ALERUS_SSN_KEYS, ALERUS_DECIMAL_HINTS, null);
+        if (!columns.length) {
+          errors.push(fileName + ": no column headers were found.");
+          continue;
+        }
+        if (!grouped[code]) {
+          grouped[code] = [];
+          layoutsByReport[code] = columnsToLayout(columns);
+          foundReports.push(code);
+        }
+        var cursor;
+        for (cursor = headerIndex + 1; cursor < rows.length; cursor += 1) {
+          totalLines += 1;
+          var built = rowFromColumns(rows[cursor], columns);
+          if (!trimValue(built.join(""))) {
+            discardedLines += 1;
+            continue;
+          }
+          grouped[code].push(built);
+          acceptedLines += 1;
+        }
+      } catch (err) {
+        errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
+      }
+    }
+
+    var missing = [];
+    var m;
+    for (m = 0; m < ALERUS_FILE_SET.members.length; m += 1) {
+      if (foundReports.indexOf(ALERUS_FILE_SET.members[m].code) === -1) {
+        missing.push(ALERUS_FILE_SET.members[m].code);
+      }
+    }
+    var note = "Read " + foundReports.length + " of " + ALERUS_FILE_SET.members.length + " Alerus files.";
+    note += missing.length ? " Still outstanding: " + missing.join(", ") + "." : " The set is complete.";
+    if (summaryHeld) {
+      note += " " + summaryHeld + " is held for reference; its plan totals are not read.";
+      discardReasons.push({ type: "message", label: summaryHeld + " is held for reference; its plan totals are not read." });
+    }
+    if (unmatched.length) {
+      note += " Ignored: " + unmatched.join(", ") + ".";
+      discardReasons.push({ type: "message", label: "Ignored: " + unmatched.join(", ") + "." });
+    }
+
+    return {
+      totalLines: totalLines,
+      acceptedLines: acceptedLines,
+      discardedLines: discardedLines,
+      foundReports: foundReports.sort(),
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      layoutsByReport: layoutsByReport,
+      errors: errors,
+      loadingNote: note
+    };
+  }
+
+  /* ---------- AMERITAS PRINTED REPORTS ----------
+     Valuation.txt is RPT-957 Participant Valuation Summary; Roth.txt is RPT-933.
+     The valuation file repeats a census block, a vesting block and a detail grid
+     for every participant, then prints the same grid once for plan totals. A
+     detail row carries a three character ID: "XY*" is a fund line, "**Z" is a
+     source line, and anything else crosses a fund with a source, which is where
+     the real balances live. Grid column edges are read off each printed
+     DESCRIPTION header instead of being hard coded, and fund and source names
+     are back filled from the fund-only and source-only lines. */
+
+  var AMERITAS_VALUATION_PATTERN = /valuation[^\\/]*\.txt$/i;
+  var AMERITAS_ROTH_PATTERN = /roth[^\\/]*\.txt$/i;
+  var AMERITAS_PARTICIPANT_START = /^(\d{3}-\d{2}-\d{4})(?:\s|$)/;
+  var AMERITAS_PARTICIPANT_CONT = /CONTINUATION OF PARTICIPANT\s+(\d{3}-\d{2}-\d{4})/i;
+  var AMERITAS_ROTH_ROW = /^\s*(\d{3}-\d{2}-\d{4})\s+(\S.*?)\s{2,}(-?[\d,]*\.\d\d-?)\s+(\d{4}\/\d{2}\/\d{2})\s*$/;
+  var AMERITAS_VEST_ENTRY = /([A-Z][A-Z0-9 \/&'-]*?)\s+(\*\*\S)\s+([\d.]+)\s+(-?[\d,]*\.?\d*-?)/g;
+  var AMERITAS_ACTIVITY_KEYS = ["beg", "contrib", "earnings", "payments", "loans", "other", "end"];
+
+
+  function ameritasAmount(raw) {
+    var text = trimValue(raw);
+    if (!text) { return ""; }
+    var negative = /-\s*$/.test(text) || /^\s*-/.test(text);
+    var digits = text.replace(/[^0-9.]/g, "");
+    var value = Number(digits);
+    if (!digits || !isFinite(value)) { return text; }
+    return (negative ? -value : value).toFixed(2);
+  }
+
+  function ameritasPercent(raw) {
+    var text = trimValue(raw).replace(/%/g, "");
+    if (!text) { return ""; }
+    var value = Number(text);
+    return isFinite(value) ? value.toFixed(2) : text;
+  }
+
+  // The grid header prints the two valuation dates under BEG BAL and END BAL,
+  // so one header line is enough to locate every column.
+  function ameritasGridColumns(line) {
+    var dates = [];
+    var dateMatch;
+    var datePattern = /\d{4}\/\d{2}\/\d{2}/g;
+    var descStart = line.indexOf("DESCRIPTION");
+    if (descStart === -1) { return null; }
+    while ((dateMatch = datePattern.exec(line)) !== null) { dates.push(dateMatch.index); }
+    if (dates.length < 2) { return null; }
+
+    var spans = [{ key: "desc", start: descStart, end: descStart + 11 }];
+    var idMatch = /\sID\s/.exec(line);
+    if (idMatch) { spans.push({ key: "id", start: idMatch.index + 1, end: idMatch.index + 4 }); }
+    var pcnt = line.indexOf("PCNT");
+    if (pcnt > -1) { spans.push({ key: "pcnt", start: pcnt, end: pcnt + 4 }); }
+    spans.push({ key: "beg", start: dates[0], end: dates[0] + 10 });
+    var labels = [["contrib", "CONTRIB"], ["earnings", "EARNINGS"], ["payments", "PAYMENTS"], ["loans", "LOANS"], ["other", "OTHER"]];
+    var i;
+    for (i = 0; i < labels.length; i += 1) {
+      var at = line.indexOf(labels[i][1]);
+      if (at > -1) { spans.push({ key: labels[i][0], start: at, end: at + labels[i][1].length }); }
+    }
+    spans.push({ key: "end", start: dates[dates.length - 1], end: dates[dates.length - 1] + 10 });
+
+    spans.sort(function (a, b) { return a.start - b.start; });
+    var cuts = [0];
+    for (i = 1; i < spans.length; i += 1) {
+      // Description and ID print left aligned under their labels, so they break at
+      // the next label's start. The money columns are right aligned, so a midpoint
+      // between neighbours is the safe cut there.
+      if (spans[i].key === "id") {
+        cuts.push(spans[i].start);
+      } else {
+        cuts.push(Math.floor((spans[i - 1].end + spans[i].start) / 2));
+      }
+    }
+    cuts.push(line.length + 200);
+    return { spans: spans, cuts: cuts };
+  }
+
+  function ameritasSliceRow(columns, line) {
+    var out = {};
+    var i;
+    for (i = 0; i < columns.spans.length; i += 1) {
+      out[columns.spans[i].key] = trimValue(line.substring(columns.cuts[i], columns.cuts[i + 1]));
+    }
+    return out;
+  }
+
+  function ameritasCensusFromBlock(ssn, block) {
+    function label(name) {
+      var found = new RegExp(name + ":\\s*([0-9]{4}\\/[0-9]{2}\\/[0-9]{2}|[0-9][0-9,.]*|[A-Z0-9]+)").exec(block);
+      return found ? trimValue(found[1]) : "";
+    }
+    var lines = block.split("\n");
+    var name = "";
+    var address = "";
+    var cityLine = "";
+    var i;
+    for (i = 0; i < lines.length; i += 1) {
+      if (lines[i].indexOf("=>") === -1) { continue; }
+      var rest = lines[i].substring(lines[i].indexOf("=>") + 2).split(/STATUS:|LOCATION:/)[0];
+      var parts = rest.split(/\s{2,}/);
+      name = trimValue(parts.shift());
+      address = trimValue(parts.join(" "));
+      if (i + 1 < lines.length) {
+        cityLine = trimValue(lines[i + 1].split(/STATUS:|LOCATION:|BIRTH:|HIRE:|TRNF:|TERM:/)[0]);
+      }
+      break;
+    }
+    var vested = /TOTAL VESTED BALANCE\s+(-?[\d,]*\.?\d*-?)/.exec(block);
+    var status = /STATUS:\s*(\S+)/.exec(block);
+    var location = /LOCATION:\s*(\S+)/.exec(block);
+    var comp = /401K EE:\s*(-?[\d,]*\.?\d*-?)/.exec(block);
+    return [
+      ssn.replace(/[^0-9]/g, ""), name, address, cityLine,
+      status ? status[1] : "", location ? location[1] : "",
+      label("BIRTH"), label("HIRE"), label("ENTRY"), label("VEST"),
+      label("CNTB"), label("TERM"), label("TRNF"),
+      comp ? ameritasAmount(comp[1]) : "",
+      vested ? ameritasAmount(vested[1]) : ""
+    ];
+  }
+
+  function parseAmeritasValuationText(text, state) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var columns = null;
+    var participant = "";
+    var censusBuffer = null;
+    var inVesting = false;
+    var pending = null;
+    var i;
+
+    function flushCensus() {
+      if (!censusBuffer) { return; }
+      if (!state.censusSeen[censusBuffer.ssn]) {
+        state.censusSeen[censusBuffer.ssn] = true;
+        state.rows.CENSUS.push(ameritasCensusFromBlock(censusBuffer.ssn, censusBuffer.text.join("\n")));
+      }
+      censusBuffer = null;
+    }
+
+    for (i = 0; i < lines.length; i += 1) {
+      var line = lines[i];
+      var bare = trimValue(line);
+      state.totalLines += 1;
+
+      if (!bare || /^F-FORF/.test(bare) || /^Y-PLAN XFER/.test(bare) || /RPT-9\d\d/.test(bare)) {
+        if (censusBuffer && bare) { censusBuffer.text.push(line); }
+        continue;
+      }
+      if (/^PLAN\s+\d/.test(bare) || /^\*+\s*CONTINUATION OF PLAN TOTALS/i.test(bare)) {
+        flushCensus();
+        if (/CONTINUATION OF PLAN TOTALS/i.test(bare)) { participant = ""; }
+        continue;
+      }
+      if (/PLAN PARTICIPANT COUNTS/i.test(bare)) {
+        flushCensus();
+        columns = null;
+        pending = null;
+        continue;
+      }
+      if (AMERITAS_PARTICIPANT_START.test(line)) {
+        flushCensus();
+        participant = AMERITAS_PARTICIPANT_START.exec(line)[1];
+        censusBuffer = { ssn: participant, text: [line] };
+        inVesting = false;
+        pending = null;
+        continue;
+      }
+      if (AMERITAS_PARTICIPANT_CONT.test(bare)) {
+        flushCensus();
+        participant = AMERITAS_PARTICIPANT_CONT.exec(bare)[1];
+        inVesting = false;
+        pending = null;
+        continue;
+      }
+      if (/^=>PLAN TOTALS/i.test(bare)) {
+        flushCensus();
+        participant = "";
+        inVesting = false;
+        pending = null;
+        continue;
+      }
+      if (/VESTING\s+I\s*N?\s*F/i.test(bare) || /V E S T I N G/i.test(bare)) {
+        inVesting = true;
+        if (censusBuffer) { censusBuffer.text.push(line); }
+        continue;
+      }
+      if (line.indexOf("DESCRIPTION") > -1) {
+        var next = ameritasGridColumns(line);
+        if (next) {
+          columns = next;
+          inVesting = false;
+          pending = null;
+          flushCensus();
+          continue;
+        }
+      }
+      if (/^\*{3,}\s*(INVESTMENTS|SOURCES)/i.test(bare)) {
+        pending = null;
+        continue;
+      }
+      if (/BEG BAL|END BAL|A C T I V I T Y|ALLOC|VESTED\s*%|VESTED AMT|SORTED BY/i.test(bare)) {
+        if (censusBuffer) { censusBuffer.text.push(line); }
+        continue;
+      }
+
+      if (inVesting) {
+        if (censusBuffer) { censusBuffer.text.push(line); }
+        var entry;
+        AMERITAS_VEST_ENTRY.lastIndex = 0;
+        while ((entry = AMERITAS_VEST_ENTRY.exec(line)) !== null) {
+          state.rows.VEST.push([
+            participant.replace(/[^0-9]/g, ""), trimValue(entry[1]),
+            trimValue(entry[2]).slice(-1), ameritasPercent(entry[3]), ameritasAmount(entry[4])
+          ]);
+          state.acceptedLines += 1;
+        }
+        continue;
+      }
+      if (censusBuffer) {
+        censusBuffer.text.push(line);
+        continue;
+      }
+      if (!columns) {
+        state.discardedLines += 1;
+        continue;
+      }
+
+      var cells = ameritasSliceRow(columns, line);
+      if (!cells.desc && !cells.id) {
+        if (pending) {
+          if (cells.other) { pending.other.push(cells.other); }
+          if (cells.end) { pending.end = cells.end; }
+          continue;
+        }
+        state.discardedLines += 1;
+        continue;
+      }
+      pending = {
+        ssn: participant.replace(/[^0-9]/g, ""),
+        desc: cells.desc,
+        id: cells.id,
+        pcnt: cells.pcnt || "",
+        beg: cells.beg || "",
+        contrib: cells.contrib || "",
+        earnings: cells.earnings || "",
+        payments: cells.payments || "",
+        loans: cells.loans || "",
+        other: cells.other ? [cells.other] : [],
+        end: cells.end || "",
+        planTotal: !participant
+      };
+      state.pendingRows.push(pending);
+      state.acceptedLines += 1;
+    }
+    flushCensus();
+  }
+
+  function finalizeAmeritasRows(state) {
+    var i;
+    var row;
+    // First pass: the fund-only and source-only lines name every code.
+    for (i = 0; i < state.pendingRows.length; i += 1) {
+      row = state.pendingRows[i];
+      if (/\*$/.test(row.id)) {
+        state.fundNames[row.id.replace(/\*+$/, "")] = row.desc;
+      } else if (/^\*\*/.test(row.id)) {
+        state.sourceNames[row.id.slice(-1)] = row.desc;
+      }
+    }
+    for (i = 0; i < state.pendingRows.length; i += 1) {
+      row = state.pendingRows[i];
+      var activity = [
+        ameritasAmount(row.beg), ameritasAmount(row.contrib), ameritasAmount(row.earnings),
+        ameritasAmount(row.payments), ameritasAmount(row.loans), row.other.join("; "),
+        ameritasAmount(row.end)
+      ];
+      if (/\*$/.test(row.id)) {
+        if (row.planTotal) { continue; }
+        state.rows.FUNDBAL.push([row.ssn, row.desc, row.id.replace(/\*+$/, ""), ameritasPercent(row.pcnt)].concat(activity));
+        continue;
+      }
+      if (/^\*\*/.test(row.id)) {
+        if (row.planTotal) { continue; }
+        state.rows.SRCBAL.push([row.ssn, row.desc, row.id.slice(-1)].concat(activity));
+        continue;
+      }
+      var fundCode = row.id.slice(0, -1);
+      var sourceCode = row.id.slice(-1);
+      var descParts = row.desc.split(/\s+/);
+      var fundName = state.fundNames[fundCode] || descParts[0] || "";
+      var sourceName = state.sourceNames[sourceCode] || descParts.slice(1).join(" ");
+      if (row.planTotal) {
+        var amount = parseAmountValue(activity[6]);
+        if (fundName) { state.planFunds[fundName] = (state.planFunds[fundName] || 0) + amount; }
+        if (sourceName) { state.planSources[sourceName] = (state.planSources[sourceName] || 0) + amount; }
+        continue;
+      }
+      state.rows.BAL.push([row.ssn, row.desc, row.id, fundCode, fundName, sourceCode, sourceName,
+        ameritasPercent(row.pcnt)].concat(activity));
+    }
+  }
+
+  function parseAmeritasRothText(text, state) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var i;
+    for (i = 0; i < lines.length; i += 1) {
+      state.totalLines += 1;
+      var found = AMERITAS_ROTH_ROW.exec(lines[i]);
+      if (!found) { continue; }
+      state.rows.ROTH.push([
+        found[1].replace(/[^0-9]/g, ""), trimValue(found[2]),
+        ameritasAmount(found[3]), trimValue(found[4])
+      ]);
+      state.acceptedLines += 1;
+    }
+  }
+
+  async function parseAmeritasReports(source, files, runId) {
+    var state = {
+      rows: { BAL: [], FUNDBAL: [], SRCBAL: [], CENSUS: [], VEST: [], ROTH: [] },
+      pendingRows: [],
+      censusSeen: {},
+      fundNames: {},
+      sourceNames: {},
+      planFunds: {},
+      planSources: {},
+      totalLines: 0,
+      acceptedLines: 0,
+      discardedLines: 0
+    };
+    var errors = [];
+    var unmatched = [];
+    var sawValuation = false;
+    var sawRoth = false;
+    var fileIndex;
+
+    for (fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({ active: true, complete: false, percent: 5 + ((fileIndex / files.length) * 90), title: "Parsing Files", note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")." });
+      try {
+        var text = await readFileAsText(file);
+        if (AMERITAS_ROTH_PATTERN.test(fileName) || /RPT-933/.test(text)) {
+          parseAmeritasRothText(text, state);
+          sawRoth = true;
+        } else if (AMERITAS_VALUATION_PATTERN.test(fileName) || /RPT-957/.test(text)) {
+          parseAmeritasValuationText(text, state);
+          sawValuation = true;
+        } else {
+          unmatched.push(fileName);
+        }
+      } catch (err) {
+        errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
+      }
+    }
+
+    finalizeAmeritasRows(state);
+
+    var grouped = {};
+    var layoutsByReport = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var code;
+    for (code in state.rows) {
+      if (state.rows.hasOwnProperty(code) && state.rows[code].length) {
+        grouped[code] = state.rows[code];
+        layoutsByReport[code] = AMERITAS_LAYOUTS[code];
+        foundReports.push(code);
+      }
+    }
+
+    var note = sawValuation ? "Read the Participant Valuation Summary." : "Waiting on the Participant Valuation Summary (Valuation.txt).";
+    note += sawRoth ? " Read the Roth report." : " Waiting on the Roth report (Roth.txt).";
+    if (unmatched.length) {
+      note += " Ignored: " + unmatched.join(", ") + ".";
+      discardReasons.push({ type: "message", label: "Ignored: " + unmatched.join(", ") + "." });
+    }
+
+    var hasPlanTotals = false;
+    for (code in state.planFunds) { if (state.planFunds.hasOwnProperty(code)) { hasPlanTotals = true; break; } }
+
+    return {
+      totalLines: state.totalLines,
+      acceptedLines: state.acceptedLines,
+      discardedLines: state.discardedLines,
+      foundReports: foundReports,
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      layoutsByReport: layoutsByReport,
+      supplementalSummary: hasPlanTotals ? {
+        fundTotals: state.planFunds,
+        sourceTotals: state.planSources,
+        sourceComparable: true
+      } : null,
+      errors: errors,
+      loadingNote: note
+    };
+  }
+
+  /* ---------- PLAN SETUP DOCUMENTS ----------
+     Onboarding Package (.xlsx), Plan Review Document (.docx) and Merger Comparison
+     (.pdf). Each is reduced to the tables a de-conversion consultant works from:
+     the plan facts, the source map, the provisions and the questionnaires. A plan
+     only ever has one of the three documents, never a set. */
+
+  /* The Onboarding Package extract finds its rows by the label printed in the
+     sheet, not by row number, so a workbook that inserts, deletes or reorders
+     rows still lands on the right provisions. labelColumn/firstColumn/lastColumn
+     are 0-based indexes (0 = A). Each label pattern is claimed by the first row
+     that matches it, which keeps repeated headings ("Participating Employer
+     Name" appears twice on Contacts) from doubling up the output. */
+  var PLANDOCS_ONBOARDING_TABS = [
+    {
+      match: /contacts/i, label: "Contacts", report: "PLANFACTS",
+      firstColumn: 0, lastColumn: 1, labelColumn: 0,
+      labels: [
+        /^plan name\b/i,
+        /^participating employer name\b/i,
+        /^participating employer effective date\b/i,
+        /^account\s*#/i,
+        /^affiliate\s*#/i
+      ]
+    },
+    {
+      match: /plan provisions/i, label: "Plan Provisions", report: "PROVISIONS",
+      firstColumn: 1, lastColumn: 7, labelColumn: 2,
+      header: /adopter'?s? elections/i,
+      labels: [
+        /^effective date of plan/i,
+        /^eligibility exclusions/i,
+        /^age\s*\/\s*service/i,
+        /^entry date/i,
+        /^eligibility computation period/i,
+        /^compensation definition/i,
+        /^automatic enrollment/i,
+        /^type of automatic enrollment/i,
+        /^effective date of auto enrollment/i,
+        /^default\s*%/i,
+        /^hardship withdrawal from elective deferrals/i,
+        /^vesting of matching and non[\s-]*matching/i,
+        /^vesting computation period/i,
+        /^vesting service crediting method/i,
+        /^participant loans/i,
+        /^required minimum distributions/i
+      ]
+    },
+    {
+      match: /transition communications/i, label: "Transition Communications", report: "CHECKLIST",
+      firstColumn: 0, lastColumn: 2, labelColumn: 0,
+      labels: [
+        /^is this a takeover plan or start ?up/i,
+        /^employer name/i,
+        /^name of prior recordkeeper/i,
+        /^what is the asset transfer strategy/i,
+        /^is anyone being auto[- ]?enrolled or re[- ]?enrolled/i,
+        /^are there any reregistrations/i,
+        /^is there a put/i,
+        /^name of fund involved in the put/i,
+        /^is the fund moving to transamerica/i,
+        /^does the takeover plan contain illiquid assets/i,
+        /^will deferral elections be mapped/i,
+        /^will allocations map/i,
+        /^will assets map/i,
+        /^effective date/i,
+        /^blackout start date/i,
+        /^liquidation date/i,
+        /^asset transfer date/i,
+        /^go live/i,
+        /^first payroll with transamerica/i,
+        /^limited access start date/i,
+        /^limited access end date/i,
+        /^what type of deferrals are allowed/i,
+        /^what is the default fund/i,
+        /^does the plan allow for loans/i,
+        /^does the plan have auto ?enroll/i,
+        /^are we outsourcing eligibility/i
+      ]
+    },
+    {
+      match: /conversion information/i, label: "Conversion Information", report: "PLANFACTS",
+      firstColumn: 1, lastColumn: 3, fromRow: 4
+    },
+    {
+      match: /payroll information/i, label: "Payroll Information", report: "PLANFACTS",
+      firstColumn: 0, lastColumn: 5, fromRow: 1
+    },
+    {
+      match: /outsourcing services/i, label: "Outsourcing Services", report: "CHECKLIST",
+      firstColumn: 0, lastColumn: 3, labelColumn: 0,
+      header: /master election/i,
+      labels: [
+        /^eligibility$/i,
+        /^deferral tracking/i,
+        /^loans$/i,
+        /^required minimum distributions/i,
+        /^qdros/i,
+        /^participant controlled marital status/i
+      ]
+    }
+  ];
+
+  var PLANDOCS_VALUE_SLOTS = { PLANFACTS: 4, CHECKLIST: 4, PROVISIONS: 7 };
+
+  function planDocsClean(value) {
+    return trimValue(String(value === undefined || value === null ? "" : value).replace(/\s+/g, " "));
+  }
+
+  function planDocsMatchTab(name) {
+    for (var i = 0; i < PLANDOCS_ONBOARDING_TABS.length; i += 1) {
+      if (PLANDOCS_ONBOARDING_TABS[i].match.test(name)) { return PLANDOCS_ONBOARDING_TABS[i]; }
+    }
+    return null;
+  }
+
+  function planDocsSlice(row, first, last) {
+    var out = [];
+    for (var c = first; c <= last; c += 1) { out.push(planDocsClean((row || [])[c])); }
+    return out;
+  }
+
+  // Each report has a fixed number of value columns; anything wider than that is
+  // folded into the last one rather than dropped.
+  function planDocsPack(cells, slots) {
+    var out = cells.slice(0, slots);
+    if (cells.length > slots) {
+      out[slots - 1] = cells.slice(slots - 1).filter(function (value) { return !!value; }).join(" | ");
+    }
+    while (out.length < slots) { out.push(""); }
+    return out;
+  }
+
+  function planDocsRowHasContent(cells, from) {
+    for (var i = from || 0; i < cells.length; i += 1) {
+      if (cells[i]) { return true; }
+    }
+    return false;
+  }
+
+  function planDocsReadOnboardingTab(spec, tabName, rows, state) {
+    var slots = PLANDOCS_VALUE_SLOTS[spec.report];
+    function emit(rowNumber) {
+      var cells = planDocsSlice(rows[rowNumber - 1], spec.firstColumn, spec.lastColumn);
+      var packed = planDocsPack(cells, slots);
+      if (!planDocsRowHasContent(packed, 0)) { return false; }
+      state.rows[spec.report].push(["Onboarding Package", tabName, String(rowNumber)].concat(packed));
+      state.accepted += 1;
+      return true;
+    }
+    if (spec.labels) {
+      var claimed = [];
+      var headerDone = !spec.header;
+      for (var r = 1; r <= rows.length; r += 1) {
+        var cells = rows[r - 1] || [];
+        if (!headerDone && spec.header) {
+          for (var h = spec.firstColumn; h <= spec.lastColumn; h += 1) {
+            if (spec.header.test(planDocsClean(cells[h]))) { headerDone = emit(r); break; }
+          }
+          if (headerDone) { continue; }
+        }
+        var text = planDocsClean(cells[spec.labelColumn]);
+        if (!text) { continue; }
+        for (var i = 0; i < spec.labels.length; i += 1) {
+          if (!claimed[i] && spec.labels[i].test(text)) {
+            claimed[i] = true;
+            emit(r);
+            break;
+          }
+        }
+      }
+      for (var m = 0; m < spec.labels.length; m += 1) {
+        if (!claimed[m]) {
+          state.notes.push(spec.label + ": no row matched " + String(spec.labels[m]) + ".");
+        }
+      }
+      return;
+    }
+    // "Capture the populated block downward": keep walking until the sheet has
+    // run dry for several rows in a row, so a single spacer row does not stop it.
+    var blanks = 0;
+    for (var r = spec.fromRow; r <= rows.length && blanks < 6; r += 1) {
+      if (emit(r)) { blanks = 0; } else { blanks += 1; }
+    }
+  }
+
+  async function planDocsReadOnboarding(file, state) {
+    var entries = await readZipEntries(await readFileAsArrayBuffer(file));
+    var sharedStrings = parseSharedStrings(decodeZipText(entries["xl/sharedStrings.xml"]));
+    var sheets = parseWorkbookSheets(decodeZipText(entries["xl/workbook.xml"]), decodeZipText(entries["xl/_rels/workbook.xml.rels"]));
+    var found = {};
+    for (var s = 0; s < sheets.length; s += 1) {
+      var sheet = sheets[s];
+      if (!sheet.path || !entries[sheet.path] || sheet.state !== "visible") { continue; }
+      var spec = planDocsMatchTab(sheet.name);
+      if (!spec) { continue; }
+      found[spec.label] = true;
+      var rows = parseWorksheetRows(decodeZipText(entries[sheet.path]), sharedStrings);
+      state.total += rows.length;
+      planDocsReadOnboardingTab(spec, sheet.name, rows, state);
+    }
+    for (var i = 0; i < PLANDOCS_ONBOARDING_TABS.length; i += 1) {
+      var label = PLANDOCS_ONBOARDING_TABS[i].label;
+      if (!found[label]) { state.notes.push("No " + label + " tab was found in the workbook."); }
+    }
+  }
+
+  /* ---------- PLAN REVIEW DOCUMENT (.docx) ----------
+     A .docx is a zip holding word/document.xml, so the workbook zip reader opens
+     it. The whole body is one long Provisions | Cite | Comments | Requested
+     Changes table: the roman section headings and the lettered parts under them
+     both live inside the first column, and each tick-box choice is its own
+     paragraph in that same cell. So the cells are read paragraph by paragraph
+     with the tick state kept, and only the checked lines of the requested parts
+     are carried out. */
+
+  // Word writes a tick box three different ways depending on the document's age,
+  // so all three are recognised: a legacy form field, a modern content control,
+  // or a plain Wingdings character sitting in the run.
+  function planDocsBoxState(xml, text) {
+    if (/[☑☒]/.test(text)) { return "X"; }
+    if (/[☐]/.test(text)) { return ""; }
+    if (!/<w:checkBox>|<w14:checkbox/.test(xml)) { return null; }
+    if (/<w:checked\s*\/>|<w:checked[^>]*w:val="(?:1|true|on)"|<w14:checked[^>]*w14:val="(?:1|true)"/.test(xml)) { return "X"; }
+    if (/<w:checked|<w14:checked/.test(xml)) { return ""; }
+    return /<w:default[^>]*w:val="1"/.test(xml) ? "X" : "";
+  }
+
+  function planDocsDocxParagraphs(body) {
+    var lines = [];
+    var regex = /<w:p(?:\s[^>]*)?>([\s\S]*?)<\/w:p>/g;
+    var found;
+    while ((found = regex.exec(String(body || ""))) !== null) {
+      var text = [];
+      var textRegex = /<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g;
+      var piece;
+      while ((piece = textRegex.exec(found[1])) !== null) { text.push(xmlDecode(piece[1])); }
+      var line = planDocsClean(text.join(""));
+      var box = planDocsBoxState(found[1], line);
+      line = planDocsClean(line.replace(/[☐☑☒]/g, " "));
+      if (line || box !== null) { lines.push({ text: line, box: box }); }
+    }
+    return lines;
+  }
+
+  function planDocsDocxTables(xml) {
+    var tables = [];
+    var blocks = String(xml || "").split(/<w:tbl(?:\s[^>]*)?>/);
+    for (var b = 1; b < blocks.length; b += 1) {
+      var body = blocks[b].split("</w:tbl>")[0];
+      var rows = [];
+      var rowParts = body.split(/<w:tr(?:\s[^>]*)?>/);
+      for (var r = 1; r < rowParts.length; r += 1) {
+        var rowBody = rowParts[r].split("</w:tr>")[0];
+        var cells = [];
+        var cellParts = rowBody.split(/<w:tc(?:\s[^>]*)?>/);
+        for (var c = 1; c < cellParts.length; c += 1) {
+          var lines = planDocsDocxParagraphs(cellParts[c].split("</w:tc>")[0]);
+          var joined = [];
+          for (var i = 0; i < lines.length; i += 1) {
+            if (lines[i].text) { joined.push(lines[i].text); }
+          }
+          cells.push({ text: joined.join(" "), lines: lines });
+        }
+        if (cells.length) { rows.push(cells); }
+      }
+      if (rows.length) { tables.push(rows); }
+    }
+    return tables;
+  }
+
+  function planDocsCellText(cells, index) {
+    return (cells[index] && cells[index].text) || "";
+  }
+
+  // Which lettered parts of which roman sections the consultant works from.
+  var PLANDOCS_PRD_PARTS = { IV: { A: true }, X: { A: true, B: true, C: true } };
+
+  function planDocsPrdSourceMap(rows, state) {
+    var width = 0;
+    var r;
+    for (r = 0; r < rows.length; r += 1) { width = Math.max(width, rows[r].length); }
+    if (width < 8) { return false; }
+    for (r = 0; r < rows.length; r += 1) {
+      var cells = [];
+      for (var c = 0; c < 8; c += 1) { cells.push(planDocsCellText(rows[r], c)); }
+      if (!planDocsRowHasContent(cells, 0)) { continue; }
+      if (/current\s*source/i.test(cells[0]) || /source mapping/i.test(cells[0])) { continue; }
+      if (/date of last update/i.test(cells[0])) { continue; }
+      state.rows.SRCMAP.push(["Plan Review Document"].concat(cells));
+      state.accepted += 1;
+    }
+    return true;
+  }
+
+  function planDocsPrdContributionTypes(rows, state) {
+    var header = -1;
+    for (var r = 0; r < rows.length && header < 0; r += 1) {
+      if (/^sources?$/i.test(planDocsCellText(rows[r], 0))) {
+        for (var c = 1; c < rows[r].length; c += 1) {
+          if (/active or frozen/i.test(planDocsCellText(rows[r], c))) { header = r; break; }
+        }
+      }
+    }
+    if (header < 0) { return false; }
+    for (var i = header + 1; i < rows.length; i += 1) {
+      var name = planDocsCellText(rows[i], 0);
+      if (!name) { continue; }
+      var ticked = false;
+      for (var k = 1; k < rows[i].length; k += 1) {
+        var lines = rows[i][k].lines;
+        for (var n = 0; n < lines.length; n += 1) {
+          if (lines[n].box === "X") { ticked = true; }
+        }
+      }
+      if (!ticked) { continue; }
+      state.rows.PLANFACTS.push(["Plan Review Document", "Contribution Types", "",
+        name.replace(/:$/, ""), planDocsCellText(rows[i], rows[i].length - 1), "", ""]);
+      state.accepted += 1;
+    }
+    return true;
+  }
+
+  // Account Number and Effective Date sit in a label cell with the value in the
+  // next cell along, so the row is walked rightward rather than read by position.
+  function planDocsPrdAccountFacts(tables, state) {
+    var wanted = [
+      { label: /^account number/i, name: "Account Number" },
+      { label: /^effective date$/i, name: "Effective Date" }
+    ];
+    var taken = {};
+    for (var t = 0; t < tables.length; t += 1) {
+      for (var r = 0; r < tables[t].length; r += 1) {
+        var cells = tables[t][r];
+        for (var c = 0; c < cells.length; c += 1) {
+          var text = planDocsCellText(cells, c);
+          for (var w = 0; w < wanted.length; w += 1) {
+            if (taken[wanted[w].name] || !wanted[w].label.test(text)) { continue; }
+            for (var v = c + 1; v < cells.length; v += 1) {
+              var value = planDocsCellText(cells, v);
+              if (!value || /^account information$/i.test(value)) { continue; }
+              taken[wanted[w].name] = true;
+              state.rows.PLANFACTS.push(["Plan Review Document", "Account Information", "",
+                wanted[w].name, value, "", ""]);
+              state.accepted += 1;
+              break;
+            }
+          }
+        }
+      }
+    }
+    for (var m = 0; m < wanted.length; m += 1) {
+      if (!taken[wanted[m].name]) { state.notes.push("No " + wanted[m].name + " was found in the Plan Review Document."); }
+    }
+  }
+
+  async function planDocsReadPrd(file, state) {
+    var entries = await readZipEntries(await readFileAsArrayBuffer(file));
+    var xml = decodeZipText(entries["word/document.xml"]);
+    if (!xml) { throw new Error(file.name + ": no document body was found inside the file."); }
+    var tables = planDocsDocxTables(xml);
+    planDocsPrdAccountFacts(tables, state);
+    var section = "";
+    var sectionKey = "";
+    var part = "";
+    var partKey = "";
+    for (var t = 0; t < tables.length; t += 1) {
+      var rows = tables[t];
+      state.total += rows.length;
+      if (planDocsPrdSourceMap(rows, state)) { continue; }
+      if (planDocsPrdContributionTypes(rows, state)) { continue; }
+      for (var r = 0; r < rows.length; r += 1) {
+        var cells = rows[r];
+        if (!cells.length) { continue; }
+        var lines = cells[0].lines;
+        for (var i = 0; i < lines.length; i += 1) {
+          var line = lines[i];
+          var roman = /^([IVXL]+)\.\s+(\S.*)$/.exec(line.text);
+          if (roman) {
+            sectionKey = roman[1].toUpperCase();
+            section = line.text;
+            part = "";
+            partKey = "";
+            continue;
+          }
+          var letter = /^([A-Z])\.\s+(\S.*)$/.exec(line.text);
+          if (letter && line.box === null) {
+            partKey = letter[1];
+            part = line.text;
+            continue;
+          }
+          if (line.box !== "X" || !line.text) { continue; }
+          if (!PLANDOCS_PRD_PARTS[sectionKey] || !PLANDOCS_PRD_PARTS[sectionKey][partKey]) { continue; }
+          state.rows.PROVISIONS.push([
+            "Plan Review Document", section, "", part, line.text,
+            planDocsCellText(cells, 1), planDocsCellText(cells, 3), "", "Checked",
+            planDocsCellText(cells, 2)
+          ]);
+          state.accepted += 1;
+        }
+      }
+    }
+  }
+
+  /* ---------- MERGER COMPARISON DOCUMENT (.pdf) ----------
+     Five columns with a repeating red header. The header text on each page gives
+     the column positions, and a new provision block starts whenever the narrow
+     stub column at the left picks up text. Only the stub, the surviving plan and
+     the comments are carried out; the merging plan is the one going away.
+
+     What counts as an answer differs by provision. Some rows are a plain value,
+     some are a tick list, and on the eligibility and vesting rows the reviewer's
+     answers are the ones typed in blue over the black template text. PDF text
+     carries no colour of its own, so the page's drawing instructions are replayed
+     to work out the fill colour in force for each run and that colour sequence is
+     lined up with the text run by run. If the two do not line up character for
+     character the colour is thrown away and the whole row is kept instead, which
+     is noisier but never silently drops an answer. */
+
+  var PLANDOCS_MERGER_HEADERS = [
+    { key: "surviving", test: /surviving plan/i },
+    { key: "merging", test: /merging plan/i },
+    { key: "comments", test: /^comments$/i },
+    { key: "requested", test: /requested changes/i }
+  ];
+
+  // keep: "all" carries the cell as-is, "checked" keeps only lines with a ticked
+  // box, "blue" only lines the reviewer typed, "blueOrChecked" either.
+  var PLANDOCS_MERGER_ROWS = [
+    { test: /^account number/i, keep: "all" },
+    { test: /^plan name/i, keep: "all" },
+    { test: /contribution types?\b/i, keep: "checked" },
+    { test: /^eligibility/i, keep: "blue" },
+    { test: /^compensation/i, keep: "checked" },
+    { test: /automatic elective deferrals/i, keep: "checked" },
+    { test: /roth elective deferrals/i, keep: "checked" },
+    { test: /voluntary after[\s-]*tax/i, keep: "checked" },
+    { test: /^vesting/i, keep: "blueOrChecked" },
+    { test: /^loans/i, keep: "all" },
+    { test: /source mapping/i, keep: "all" }
+  ];
+
+  function planDocsMergerWanted(provision) {
+    var text = planDocsClean(provision);
+    for (var i = 0; i < PLANDOCS_MERGER_ROWS.length; i += 1) {
+      if (PLANDOCS_MERGER_ROWS[i].test.test(text)) { return PLANDOCS_MERGER_ROWS[i]; }
+    }
+    return null;
+  }
+
+  function planDocsIsBlue(r, g, b) {
+    return b > 90 && b - r > 40 && b - g > 30;
+  }
+
+  // Replays the page's drawing instructions and returns the characters in the
+  // order they are painted, each carrying the fill colour in force at the time.
+  async function planDocsMergerColourRun(page, pdfjsLib) {
+    var ops;
+    try { ops = await page.getOperatorList(); } catch (err) { return null; }
+    if (!ops || !pdfjsLib.OPS) { return null; }
+    var OPS = pdfjsLib.OPS;
+    var marks = [];
+    var blue = false;
+    for (var i = 0; i < ops.fnArray.length; i += 1) {
+      var fn = ops.fnArray[i];
+      var args = ops.argsArray[i] || [];
+      if (fn === OPS.setFillRGBColor) {
+        blue = planDocsIsBlue(args[0], args[1], args[2]);
+      } else if (fn === OPS.setFillGray) {
+        blue = false;
+      } else if (fn === OPS.setFillCMYKColor) {
+        blue = planDocsIsBlue(255 * (1 - Math.min(1, args[0] + args[3])),
+          255 * (1 - Math.min(1, args[1] + args[3])),
+          255 * (1 - Math.min(1, args[2] + args[3])));
+      } else if (fn === OPS.showText || fn === OPS.showSpacedText) {
+        var glyphs = args[0] || [];
+        for (var g = 0; g < glyphs.length; g += 1) {
+          var glyph = glyphs[g];
+          if (!glyph || typeof glyph !== "object") { continue; }
+          var unicode = glyph.unicode === undefined ? "" : String(glyph.unicode);
+          for (var u = 0; u < unicode.length; u += 1) {
+            if (!/\s/.test(unicode[u])) { marks.push({ ch: unicode[u], blue: blue }); }
+          }
+        }
+      }
+    }
+    return marks.length ? marks : null;
+  }
+
+  async function planDocsMergerPageItems(page, pdfjsLib) {
+    var viewport = page.getViewport({ scale: 1 });
+    var content = await page.getTextContent();
+    var marks = await planDocsMergerColourRun(page, pdfjsLib);
+    var kept = [];
+    var i;
+    // The two streams do not always agree: pdf.js drops glyphs it considers
+    // unpaintable (anything clipped off the page edge, for one) from the text it
+    // hands back. So the reader walks the colour stream looking for the character
+    // it is holding rather than assuming the two run in lockstep, and only gives
+    // up on colour for the page if it loses the thread badly.
+    var coloured = !!marks;
+    var cursor = 0;
+    for (i = 0; i < content.items.length && coloured; i += 1) {
+      var item = content.items[i];
+      if (!item || typeof item.str !== "string") { continue; }
+      var chars = item.str.replace(/\s/g, "");
+      var hits = 0;
+      for (var c = 0; c < chars.length; c += 1) {
+        var skipped = 0;
+        while (cursor < marks.length && marks[cursor].ch !== chars[c] && skipped < 400) {
+          cursor += 1;
+          skipped += 1;
+        }
+        if (cursor >= marks.length || marks[cursor].ch !== chars[c]) { coloured = false; break; }
+        if (marks[cursor].blue) { hits += 1; }
+        cursor += 1;
+      }
+      if (!coloured) { break; }
+      if (!item.str.trim()) { continue; }
+      var transformed = pdfjsLib.Util.transform(viewport.transform, item.transform);
+      // Some authors tick boxes with a Wingdings character instead of a form
+      // widget, so the glyph is treated as a tick and dropped from the text.
+      var str = item.str.trim();
+      var ticked = /[☑☒]/.test(str);
+      str = str.replace(/[☐☑☒]/g, " ").trim();
+      if (str || ticked) {
+        kept.push({
+          x: transformed[4], y: transformed[5], str: str,
+          blue: chars.length > 0 && hits * 2 > chars.length, box: ticked
+        });
+      }
+    }
+    if (!coloured) {
+      kept = [];
+      for (i = 0; i < content.items.length; i += 1) {
+        var plain = content.items[i];
+        if (!plain || typeof plain.str !== "string" || !plain.str.trim()) { continue; }
+        var flat = pdfjsLib.Util.transform(viewport.transform, plain.transform);
+        var plainStr = plain.str.trim();
+        var plainTick = /[☑☒]/.test(plainStr);
+        plainStr = plainStr.replace(/[☐☑☒]/g, " ").trim();
+        if (plainStr || plainTick) {
+          kept.push({ x: flat[4], y: flat[5], str: plainStr, blue: false, box: plainTick });
+        }
+      }
+    }
+    var annotations = [];
+    try { annotations = await page.getAnnotations(); } catch (err) { annotations = []; }
+    for (i = 0; i < annotations.length; i += 1) {
+      var note = annotations[i];
+      if (!note || note.checkBox !== true || note.fieldValue === undefined) { continue; }
+      var value = String(note.fieldValue || "");
+      if (!value || /^off$/i.test(value)) { continue; }
+      // A tick box sits on the same baseline as its label, which is the bottom
+      // edge of its rectangle, so that edge is what lines it up with the text.
+      var rect = note.rect || [0, 0, 0, 0];
+      kept.push({ x: rect[0], y: viewport.height - rect[1], str: "", blue: false, box: true });
+    }
+    kept.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+    return { items: kept, coloured: coloured };
+  }
+
+  function planDocsMergerColumns(items) {
+    var anchors = {};
+    var i;
+    var h;
+    for (i = 0; i < items.length; i += 1) {
+      for (h = 0; h < PLANDOCS_MERGER_HEADERS.length; h += 1) {
+        var spec = PLANDOCS_MERGER_HEADERS[h];
+        if (anchors[spec.key] === undefined && spec.test.test(items[i].str)) {
+          anchors[spec.key] = items[i].x;
+        }
+      }
+    }
+    if (anchors.surviving === undefined || anchors.merging === undefined) { return null; }
+    return anchors;
+  }
+
+  function planDocsMergerColumnFor(x, anchors) {
+    var keys = ["surviving", "merging", "comments", "requested"];
+    var best = "provision";
+    var bestGap = Infinity;
+    for (var i = 0; i < keys.length; i += 1) {
+      if (anchors[keys[i]] === undefined) { continue; }
+      var gap = Math.abs(x - anchors[keys[i]]);
+      if (gap < bestGap) { bestGap = gap; best = keys[i]; }
+    }
+    // Anything sitting clearly to the left of the first data column is the
+    // provision stub that names the row.
+    if (x < anchors.surviving - 12) { return "provision"; }
+    return best;
+  }
+
+  // Rebuilds the visual lines inside one cell so a ticked box or a run of blue
+  // text can pull its own line out and leave the template text behind.
+  function planDocsMergerKeep(tokens, mode) {
+    if (!tokens.length) { return ""; }
+    var text = [];
+    var i;
+    if (mode === "all") {
+      for (i = 0; i < tokens.length; i += 1) {
+        if (tokens[i].str) { text.push(tokens[i].str); }
+      }
+      return planDocsClean(text.join(" "));
+    }
+    var lines = [];
+    var current = null;
+    for (i = 0; i < tokens.length; i += 1) {
+      if (!current || Math.abs(tokens[i].y - current.y) > 5) {
+        current = { y: tokens[i].y, tokens: [] };
+        lines.push(current);
+      }
+      current.tokens.push(tokens[i]);
+    }
+    var out = [];
+    for (var l = 0; l < lines.length; l += 1) {
+      var ticked = false;
+      var blue = false;
+      var parts = [];
+      for (var t = 0; t < lines[l].tokens.length; t += 1) {
+        var token = lines[l].tokens[t];
+        if (token.box) { ticked = true; }
+        if (token.blue) { blue = true; }
+        if (token.str) { parts.push(token.str); }
+      }
+      if (!parts.length) { continue; }
+      if ((mode === "checked" && ticked) ||
+          (mode === "blue" && blue) ||
+          (mode === "blueOrChecked" && (ticked || blue))) {
+        out.push(parts.join(" "));
+      }
+    }
+    return planDocsClean(out.join(" | "));
+  }
+
+  function planDocsMergerFlush(block, pageNumber, coloured, state) {
+    if (!block || !block.provision.length) { return; }
+    var provision = planDocsClean(block.provision.map(function (token) { return token.str; }).join(" "));
+    var spec = planDocsMergerWanted(provision);
+    if (!spec) { return; }
+    var mode = spec.keep;
+    if (!coloured && (mode === "blue" || mode === "blueOrChecked")) { mode = "all"; }
+    var row = [String(pageNumber), provision,
+      planDocsMergerKeep(block.surviving, mode),
+      planDocsMergerKeep(block.comments, "all")];
+    if (!planDocsRowHasContent(row, 2)) { return; }
+    state.rows.MERGERCMP.push(row);
+    state.accepted += 1;
+  }
+
+  async function planDocsReadMerger(file, state) {
+    var pdfjsLib = await loadPdfJsLibrary();
+    var pdf = await pdfjsLib.getDocument({ data: await readFileAsArrayBuffer(file), disableWorker: true, useSystemFonts: true }).promise;
+    var plainPages = [];
+    for (var pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      var page = await pdf.getPage(pageNumber);
+      var read = await planDocsMergerPageItems(page, pdfjsLib);
+      var items = read.items;
+      state.total += items.length;
+      var anchors = planDocsMergerColumns(items);
+      if (!anchors) { page.cleanup(); continue; }
+      if (!read.coloured) { plainPages.push(pageNumber); }
+      var block = null;
+      for (var i = 0; i < items.length; i += 1) {
+        var text = items[i].str;
+        if (/docusign envelope id/i.test(text)) { continue; }
+        var key = planDocsMergerColumnFor(items[i].x, anchors);
+        if (key === "provision") {
+          if (/surviving plan|merging plan/i.test(text)) { continue; }
+          if (!block || block.hasData) {
+            planDocsMergerFlush(block, pageNumber, read.coloured, state);
+            block = { provision: [], surviving: [], merging: [], comments: [], requested: [], hasData: false };
+          }
+          block.provision.push(items[i]);
+          continue;
+        }
+        if (!block) { block = { provision: [], surviving: [], merging: [], comments: [], requested: [], hasData: false }; }
+        block[key].push(items[i]);
+        block.hasData = true;
+      }
+      planDocsMergerFlush(block, pageNumber, read.coloured, state);
+      page.cleanup();
+    }
+    if (plainPages.length) {
+      state.notes.push("Text colour could not be read on page(s) " + plainPages.join(", ") +
+        ", so the eligibility and vesting rows there carry the whole cell rather than only the reviewer's blue answers.");
+    }
+  }
+
+  async function parsePlanDocuments(source, files, runId) {
+    var state = {
+      rows: { PLANFACTS: [], SRCMAP: [], PROVISIONS: [], MERGERCMP: [], CHECKLIST: [] },
+      notes: [],
+      total: 0,
+      accepted: 0
+    };
+    var errors = [];
+    var ignored = [];
+    var read = [];
+
+    for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      if (/^~\$/.test(fileName)) { continue; }
+      setLoadingState({
+        active: true, complete: false,
+        percent: 5 + ((fileIndex / files.length) * 90),
+        title: "Reading Documents",
+        note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")."
+      });
+      try {
+        if (/\.(xlsx|xlsm)$/i.test(fileName)) {
+          await planDocsReadOnboarding(file, state);
+          read.push("Onboarding Package");
+        } else if (/\.docx$/i.test(fileName)) {
+          await planDocsReadPrd(file, state);
+          read.push("Plan Review Document");
+        } else if (/\.pdf$/i.test(fileName)) {
+          await planDocsReadMerger(file, state);
+          read.push("Merger Comparison");
+        } else {
+          ignored.push(fileName);
+        }
+      } catch (err) {
+        errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
+      }
+    }
+
+    var grouped = {};
+    var layoutsByReport = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var code;
+    for (code in state.rows) {
+      if (state.rows.hasOwnProperty(code) && state.rows[code].length) {
+        grouped[code] = state.rows[code];
+        layoutsByReport[code] = PLANDOCS_LAYOUTS[code];
+        foundReports.push(code);
+      }
+    }
+
+    var note = read.length ? "Read the " + read.join(" and the ") + "." : "No plan document was recognized in the drop.";
+    if (ignored.length) {
+      note += " Ignored: " + ignored.join(", ") + ".";
+      discardReasons.push({ type: "message", label: "Ignored: " + ignored.join(", ") + "." });
+    }
+    for (var n = 0; n < state.notes.length; n += 1) {
+      discardReasons.push({ type: "message", label: state.notes[n] });
+    }
+
+    return {
+      totalLines: state.total,
+      acceptedLines: state.accepted,
+      discardedLines: Math.max(0, state.total - state.accepted),
+      foundReports: foundReports,
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      layoutsByReport: layoutsByReport,
+      errors: errors,
+      loadingNote: note
+    };
+  }
+
+  function baseRemitBlank(value) {
+    return !value || !/[^0\s]/.test(value);
+  }
+
+  function baseRemitCheckDate(value) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value) || /^\d{8}$/.test(value)) { return true; }
+    return /^\d{2}\/\d{2}\/\d{4}$/.test(value);
+  }
+
+  function baseRemitCheckField(field, raw) {
+    var value = trimValue(raw);
+    if (baseRemitBlank(value)) {
+      if (field.fatal) { return { severity: "FATAL", problem: field.name + " is required; the record will not load without it." }; }
+      if (field.req) { return { severity: "WARNING", problem: field.name + " is marked required on the layout sheet but is blank." }; }
+      return null;
+    }
+    if (field.type === "ssn") {
+      if (!/^\d{9}$/.test(value.replace(/-/g, ""))) {
+        return { severity: "FATAL", problem: "Social Security Number must be nine digits, with or without dashes." };
+      }
+      return null;
+    }
+    if (field.type === "date") {
+      if (!baseRemitCheckDate(value)) {
+        return { severity: "ERROR", problem: field.name + " is not a valid date (expected YYYY-MM-DD, YYYYMMDD or MM/DD/YYYY)." };
+      }
+      return null;
+    }
+    if (field.type === "num") {
+      if (!/^-?\d+(\.\d+)?-?$/.test(value)) {
+        return { severity: "ERROR", problem: field.name + " must contain only digits, an optional decimal point and an optional sign." };
+      }
+      return null;
+    }
+    if (field.type === "code") {
+      if (field.values.indexOf(value.toUpperCase()) === -1) {
+        return { severity: "ERROR", problem: field.name + " must be one of: " + field.values.join(", ") + "." };
+      }
+      return null;
+    }
+    if (field.type === "account") {
+      if (!/^[A-Za-z]{2}\d{10,11}$/.test(value)) {
+        return { severity: "ERROR", problem: "Account Number must be two letters followed by ten or eleven digits." };
+      }
+      return null;
+    }
+    if (field.type === "division") {
+      if (value.length !== 4) {
+        return { severity: "ERROR", problem: "Employee Division/Location Code must be exactly four characters." };
+      }
+      return null;
+    }
+    return null;
+  }
+
+  function baseRemitPickTemplate(lines, fileName) {
+    var counts = {};
+    var i;
+    for (i = 0; i < lines.length; i += 1) { counts[lines[i].length] = (counts[lines[i].length] || 0) + 1; }
+    var best = null;
+    for (i = 0; i < BASEREMIT_TEMPLATES.length; i += 1) {
+      var template = BASEREMIT_TEMPLATES[i];
+      var hits = counts[template.length] || 0;
+      if (hits && (!best || hits > best.hits)) { best = { template: template, hits: hits }; }
+    }
+    if (best) { return best.template; }
+    for (i = 0; i < BASEREMIT_TEMPLATES.length; i += 1) {
+      if (BASEREMIT_TEMPLATES[i].namePattern.test(fileName)) { return BASEREMIT_TEMPLATES[i]; }
+    }
+    return null;
+  }
+
+  function baseRemitCheckLine(template, line, lineNumber, issues) {
+    var fields = template.fields;
+    var ssnField = fields[1];
+    var ssn = trimValue(line.substr(ssnField.start - 1, ssnField.len));
+    var counts = { FATAL: 0, ERROR: 0, WARNING: 0 };
+
+    function add(severity, field, problem, value) {
+      counts[severity] += 1;
+      issues.push([String(lineNumber), severity, ssn, field ? field.name : "Whole record",
+        field ? (field.start + "-" + (field.start + field.len - 1)) : ("1-" + line.length),
+        problem, value || ""]);
+    }
+
+    if (line.length !== template.length) {
+      add("ERROR", null, "Record is " + line.length + " characters; the " + template.label +
+        " layout is " + template.length + ".", "");
+    }
+
+    var pairs = {};
+    for (var i = 0; i < fields.length; i += 1) {
+      var field = fields[i];
+      var raw = line.substr(field.start - 1, field.len);
+      var value = trimValue(raw);
+      var problem = baseRemitCheckField(field, raw);
+      if (problem) { add(problem.severity, field, problem.problem, value); }
+      if (field.pair && !baseRemitBlank(value)) {
+        if (!pairs[field.pair]) { pairs[field.pair] = {}; }
+        pairs[field.pair][field.side] = field;
+      }
+    }
+    for (var name in pairs) {
+      if (pairs.hasOwnProperty(name) && pairs[name].amount && pairs[name].percent) {
+        add("ERROR", pairs[name].amount, name + " has both a dollar amount and a percent; the layout allows one or the other.", "");
+      }
+    }
+    return counts;
+  }
+
+  async function parseBaseRemitTemplates(source, files, runId) {
+    var results = [];
+    var issues = [];
+    var errors = [];
+    var ignored = [];
+    var total = 0;
+    var accepted = 0;
+    var failed = 0;
+
+    for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({
+        active: true, complete: false,
+        percent: 5 + ((fileIndex / files.length) * 90),
+        title: "Validating Template",
+        note: "Checking " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")."
+      });
+      try {
+        var text = await readFileAsText(file);
+        var lines = text.split(/\r\n|\r|\n/).filter(function (line) { return trimValue(line) !== ""; });
+        var template = baseRemitPickTemplate(lines, fileName);
+        if (!template) {
+          ignored.push(fileName);
+          continue;
+        }
+        var tally = { FATAL: 0, ERROR: 0, WARNING: 0 };
+        for (var i = 0; i < lines.length; i += 1) {
+          total += 1;
+          var counts = baseRemitCheckLine(template, lines[i], i + 1, issues);
+          tally.FATAL += counts.FATAL;
+          tally.ERROR += counts.ERROR;
+          tally.WARNING += counts.WARNING;
+          if (!counts.FATAL && !counts.ERROR) { accepted += 1; }
+        }
+        var pass = !tally.FATAL && !tally.ERROR;
+        if (!pass) { failed += 1; }
+        results.push([fileName, template.label, String(template.length), String(lines.length),
+          String(tally.FATAL), String(tally.ERROR), String(tally.WARNING), pass ? "PASS" : "FAIL"]);
+      } catch (err) {
+        errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
+      }
+    }
+
+    var grouped = {};
+    var layoutsByReport = {};
+    var foundReports = [];
+    if (results.length) {
+      grouped.RESULT = results;
+      layoutsByReport.RESULT = BASEREMIT_LAYOUTS.RESULT;
+      foundReports.push("RESULT");
+    }
+    if (issues.length) {
+      grouped.ISSUES = issues;
+      layoutsByReport.ISSUES = BASEREMIT_LAYOUTS.ISSUES;
+      foundReports.push("ISSUES");
+    }
+
+    var discardReasons = [];
+    var note;
+    if (!results.length) {
+      note = "No Base Data or Remittance file was recognized in the drop.";
+    } else if (failed) {
+      note = "FAIL - " + failed + " of " + results.length + " file(s) have problems. See Problems Found.";
+    } else {
+      note = "PASS - every record matches the template.";
+    }
+    if (ignored.length) {
+      discardReasons.push({ type: "message", label: "Not a recognized template: " + ignored.join(", ") + "." });
+    }
+
+    return {
+      totalLines: total,
+      acceptedLines: accepted,
+      discardedLines: Math.max(0, total - accepted),
+      foundReports: foundReports,
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      layoutsByReport: layoutsByReport,
+      errors: errors,
+      loadingNote: note
+    };
+  }
+
+  var JOHN_HANCOCK_ADMIN_SSN_KEYS = ["ssn", "socialsecuritynumber"];
+  var JOHN_HANCOCK_ADMIN_DECIMALS = /(balance|contributions|rollovers|earnings|loans|repay|transfers|withdrawals|forfeitures|fees|excess|activity|amount|shares|percent)/;
+
+  async function parseJohnHancockAdminReport(file) {
+    var rows = splitDelimitedText(await readFileAsText(file));
+    if (!rows.length) {
+      throw new Error(file.name + " is empty.");
+    }
+    var headerIndex = detectPrincipalHeaderRow(rows);
+    if (headerIndex === -1) {
+      throw new Error(file.name + ": could not find the header row.");
+    }
+    var columns = buildHeaderColumns(rows[headerIndex], JOHN_HANCOCK_ADMIN_SSN_KEYS, JOHN_HANCOCK_ADMIN_DECIMALS, null);
+    var outRows = [];
+    var cursor;
+    for (cursor = headerIndex + 1; cursor < rows.length; cursor += 1) {
+      var built = rowFromColumns(rows[cursor], columns);
+      if (!trimValue(built.join(""))) {
+        continue;
+      }
+      outRows.push(built);
+    }
+    return { layout: columnsToLayout(columns), rows: outRows };
+  }
+
+  async function parseJohnHancockFileSet(source, files, runId) {
+    var grouped = {};
+    var layoutsByReport = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var errors = [];
+    var totalLines = 0;
+    var acceptedLines = 0;
+    var discardedLines = 0;
+    var unmatched = [];
+    var fileIndex;
+
+    for (fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({ active: true, complete: false, percent: 5 + ((fileIndex / files.length) * 90), title: "Parsing Files", note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")." });
+
+      if (JOHN_HANCOCK_ADMIN_PATTERN.test(fileName)) {
+        if (!/\.csv$/i.test(fileName)) {
+          discardReasons.push({ type: "message", label: fileName + " is the Administrative Report in Excel form. Save it as .csv and drop it again to read it." });
+          continue;
+        }
+        try {
+          var admin = await parseJohnHancockAdminReport(file);
+          grouped.ADMIN = admin.rows;
+          layoutsByReport.ADMIN = admin.layout;
+          foundReports.push("ADMIN");
+          totalLines += admin.rows.length;
+          acceptedLines += admin.rows.length;
+        } catch (err) {
+          errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
+        }
+        continue;
+      }
+
+      var code = fileSetCodeForName(JOHN_HANCOCK_FILE_SET, fileName);
+      if (!code) {
+        unmatched.push(fileName);
+        continue;
+      }
+
+      if (code === "BD") {
+        if (!/\.xlsx$/i.test(fileName)) {
+          discardReasons.push({ type: "message", label: fileName + " is a legacy .xls beneficiary file. Save it as .xlsx or .csv and drop it again to read it." });
+          continue;
+        }
+      }
+
+      try {
+        if (code === "BD" || code === "MV") {
+          var positional = code === "MV" ? JOHN_HANCOCK_MV_LAYOUT : JOHN_HANCOCK_BD_LAYOUT;
+          var cells = code === "MV" ? splitDelimitedText(await readFileAsText(file)) : await readFirstSheetRows(file);
+          var startRow = 0;
+          if (cells.length && /^(account|full)/i.test(trimValue(cells[0][0]))) {
+            startRow = 1;
+          }
+          var mvColumns = [];
+          var p;
+          for (p = 0; p < positional.length; p += 1) {
+            mvColumns.push({
+              index: p,
+              header: positional[p].header,
+              isSsn: /ssn/i.test(positional[p].header),
+              type: positional[p].type,
+              decimalPlaces: positional[p].decimalPlaces
+            });
+          }
+          var outRows = [];
+          var r;
+          for (r = startRow; r < cells.length; r += 1) {
+            totalLines += 1;
+            var built = rowFromColumns(cells[r], mvColumns);
+            if (!trimValue(built.join(""))) {
+              discardedLines += 1;
+              continue;
+            }
+            outRows.push(built);
+            acceptedLines += 1;
+          }
+          grouped[code] = outRows;
+          layoutsByReport[code] = positional;
+          foundReports.push(code);
+          continue;
+        }
+
+        var fields = JOHN_HANCOCK_SDF_LAYOUTS[code];
+        var text = await readFileAsText(file);
+        var lines = String(text).split(/\r\n|\n|\r/);
+        var delimited = /\.csv$/i.test(fileName);
+        var rowsOut = [];
+        var lineIndex;
+        for (lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+          var line = lines[lineIndex];
+          if (!trimValue(line)) { continue; }
+          totalLines += 1;
+          var row = delimited
+            ? rowFromColumns(splitDelimitedLine(line), fields.map(function (field, index) {
+              return { index: index, header: field.header, isSsn: field.header === "SSN", type: field.type };
+            }))
+            : rowFromFixedLayout(line, fields);
+          if (!trimValue(row[0])) {
+            discardedLines += 1;
+            continue;
+          }
+          rowsOut.push(row);
+          acceptedLines += 1;
+        }
+        grouped[code] = rowsOut;
+        layoutsByReport[code] = fields.map(function (field) {
+          return { header: field.header, type: field.type };
+        });
+        foundReports.push(code);
+      } catch (err) {
+        errors.push(err && err.message ? err.message : ("Unable to read " + fileName + "."));
+      }
+    }
+
+    var missing = [];
+    var m;
+    for (m = 0; m < JOHN_HANCOCK_FILE_SET.members.length; m += 1) {
+      if (foundReports.indexOf(JOHN_HANCOCK_FILE_SET.members[m].code) === -1) {
+        missing.push(JOHN_HANCOCK_FILE_SET.members[m].code);
+      }
+    }
+    var note = "Read " + foundReports.length + " John Hancock file(s).";
+    note += missing.length ? " Still outstanding: " + missing.join(", ") + "." : " The set is complete.";
+    if (unmatched.length) {
+      note += " Ignored: " + unmatched.join(", ") + ".";
+      discardReasons.push({ type: "message", label: "Ignored: " + unmatched.join(", ") + "." });
+    }
+
+    return {
+      totalLines: totalLines,
+      acceptedLines: acceptedLines,
+      discardedLines: discardedLines,
+      foundReports: foundReports.sort(),
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      layoutsByReport: layoutsByReport,
+      errors: errors,
+      loadingNote: note
+    };
+  }
+
+  async function readFirstSheetRows(file) {
+    var entries = await readZipEntries(await readFileAsArrayBuffer(file));
+    var sharedStrings = parseSharedStrings(decodeZipText(entries["xl/sharedStrings.xml"]));
+    var sheets = parseWorkbookSheets(decodeZipText(entries["xl/workbook.xml"]), decodeZipText(entries["xl/_rels/workbook.xml.rels"]));
+    if (!sheets.length || !entries[sheets[0].path]) {
+      throw new Error(file.name + ": no readable worksheet was found.");
+    }
+    return parseWorksheetRows(decodeZipText(entries[sheets[0].path]), sharedStrings);
   }
 
   async function parseJohnHancockSource(source, files, runId) {
-    var workbookFiles = files.filter(function (file) {
-      return !!file && file.name && !/^~\$/i.test(file.name) && /\.(xlsx|xlsm)$/i.test(file.name);
+    var discontinuanceFiles = files.filter(function (file) {
+      return !!file && file.name && !/^~\$/i.test(file.name) && /\.(xlsx|xlsm)$/i.test(file.name)
+        && !fileSetCodeForName(JOHN_HANCOCK_FILE_SET, file.name)
+        && !JOHN_HANCOCK_ADMIN_PATTERN.test(file.name);
     });
-    if (!workbookFiles.length && fileSetFilesPresent(JOHN_HANCOCK_FILE_SET, files)) {
-      return buildFileSetIntakeResult(source, files, JOHN_HANCOCK_FILE_SET);
+    if (!discontinuanceFiles.length) {
+      return parseJohnHancockFileSet(source, files, runId);
     }
     return parseJohnHancockWorkbook(source, files, runId);
   }
@@ -19984,12 +22826,13 @@ body .breakdown-row{
       return null;
     }
     rule = SUMMARY_RULES[source.key];
-    if (!rule || !layoutsByReport || !layoutsByReport[rule.reportCode]) {
+    var activeCode = resolveRuleReportCode(rule, layoutsByReport, null);
+    if (!activeCode) {
       return null;
     }
-    layouts = layoutsByReport[rule.reportCode];
+    layouts = layoutsByReport[activeCode];
     return {
-      reportCode: rule.reportCode,
+      reportCode: activeCode,
       participantIndex: getHeaderIndex(layouts, rule.participantHeaders || []),
       sourceIndex: getHeaderIndex(layouts, rule.sourceHeaders || []),
       fundIndex: getHeaderIndex(layouts, rule.fundHeaders || []),
@@ -20424,12 +23267,13 @@ body .breakdown-row{
       sourceTotals: [],
       fundTotals: []
     };
-    if (source.supportsBreakdown === false || !rule || !result.grouped[rule.reportCode] || !result.layoutsByReport[rule.reportCode]) {
+    var activeCode = resolveRuleReportCode(rule, result.layoutsByReport, result.grouped);
+    if (source.supportsBreakdown === false || !activeCode) {
       return empty;
     }
 
-    var layouts = result.layoutsByReport[rule.reportCode];
-    var rows = result.grouped[rule.reportCode];
+    var layouts = result.layoutsByReport[activeCode];
+    var rows = result.grouped[activeCode];
     var participantIndex = getHeaderIndex(layouts, rule.participantHeaders || []);
     var sourceIndex = getHeaderIndex(layouts, rule.sourceHeaders || []);
     var fundIndex = getHeaderIndex(layouts, rule.fundHeaders || []);
@@ -21129,12 +23973,13 @@ body .breakdown-row{
       return null;
     }
     var rule = SUMMARY_RULES[source.key];
-    if (source.supportsBreakdown === false || !rule || !result.grouped[rule.reportCode] || !result.layoutsByReport[rule.reportCode]) {
+    var activeCode = resolveRuleReportCode(rule, result.layoutsByReport, result.grouped);
+    if (source.supportsBreakdown === false || !activeCode) {
       return null;
     }
 
-    var layouts = result.layoutsByReport[rule.reportCode];
-    var rows = result.grouped[rule.reportCode];
+    var layouts = result.layoutsByReport[activeCode];
+    var rows = result.grouped[activeCode];
     var participantIndex = getHeaderIndex(layouts, rule.participantHeaders || []);
     var sourceIndex = getHeaderIndex(layouts, rule.sourceHeaders || []);
     var fundIndex = getHeaderIndex(layouts, rule.fundHeaders || []);
@@ -21300,8 +24145,9 @@ body .breakdown-row{
       return null;
     }
 
-    layouts = spec.reportCode ? result.layoutsByReport[spec.reportCode] : null;
-    rows = spec.reportCode ? result.grouped[spec.reportCode] : null;
+    var electionCode = resolveRuleReportCode(spec, result.layoutsByReport, result.grouped);
+    layouts = electionCode ? result.layoutsByReport[electionCode] : null;
+    rows = electionCode ? result.grouped[electionCode] : null;
 
     exportRows.push("<row r=\"1\">" +
       textCell("A1", "Case Number", 6) +
@@ -21364,8 +24210,9 @@ body .breakdown-row{
       return null;
     }
 
-    layouts = spec.reportCode ? result.layoutsByReport[spec.reportCode] : null;
-    rows = spec.reportCode ? result.grouped[spec.reportCode] : null;
+    var balanceCode = resolveRuleReportCode(spec, result.layoutsByReport, result.grouped);
+    layouts = balanceCode ? result.layoutsByReport[balanceCode] : null;
+    rows = balanceCode ? result.grouped[balanceCode] : null;
 
     exportRows.push("<row r=\"1\">" +
       textCell("A1", "Case Number", 6) +
@@ -21434,6 +24281,103 @@ body .breakdown-row{
       return currentType;
     }
     return "text";
+  }
+
+  var AUTO_SUMMARY_SPECS = [
+    {
+      name: "Deferrals",
+      headerContains: ["Deferral", "Deferr", "DFRL", "Pre-tax", "Pretax", "Before Tax", "After Tax", "Roth Percentage", "Roth Rate", "Roth Amount", "Catch-up", "Catchup", "QACA", "EACA", "Auto Enroll", "Auto Increase", "Auto Incr", "Automatic", "Escalator", "Default Deferral", "Managed Savings", "Defaulted Participant"],
+      headerExcludes: ["Prior", "Previous", "PYTD"]
+    },
+    {
+      name: "Roth Basis",
+      headerContains: ["Roth", "Tax Basis", "Basis Amount", "Contribution Basis", "Hardship", "First Contribution", "Accumulator"],
+      headerExcludes: ["Prior", "Previous", "PYTD"]
+    },
+    {
+      name: "YTD",
+      headerContains: ["YTD", "Year-to-Date", "Year To Date", "Hours", "Compensation", "Salary"],
+      headerExcludes: ["PYTD", "Prior", "Previous", "Highly Compensated", "Hours Tracking", "Hours Included"]
+    },
+    {
+      name: "Prior Year",
+      headerContains: ["Prior", "Previous", "PYTD", "Beg Balance", "Beginning Balance"],
+      headerExcludes: ["Pre-1987", "Pre87", "Prior Loan", "Prior Status", "Prior Term", "Prior Freq", "Prior HCE", "Prior Division", "Previous Division", "Previous Loan Payment"]
+    }
+  ];
+
+  function appendAutoSummarySpecs(specs, source) {
+    var existing = {};
+    var i;
+    var spec;
+    for (i = 0; i < specs.length; i += 1) {
+      existing[specs[i].name] = true;
+    }
+    for (i = 0; i < AUTO_SUMMARY_SPECS.length; i += 1) {
+      spec = AUTO_SUMMARY_SPECS[i];
+      if (existing[spec.name] || !source.reports || !source.reports.length) {
+        continue;
+      }
+      specs.push({
+        name: spec.name,
+        reports: source.reports.slice(0),
+        headerContains: spec.headerContains,
+        headerExcludes: spec.headerExcludes,
+        omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"]
+      });
+    }
+  }
+
+  function buildFundSourceBreakdownSheet(result, caseNumber, sheetNumber) {
+    var source = getSelectedSource();
+    if (!source || source.supportsBreakdown === false) {
+      return null;
+    }
+    var summary = buildSummaryTotals(result);
+    if (!summary || (!summary.sourceTotals.length && !summary.fundTotals.length)) {
+      return null;
+    }
+    var caseValue = trimValue(caseNumber || result.caseNumber || "");
+    var rows = [];
+
+    rows.push("<row r=\"1\">" +
+      textCell("A1", "Case Number", 6) +
+      textCell("B1", "Type", 6) +
+      textCell("C1", "Code", 6) +
+      textCell("D1", "Total", 6) +
+      "</row>");
+
+    function pushBreakdownBlock(label, list) {
+      var i;
+      var rowNumber;
+      for (i = 0; i < list.length; i += 1) {
+        rowNumber = rows.length + 1;
+        rows.push("<row r=\"" + rowNumber + "\">" +
+          textCell("A" + rowNumber, caseValue, 1) +
+          textCell("B" + rowNumber, label, 1) +
+          textCell("C" + rowNumber, list[i].key, 1) +
+          numberCell("D" + rowNumber, String(list[i].value), 3) +
+          "</row>");
+      }
+    }
+
+    pushBreakdownBlock("Source", summary.sourceTotals);
+    pushBreakdownBlock("Fund", summary.fundTotals);
+
+    return {
+      name: "Fund and Source Breakdown",
+      path: "xl/worksheets/sheet" + sheetNumber + ".xml",
+      content: worksheetXml(rows, [
+        "<col min=\"1\" max=\"1\" width=\"18\" bestFit=\"1\" customWidth=\"1\"/>",
+        "<col min=\"2\" max=\"2\" width=\"12\" bestFit=\"1\" customWidth=\"1\"/>",
+        "<col min=\"3\" max=\"3\" width=\"18\" bestFit=\"1\" customWidth=\"1\"/>",
+        "<col min=\"4\" max=\"4\" width=\"16\" bestFit=\"1\" customWidth=\"1\"/>"
+      ], {
+        freezeTopRow: true,
+        autoFilterRef: worksheetRange(rows.length, 4),
+        dimensionRef: worksheetRange(rows.length, 4)
+      })
+    };
   }
 
   function buildVendorSummarySheets(result, caseNumber, firstSheetNumber, reportCodes) {
@@ -21994,10 +24938,14 @@ body .breakdown-row{
     var selectedReports = {};
     var useReportFilter = !!(reportCodes && reportCodes.length);
     var i;
-    if (!source || !specsBySource[source.key]) {
+    if (!source) {
       return sheets;
     }
-    specs = specsBySource[source.key];
+    specs = (specsBySource[source.key] || []).slice(0);
+    appendAutoSummarySpecs(specs, source);
+    if (!specs.length) {
+      return sheets;
+    }
     if (useReportFilter) {
       for (i = 0; i < reportCodes.length; i += 1) {
         selectedReports[reportCodes[i]] = true;
@@ -22125,7 +25073,8 @@ body .breakdown-row{
         if (spec.headerContains) {
           for (c = 0; c < layouts.length; c += 1) {
             field = layouts[c];
-            if (fieldHeaderMatchesAny(field, spec.headerContains)) {
+            if (fieldHeaderMatchesAny(field, spec.headerContains) &&
+              !(spec.headerExcludes && fieldHeaderMatchesAny(field, spec.headerExcludes))) {
               addOutputField(field.header, field.type);
               reportFieldMap[report].push({ output: field.header, index: c, type: field.type });
             }
@@ -22388,6 +25337,18 @@ body .breakdown-row{
       sheetFiles.push({
         path: vendorSummarySheet.path,
         content: vendorSummarySheet.content
+      });
+    }
+
+    var breakdownSheet = buildFundSourceBreakdownSheet(result, caseNumber, sheetIndex + 1);
+    if (breakdownSheet) {
+      sheetIndex += 1;
+      sheetDefs.push({ name: breakdownSheet.name, path: breakdownSheet.path });
+      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + breakdownSheet.path.split("/").pop() + "\"/>");
+      contentOverrides.push("<Override PartName=\"/" + breakdownSheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
+      sheetFiles.push({
+        path: breakdownSheet.path,
+        content: breakdownSheet.content
       });
     }
 
@@ -22740,9 +25701,14 @@ body .breakdown-row{
     { key: "VANGUARD", patterns: [/^ENTJ767.*\.txt$/i, /^ENTJ768.*-PAYROLL-PART\.txt$/i] },
     { key: "PRINCIPAL", patterns: [/^\d-\d{5}\b.*\.(?:xlsx|xlsm)$/i, /DE[ _-]*CONVERSION[ _-]*FILE.*\.(?:xlsx|xlsm)$/i] },
     { key: "ASCENSUS", patterns: [/(?:^|[^A-Z])CONVERSION[ _-]*FILE.*\.(?:xlsx|xlsm)$/i] },
-    { key: "JOHNHANCOCK", patterns: [/DISCONTINUANCE[ _-]*FILE.*\.(?:xlsx|xlsm)$/i, /^[A-Za-z0-9_-]*?(?:AC|AI|BD|DP|ID|IE|IW|RM|VI|YT)\.csv$/i] },
-    { key: "TIAA", patterns: [/^DCNV\.(?:ACCUM|CYTD|INDIC|KEY|ORIGSTAT|PYTD|SRCE1231)\.csv$/i] },
-    { key: "AMERICANFUNDS", patterns: [/^ZTR051/i] }
+    { key: "JOHNHANCOCK", patterns: [/DISCONTINUANCE[ _-]*FILE.*\.(?:xlsx|xlsm)$/i, /^[A-Za-z0-9_ -]*?(?:AC|AI|BD|DP|ID|IE|IW|MV|RM|VI|YT)\.(?:sdf|csv|txt|xls|xlsx)$/i, /ADMINISTRATIVE[ _-]*REPORT.*\.(?:csv|xls|xlsx)$/i] },
+    { key: "TIAA", patterns: [/^DCNV\.(?:ACCUM|CYTD|INDIC|KEY|ORIGSTAT|PYTD|SRCE1231)\.csv$/i, /^FUND_TOT_RPT.*\.(?:xlsx|xlsm)$/i] },
+    { key: "ALERUS", patterns: [/^(?:SERVICETERM|SERVTRM)(?:BALALLOC|CONTRIB|DISBSC|DISB|LPMT|HILN|LN|PT)\b.*\.(?:xlsx|xlsm)$/i, /^Participant[ _-]*Valuation[ _-]*Summary.*\.pdf$/i] },
+    { key: "AMERITAS", patterns: [/^Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i] },
+    { key: "PLANDOCS", patterns: [/Onboarding[ _-]*Package.*\.(?:xlsx|xlsm)$/i, /(?:^|[ _-])PRD(?:[ _-]|\.).*\.docx$/i, /Plan[ _-]*Review[ _-]*Document.*\.docx$/i, /Merger[ _-]*Compar\w*.*\.pdf$/i] },
+    { key: "BASEREMIT", patterns: [/base[ _-]*data.*\.(?:txt|text|dat)$/i, /remit\w*.*\.(?:txt|text|dat)$/i, /payroll[ _-]*data.*\.(?:txt|text|dat)$/i] },
+    { key: "AMERICANFUNDS", patterns: [/^ZTR051/i] },
+    { key: "FIDELITY", patterns: [/^\d{4,6}report\.txt$/i, /^Deconversions?\s+from\s+Fidelity.*\.pdf$/i] }
   ];
 
   function vendorKeysForFileName(name) {
@@ -22818,9 +25784,12 @@ body .breakdown-row{
     if (await looksLikeVoyaFileSet(files)) {
       return "VOYA";
     }
-    if (files.length === 1 && /\.txt$/i.test(files[0].name || "")) {
-      var head = await readFileHead(files[0]);
-      if (looksLikeFidelityText(head)) {
+    for (var f = 0; f < files.length; f += 1) {
+      if (!/\.txt$/i.test(files[f].name || "")) {
+        continue;
+      }
+      var head = await readFileHead(files[f]);
+      if (looksLikeFidelityText(head) || looksLikeFidelityPrintedReport(head)) {
         return "FIDELITY";
       }
     }
@@ -23293,6 +26262,9 @@ body .breakdown-row{
     ADP: "ADP",
     ASCENSUS: "ASC",
     ALERUS: "ALR",
+    AMERITAS: "AMS",
+    PLANDOCS: "DOC",
+    BASEREMIT: "TPL",
     HANCOCK: "HCK",
     JOHNHANCOCK: "JHC",
     TRANSAMERICA: "TRA",
