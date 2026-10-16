@@ -9016,7 +9016,9 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
       participantHeaders: ["Social Security Number", "SSN", "Participant Id"],
       sourceHeaders: ["Source"],
       fundHeaders: ["Fund Symbol"],
-      amountHeaders: ["Cash/Market Value"]
+      amountHeaders: ["Cash/Market Value"],
+      /* PS86 is a stand-in for Roth money, not a real holding, and the wire leaves it out. */
+      excludeFunds: ["PS86"]
     },
     PAYCHEX: {
       reportCode: "BALANCES",
@@ -24309,6 +24311,10 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
     return list;
   }
 
+  function isExcludedSummaryFund(rule, fundValue) {
+    return !!(rule && rule.excludeFunds) && rule.excludeFunds.indexOf(trimValue(fundValue || "").toUpperCase()) > -1;
+  }
+
   function createSummaryAccumulator(source, layoutsByReport) {
     var rule;
     var layouts;
@@ -24323,6 +24329,7 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
     layouts = layoutsByReport[activeCode];
     return {
       reportCode: activeCode,
+      rule: rule,
       participantIndex: getHeaderIndex(layouts, rule.participantHeaders || []),
       sourceIndex: getHeaderIndex(layouts, rule.sourceHeaders || []),
       fundIndex: getHeaderIndex(layouts, rule.fundHeaders || []),
@@ -24363,6 +24370,9 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
     if (participantValue && !summaryState.participantSet[participantValue]) {
       summaryState.participantSet[participantValue] = true;
       summaryState.participantCount += 1;
+    }
+    if (isExcludedSummaryFund(summaryState.rule, fundValue)) {
+      return;
     }
     if (sourceValue) {
       summaryState.sourceMap[sourceValue] = (summaryState.sourceMap[sourceValue] || 0) + amountValue;
@@ -24800,6 +24810,9 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
 
       if (participantValue) {
         participantSet[participantValue] = true;
+      }
+      if (isExcludedSummaryFund(rule, fundValue)) {
+        continue;
       }
       if (sourceValue) {
         sourceMap[sourceValue] = (sourceMap[sourceValue] || 0) + amountValue;
@@ -25468,6 +25481,11 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
     return result;
   }
 
+  function isoDateYear(value) {
+    var match = /^(\d{4})-\d{2}-\d{2}$/.exec(trimValue(value || ""));
+    return match ? match[1] : "";
+  }
+
   function excelSerialFromIsoDate(iso) {
     var parts = iso.split("-");
     var utc = Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
@@ -25630,6 +25648,10 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
       var sourceValue = sourceIndex > -1 ? trimValue(currentRow[sourceIndex]) : "";
       var fundValue = fundIndex > -1 ? trimValue(currentRow[fundIndex]) : "";
       var amountValue = 0;
+      var rowNumber = exportRows.length + 1;
+      if (isExcludedSummaryFund(rule, fundValue)) {
+        continue;
+      }
 
       for (c = 0; c < amountIndices.length; c += 1) {
         amountValue = parseAmountValue(currentRow[amountIndices[c]]);
@@ -25641,13 +25663,13 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
         amountValue = amountValue / divisor;
       }
 
-      exportRows.push("<row r=\"" + (r + 2) + "\">" +
-        textCell("A" + (r + 2), caseValue, 1) +
-        textCell("B" + (r + 2), regionValue, 1) +
-        textCell("C" + (r + 2), ssnValue, 1) +
-        textCell("D" + (r + 2), sourceValue, 1) +
-        textCell("E" + (r + 2), fundValue, 1) +
-        numberCell("F" + (r + 2), String(amountValue), 3) +
+      exportRows.push("<row r=\"" + rowNumber + "\">" +
+        textCell("A" + rowNumber, caseValue, 1) +
+        textCell("B" + rowNumber, regionValue, 1) +
+        textCell("C" + rowNumber, ssnValue, 1) +
+        textCell("D" + rowNumber, sourceValue, 1) +
+        textCell("E" + rowNumber, fundValue, 1) +
+        numberCell("F" + rowNumber, String(amountValue), 3) +
         "</row>");
     }
 
@@ -25967,6 +25989,111 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
     }
   }
 
+  /* Special rollover plans hold their Roth money as fund PS86, and PS86 only
+     ever sits in the Roth source. Every other source counts as Non-Roth. */
+  function buildSpecialRolloverSheet(result, caseNumber, sheetNumber) {
+    var source = getSelectedSource();
+    var balanceLayouts = result.layoutsByReport["77"] || [];
+    var balanceRows = result.grouped["77"] || [];
+    var ssnIndex = getHeaderIndex(balanceLayouts, ["Social Security Number"]);
+    var sourceIndex = getHeaderIndex(balanceLayouts, ["Source"]);
+    var fundIndex = getHeaderIndex(balanceLayouts, ["Fund Symbol"]);
+    var amountIndex = getHeaderIndex(balanceLayouts, ["Cash/Market Value"]);
+    var rothSources = {};
+    var people = {};
+    var order = [];
+    var exportRows = [];
+    var row;
+    var entry;
+    var ssn;
+    var r;
+    if (!source || source.key !== "FIDELITY" || ssnIndex === -1 || sourceIndex === -1 || fundIndex === -1 || amountIndex === -1) {
+      return null;
+    }
+    for (r = 0; r < balanceRows.length; r += 1) {
+      if (trimValue(balanceRows[r][fundIndex]).toUpperCase() === "PS86") {
+        rothSources[trimValue(balanceRows[r][sourceIndex])] = true;
+      }
+    }
+    if (!Object.keys(rothSources).length) {
+      return null;
+    }
+
+    for (r = 0; r < balanceRows.length; r += 1) {
+      row = balanceRows[r];
+      ssn = trimValue(row[ssnIndex]);
+      if (!ssn) {
+        continue;
+      }
+      if (!people[ssn]) {
+        people[ssn] = { nonRoth: 0, roth: 0, year: "", basis: null };
+        order.push(ssn);
+      }
+      if (trimValue(row[fundIndex]).toUpperCase() === "PS86") {
+        people[ssn].roth += parseAmountValue(row[amountIndex]);
+      } else if (!rothSources[trimValue(row[sourceIndex])]) {
+        people[ssn].nonRoth += parseAmountValue(row[amountIndex]);
+      }
+    }
+
+    var dateLayouts = result.layoutsByReport["07DR"] || [];
+    var dateRows = result.grouped["07DR"] || [];
+    var dateSsnIndex = getHeaderIndex(dateLayouts, ["Social Security Number"]);
+    var dateIndex = getHeaderIndex(dateLayouts, ["Date Of 1st Roth Contribution"]);
+    for (r = 0; dateSsnIndex > -1 && dateIndex > -1 && r < dateRows.length; r += 1) {
+      entry = people[trimValue(dateRows[r][dateSsnIndex])];
+      var year = isoDateYear(dateRows[r][dateIndex]);
+      if (entry && year && (!entry.year || year < entry.year)) {
+        entry.year = year;
+      }
+    }
+
+    var basisLayouts = result.layoutsByReport["18R"] || [];
+    var basisRows = result.grouped["18R"] || [];
+    var basisSsnIndex = getHeaderIndex(basisLayouts, ["Social Security Number"]);
+    var basisIndex = getHeaderIndex(basisLayouts, ["Contribution Basis", "Roth Rpt"]);
+    for (r = 0; basisSsnIndex > -1 && basisIndex > -1 && r < basisRows.length; r += 1) {
+      entry = people[trimValue(basisRows[r][basisSsnIndex])];
+      if (entry && trimValue(basisRows[r][basisIndex])) {
+        entry.basis = (entry.basis || 0) + parseAmountValue(basisRows[r][basisIndex]);
+      }
+    }
+
+    exportRows.push("<row r=\"1\">" +
+      textCell("A1", "SSN", 6) +
+      textCell("B1", "Non-Roth", 6) +
+      textCell("C1", "Roth", 6) +
+      textCell("D1", "First Roth Year", 6) +
+      textCell("E1", "Basis", 6) +
+      "</row>");
+    for (r = 0; r < order.length; r += 1) {
+      entry = people[order[r]];
+      var rowNumber = r + 2;
+      exportRows.push("<row r=\"" + rowNumber + "\">" +
+        textCell("A" + rowNumber, order[r], 1) +
+        numberCell("B" + rowNumber, entry.nonRoth.toFixed(2), 3) +
+        numberCell("C" + rowNumber, entry.roth.toFixed(2), 3) +
+        textCell("D" + rowNumber, entry.year, 1) +
+        (entry.basis === null ? textCell("E" + rowNumber, "", 1) : numberCell("E" + rowNumber, entry.basis.toFixed(2), 3)) +
+        "</row>");
+    }
+
+    return {
+      name: "Special Rollover Breakout",
+      path: "xl/worksheets/sheet" + sheetNumber + ".xml",
+      content: worksheetXml(exportRows, [
+        "<col min=\"1\" max=\"1\" width=\"16\" bestFit=\"1\" customWidth=\"1\"/>",
+        "<col min=\"2\" max=\"3\" width=\"16\" bestFit=\"1\" customWidth=\"1\"/>",
+        "<col min=\"4\" max=\"4\" width=\"16\" bestFit=\"1\" customWidth=\"1\"/>",
+        "<col min=\"5\" max=\"5\" width=\"16\" bestFit=\"1\" customWidth=\"1\"/>"
+      ], {
+        freezeTopRow: true,
+        autoFilterRef: worksheetRange(exportRows.length, 5),
+        dimensionRef: worksheetRange(exportRows.length, 5)
+      })
+    };
+  }
+
   function buildFundSourceBreakdownSheet(result, caseNumber, sheetNumber) {
     var source = getSelectedSource();
     if (!source || source.supportsBreakdown === false) {
@@ -26045,7 +26172,7 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
           fieldsByReport: {
             "07DR": [
-              { output: "Date of 1st Roth Contribution", candidates: ["Date Of 1st Roth Contribution"] }
+              { output: "Date of 1st Roth Contribution", candidates: ["Date Of 1st Roth Contribution"], yearOnly: true }
             ],
             "18R": [
               { output: "Roth Gross", candidates: ["Roth Gross"] },
@@ -26780,10 +26907,10 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
             fieldSpec = spec.fieldsByReport[report][c];
             match = getFieldByCandidates(layouts, fieldSpec.candidates);
             if (!fieldSpec.internal) {
-              addOutputField(fieldSpec.output, match && match.field ? match.field.type : "text");
+              addOutputField(fieldSpec.output, fieldSpec.yearOnly ? "text" : (match && match.field ? match.field.type : "text"));
             }
             if (match) {
-              reportFieldMap[report].push({ output: fieldSpec.output, index: match.index, type: match.field.type });
+              reportFieldMap[report].push({ output: fieldSpec.output, index: match.index, type: match.field.type, yearOnly: !!fieldSpec.yearOnly });
             }
           }
         }
@@ -26846,7 +26973,7 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
           appendSummaryValue(values, "Loan ID", loanIdValue);
           for (rowNumber = 0; rowNumber < reportFieldMap[report].length; rowNumber += 1) {
             field = reportFieldMap[report][rowNumber];
-            appendSummaryValue(values, field.output, currentRow[field.index]);
+            appendSummaryValue(values, field.output, field.yearOnly ? isoDateYear(currentRow[field.index]) : currentRow[field.index]);
           }
         }
       }
@@ -27088,6 +27215,18 @@ body.density-compact :is(.vp-hold,.vp-clear){padding:9px 12px}
       sheetFiles.push({
         path: vendorSummarySheet.path,
         content: vendorSummarySheet.content
+      });
+    }
+
+    var rolloverSheet = fullExport ? buildSpecialRolloverSheet(result, caseNumber, sheetIndex + 1) : null;
+    if (rolloverSheet) {
+      sheetIndex += 1;
+      sheetDefs.push({ name: rolloverSheet.name, path: rolloverSheet.path });
+      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + rolloverSheet.path.split("/").pop() + "\"/>");
+      contentOverrides.push("<Override PartName=\"/" + rolloverSheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
+      sheetFiles.push({
+        path: rolloverSheet.path,
+        content: rolloverSheet.content
       });
     }
 
