@@ -25939,7 +25939,7 @@ input::placeholder{color:var(--faint)}
     var basisLayouts = result.layoutsByReport["18R"] || [];
     var basisRows = result.grouped["18R"] || [];
     var basisSsnIndex = getHeaderIndex(basisLayouts, ["Social Security Number"]);
-    var basisIndex = getHeaderIndex(basisLayouts, ["Contribution Basis", "Roth Rpt"]);
+    var basisIndex = getHeaderIndex(basisLayouts, ["Roth Gross"]);
     for (r = 0; basisSsnIndex > -1 && basisIndex > -1 && r < basisRows.length; r += 1) {
       entry = people[trimValue(basisRows[r][basisSsnIndex])];
       if (entry && trimValue(basisRows[r][basisIndex])) {
