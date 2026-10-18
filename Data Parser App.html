@@ -18707,11 +18707,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var suffix = compact.substring(2);
     var digits = suffix;
     /* The query system wants 15 characters: T plans are 2 letters, 6 digits, 2 spaces, 5 digits;
+       67 plans are 6 digits (counting the 67), 4 spaces, 5 digits;
        every other plan is 2 letters, 5 digits, 3 spaces, 5 digits. */
-    var rule = prefix.charAt(0) === "T" ? { first: 6, spaces: 2, total: 11 } : { first: 5, spaces: 3, total: 10 };
+    var rule = prefix === "67" ? { first: 4, spaces: 4, total: 9 }
+      : prefix.charAt(0) === "T" ? { first: 6, spaces: 2, total: 11 } : { first: 5, spaces: 3, total: 10 };
 
-    if (!/^[A-Z]{2}$/.test(prefix)) {
-      setCaseMessage("Case number must start with two letters.", true);
+    if (!/^([A-Z]{2}|67)$/.test(prefix)) {
+      setCaseMessage("Case number must start with two letters or 67.", true);
       return { valid: false, formatted: raw, empty: false };
     }
 
