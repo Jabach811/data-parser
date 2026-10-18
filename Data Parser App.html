@@ -1767,6 +1767,12 @@ body.app-edition.pal-navy.mode-dark{--paper:#101820;--surface:#18232f;--surface-
 .summary-cards{gap:14px}
 .summary-card{padding:17px 19px;border-radius:10px;gap:9px;border-color:var(--line)}
 .summary-card .v{font-size:29px;font-weight:600;line-height:1.15;letter-spacing:-.045em;color:var(--ink)}
+.summary-cards.has-side{grid-template-columns:repeat(3,1fr) minmax(160px,auto)}
+.summary-side{display:flex;flex-direction:column;justify-content:center;gap:6px;padding:4px 2px 4px 18px;border-left:1px solid var(--line);font-size:13px;color:var(--ink-2)}
+.summary-side-row{display:flex;justify-content:space-between;gap:16px}
+.summary-side-row b{font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.summary-side-note{font-size:12px;color:var(--ink-3)}
+@media (max-width:900px){.summary-cards.has-side{grid-template-columns:1fr}.summary-side{border-left:0;padding:0 2px}}
 .stat-strip{gap:12px 24px;padding:0 2px}
 .stat-strip span{font-size:13px;line-height:1.4;color:var(--ink-2)}
 .stat-strip b{font-size:13px;font-weight:500;margin-left:7px;color:var(--ink)}
@@ -2064,6 +2070,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         <div class="summary-card"><span class="eyebrow">Participants</span><span id="participantCountText" class="v">0</span></div>
         <div class="summary-card"><span class="eyebrow">Grand total</span><span id="grandTotalText" class="v">0.00</span></div>
         <div class="summary-card"><span class="eyebrow">Discarded lines</span><span id="discardCountText" class="v">&mdash;</span></div>
+        <div id="excludedFundSummary" class="summary-side" hidden></div>
       </div>
       <div class="stat-strip">
         <span>Total lines<b id="totalLinesText">0</b></span>
@@ -18699,19 +18706,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var prefix = compact.substring(0, 2);
     var suffix = compact.substring(2);
     var digits = suffix;
-    var validPrefixes = {
-      QK: { first: 5, spaces: 3, total: 10 },
-      NQ: { first: 5, spaces: 3, total: 10 },
-      TA: { first: 6, spaces: 2, total: 11 },
-      TE: { first: 6, spaces: 2, total: 11 },
-      TG: { first: 6, spaces: 2, total: 11 },
-      JK: { first: 6, spaces: 2, total: 11 },
-      TO: { first: 6, spaces: 2, total: 11 }
-    };
-    var rule = validPrefixes[prefix];
+    /* The query system wants 15 characters: T plans are 2 letters, 6 digits, 2 spaces, 5 digits;
+       every other plan is 2 letters, 5 digits, 3 spaces, 5 digits. */
+    var rule = prefix.charAt(0) === "T" ? { first: 6, spaces: 2, total: 11 } : { first: 5, spaces: 3, total: 10 };
 
-    if (!rule) {
-      setCaseMessage("Case number must start with QK, NQ, TA, TE, TG, JK, or TO.", true);
+    if (!/^[A-Z]{2}$/.test(prefix)) {
+      setCaseMessage("Case number must start with two letters.", true);
       return { valid: false, formatted: raw, empty: false };
     }
 
@@ -25106,8 +25106,66 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     };
   }
 
+  /* Funds left out of the totals (Fidelity PS86) still get shown on their own,
+     split by the source they sit in, so the gap against a vendor report is explained. */
+  function buildExcludedFundTotals(result) {
+    var source = getSelectedSource();
+    var rule = source && source.supportsBreakdown !== false ? SUMMARY_RULES[source.key] : null;
+    var activeCode = rule && rule.excludeFunds ? resolveRuleReportCode(rule, result.layoutsByReport, result.grouped) : "";
+    if (!activeCode) {
+      return null;
+    }
+    var layouts = result.layoutsByReport[activeCode];
+    var rows = result.grouped[activeCode] || [];
+    var sourceIndex = getHeaderIndex(layouts, rule.sourceHeaders || []);
+    var fundIndex = getHeaderIndex(layouts, rule.fundHeaders || []);
+    var amountIndices = getHeaderIndices(layouts, rule.amountHeaders || []);
+    var divisor = rule.amountDivisor || 1;
+    var bySource = {};
+    var found = false;
+    for (var i = 0; fundIndex > -1 && i < rows.length; i += 1) {
+      var fundValue = normalizeSummaryCodeForSource(source, "fund", sliceSummaryCode(rows[i][fundIndex], rule.fundSlice));
+      if (!isExcludedSummaryFund(rule, fundValue)) {
+        continue;
+      }
+      var sourceValue = sourceIndex > -1 ? normalizeSummaryCodeForSource(source, "source", sliceSummaryCode(rows[i][sourceIndex], rule.sourceSlice)) : "";
+      var amountValue = 0;
+      for (var c = 0; c < amountIndices.length; c += 1) {
+        amountValue = parseAmountValue(rows[i][amountIndices[c]]);
+        if (amountValue !== 0) {
+          break;
+        }
+      }
+      bySource[sourceValue] = (bySource[sourceValue] || 0) + amountValue / divisor;
+      found = true;
+    }
+    return found ? { label: rule.excludeFunds.join(", "), bySource: bySource } : null;
+  }
+
+  function renderExcludedFundSummary(result) {
+    var box = document.getElementById("excludedFundSummary");
+    if (!box) {
+      return;
+    }
+    var excluded = result ? buildExcludedFundTotals(result) : null;
+    box.hidden = !excluded;
+    box.parentNode.classList.toggle("has-side", !!excluded);
+    if (!excluded) {
+      box.innerHTML = "";
+      return;
+    }
+    var html = "<span class=\"eyebrow\">" + escapeHtml(excluded.label) + " summary</span>";
+    var keys = Object.keys(excluded.bySource).sort();
+    for (var i = 0; i < keys.length; i += 1) {
+      html += "<div class=\"summary-side-row\"><span>" + (keys[i] ? "Source " + escapeHtml(keys[i]) : "No source") + "</span><b>" + formatTotalAmount(excluded.bySource[keys[i]]) + "</b></div>";
+    }
+    html += "<div class=\"summary-side-note\">Not in grand total</div>";
+    box.innerHTML = html;
+  }
+
   function renderSummaryTotals(result) {
     var source = getSelectedSource();
+    renderExcludedFundSummary(result);
     if (!source) {
       setBreakdownAvailability(source);
       return;
@@ -27801,7 +27859,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var list = dialog.querySelector("#dpcExportSheetList");
     var confirm = dialog.querySelector("#dpcExportConfirm");
     var override = dialog.querySelector("#dpcExportOverride");
-    dialog.querySelector("#dpcExportIntent").textContent = request.suffix + " - " + request.fileName;
+    dialog.querySelector("#dpcExportIntent").textContent = request.fileName;
     dialog.querySelector("#dpcExportMappingStatus").textContent = request.mapping.label;
     dialog.querySelector("#dpcExportMappingDetail").textContent = request.mapping.detail;
     list.textContent = "";
@@ -27913,18 +27971,27 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return;
     }
     var caseState = validateAndFormatCaseNumber(true);
-    if (!caseState.valid) {
-      setCaseMessage("Fix the case number or clear it to export with a placeholder.", true);
+    if (caseState.empty || !caseState.valid) {
+      if (caseState.empty) {
+        setCaseMessage("Enter the case number before exporting.", true);
+      }
       if (caseNumberInput) {
         caseNumberInput.focus();
       }
       return;
     }
     var exportPlanName = getCurrentExportPlanName();
+    if (!exportPlanName) {
+      setCaseMessage("Enter the plan name before exporting.", true);
+      if (planNameInput) {
+        planNameInput.focus();
+      }
+      return;
+    }
     var mappingDecision = getExportMappingDecision();
     var exportResult = Object.assign({}, lastParseResult, { planName: exportPlanName, exportMappingLabel: mappingDecision.label });
     var files = buildWorkbookFiles(exportResult, reportCodes, caseState.formatted, currentMappingValidation);
-    var exportMarker = mappingDecision.key === "valid" ? "" : (mappingDecision.key === "unresolved" ? " - WITH GAPS" : " - RAW");
+    var exportMarker = mappingDecision.key === "valid" ? "" : (mappingDecision.key === "unresolved" ? " - WITH GAPS" : "");
     var request = {
       reportCodes: reportCodes && reportCodes.length ? reportCodes.slice(0) : null,
       suffix: suffix,
@@ -27942,7 +28009,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         acceptedLines: Number(lastParseResult.acceptedLines) || 0,
         discardedLines: Number(lastParseResult.discardedLines) || 0
       },
-      fileName: safeFilePart(caseState.formatted, "Case Number") + " - " + safeFilePart(exportPlanName, "Plan Name") + " - " + suffix + exportMarker + ".xlsx"
+      fileName: caseState.formatted + " - " + safeFilePart(exportPlanName, "Plan Name") + " - " + suffix + exportMarker + ".xlsx"
     };
     if (request.mapping.key !== "valid") {
       lastBlockedExportRequest = request;
@@ -28704,6 +28771,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     caseNumberInput.onblur = function () {
       validateAndFormatCaseNumber(true);
     };
+  }
+
+  if (planNameInput) {
+    planNameInput.addEventListener("input", function () {
+      validateAndFormatCaseNumber(false);
+    });
   }
 
   if (exportBtn) {
