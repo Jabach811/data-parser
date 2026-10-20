@@ -25928,7 +25928,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   function buildReferenceContentsSheet(result, caseNumber, source, sheetDefs, sheetFiles, mappingState) {
     var rows = [], links = [], offset = 21;
-    function cell(ref, value, style) { return textCell(ref, value, offset + style); }
+    function cell(ref, value, style) { return value === '' ? '<c r="' + ref + '" s="' + (offset + style) + '"/>' : textCell(ref, value, offset + style); }
     function line(n, height, contents) { rows.push('<row r="' + n + '" ht="' + height + '" customHeight="1">' + contents + '</row>'); }
     function linked(ref, value, target, style) {
       links.push('<hyperlink ref="' + ref + '" location="' + escapeXml("'" + target.replace(/'/g, "''") + "'!A1") + '"/>');
