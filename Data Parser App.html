@@ -13721,6 +13721,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       try {
         if (!paychexReportNamePattern.test(file.name || "")) {
           skippedFiles += 1;
+          discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". The name doesn't match a Paychex report name." });
           continue;
         }
         var text = await new Promise(function (resolve, reject) {
@@ -13800,6 +13801,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           continue;
         }
         skippedFiles += 1;
+        discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". It isn't a Paychex balance or loan report." });
       } catch (err) {
         errors.push(err.message);
       }
@@ -13811,6 +13813,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     pushGrouped("LOAN_SOURCE", buildPaychexLayoutRows(source.layouts.LOAN_SOURCE, loanSourceRecords));
 
     discardedLines = Math.max(totalLines - acceptedLines, 0);
+    if (discardedLines > 0) {
+      discardReasons.push({ type: "message", label: discardedLines + " report line(s) were not data rows: page headings, column titles and totals. " + acceptedLines + " rows were kept." });
+    }
 
     return {
       totalLines: totalLines,
@@ -14306,6 +14311,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       try {
         if (!oneAmericaReportNamePattern.test(file.name || "")) {
           skippedFiles += 1;
+          discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". The name doesn't match a OneAmerica report name." });
           continue;
         }
         var text = await new Promise(function (resolve, reject) {
@@ -14353,6 +14359,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           continue;
         }
         skippedFiles += 1;
+        discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". It isn't a OneAmerica balance or loan report." });
       } catch (err) {
         errors.push(err.message);
       }
@@ -14364,6 +14371,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     pushGrouped("LOAN_SOURCE", buildOneAmericaLayoutRows(source.layouts.LOAN_SOURCE, loanSourceRecords));
 
     discardedLines = Math.max(totalLines - acceptedLines, 0);
+    if (discardedLines > 0) {
+      discardReasons.push({ type: "message", label: discardedLines + " report line(s) were not data rows: page headings, column titles and totals. " + acceptedLines + " rows were kept." });
+    }
 
     return {
       totalLines: totalLines,
@@ -17420,6 +17430,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var discardedLines = 0;
     var supplementalSummary = null;
     var printedNotes = [];
+    var unknownCodes = {};
     var summaryState = createSummaryAccumulator(source, source.layouts);
 
     for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
@@ -17485,6 +17496,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           var record = resolveRecordForSource(line, source);
           if (source.reports.indexOf(record) === -1 || !source.layouts[record]) {
             discardedLines += 1;
+            var unknownKey = record || "(blank)";
+            if (!unknownCodes[unknownKey]) { unknownCodes[unknownKey] = []; }
+            unknownCodes[unknownKey].push(fileName + " line " + (lineIndex + 1));
             continue;
           }
           if (!grouped[record]) {
@@ -17516,6 +17530,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     for (var n = 0; n < printedNotes.length; n += 1) {
       discardReasons.push({ type: "message", label: printedNotes[n] });
     }
+    Object.keys(unknownCodes).forEach(function (code) {
+      var where = unknownCodes[code];
+      discardReasons.push({ type: "message", label: "Record code " + code + " is not in the Fidelity layout, so " + where.length + " line(s) were set aside: " + where.slice(0, 5).join(", ") + (where.length > 5 ? ", and " + (where.length - 5) + " more" : "") + "." });
+    });
 
     return {
       totalLines: totalLines,
