@@ -9244,6 +9244,21 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     filePickerHelpText: "Milliman mode is active. Drop the 7.5 deconversion extract file(s) - they are usually named EXPORT.<date>.<plan id> with no real extension. Each line is split by the two-character record code in positions 1-2.",
     normalizers: {}
   };
+  SOURCE_CARD_META.ALIGHT = {
+    accent: "#6a4c93",
+    accentStrong: "#8b6bb8",
+    accentSoft: "rgba(106,76,147,.18)",
+    glassTop: "rgba(250,247,253,.86)",
+    glassBottom: "rgba(236,229,245,.78)",
+    note: "Alight deconversion records and Data Dictionary",
+    icon: "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3l9 5-9 5-9-5 9-5z\"></path><path d=\"M3 13l9 5 9-5\"></path><path d=\"M3 17.5l9 5 9-5\"></path></svg>"
+  };
+  SOURCE_RUNTIME_CONFIG.ALIGHT = {
+    cardMeta: SOURCE_CARD_META.ALIGHT,
+    fileAccept: ".txt,.text,.dat,.xlsx,.xlsm",
+    filePickerHelpText: "Alight mode is active. Drop the record files (or the one combined Records.txt) and the Data Dictionary workbook. Each line is sorted by the four-letter tag in positions 8-11.",
+    normalizers: {}
+  };
   SOURCE_RUNTIME_CONFIG.AMERICANFUNDS = {
     cardMeta: SOURCE_CARD_META.AMERICANFUNDS,
     fileAccept: ".txt,.text,.dat,.pdf",
@@ -15201,6 +15216,464 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   }
 
   CONFIG.TIAA = buildTiaaSourceConfig();
+
+  /* ---------- ALIGHT DECONVERSION FILES ----------
+     Fixed-width lines. Positions 1-66 are a shared header; the record type is the
+     four-letter tag at 8-11, so lines are sorted by that tag and never by file name.
+     The package arrives either as one file per record type or as one combined
+     Records.txt. The Data Dictionary workbook turns ID codes into names and carries
+     Alight's own counts, which are compared with what the files hold.
+     Field kinds: t text, i whole number or ID, n signed number with implied
+     decimals, d date. Each field is [header, start, length, kind, decimals, dictKey]. */
+
+  var ALIGHT_LAYOUTS = {"12LN":{"name":"12-Month Loan Balances","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Employee ID",49,9,"t",0],["Plan ID",67,4,"i",0],["Effective Date",75,10,"d",0],["Balance Value",85,9,"n",2]]},"BELC":{"name":"DB Beneficiary Elections","fields":[["Employee Person ID",34,15,"t",0],["Non-Part Rkpg Person ID",67,15,"t",0],["Non-RK First Name",82,20,"t",0],["Non-RK Last Name",102,30,"t",0],["Non-RK Birth Date",132,10,"d",0],["Relation Sequence",142,4,"i",0],["Plan ID",146,9,"i",0],["DB Election ID",155,9,"i",0],["Service Period End Date",164,10,"d",0],["Bene Priority Sequence",174,4,"i",0],["Bene Numerator Amount",178,4,"i",0],["Bene Denominator Amount",182,4,"i",0]]},"CDF":{"name":"Client Defined Fields","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Cdd Fld Set Definition ID",67,9,"i",0],["Cdf Data Row",76,30,"t",0],["Cdd Fld Intn ID",106,18,"t",0],["Non-RK First Name",124,20,"t",0],["Non-RK Last Name",144,30,"t",0],["Non-RK Birth Date",174,10,"d",0],["Relation Sequence",184,4,"i",0],["Non-RK Person ID",188,15,"t",0]]},"CDH":{"name":"Client Defined History","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Person Cdh Begin Date",67,10,"d",0],["Cdd Fld Set Definition ID",77,9,"i",0],["Person Cdh End Date",86,10,"d",0],["Cdh Data Row",96,30,"t",0],["Cdd Fld Intn ID",126,18,"t",0],["Non-RK First Name",144,20,"t",0],["Non-RK Last Name",164,30,"t",0],["Non-RK Birth Date",194,10,"d",0],["Relation Sequence",204,4,"i",0],["Non-RK Person ID",208,15,"t",0]]},"CRED":{"name":"Credit Information","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Cr ID",67,9,"i",0],["Person Cr Begin Date",76,10,"d",0],["Person Cr End Date",86,10,"d",0],["Person Cr Amount",96,9,"n",2],["Cr Rspn Code",105,1,"t",0]]},"CTEL":{"name":"Contribution Rate Elections","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Contribution Rate",67,9,"i",0,"CTRB"],["Contribution Amount",76,15,"n",2],["Contribution Rate",91,7,"n",4],["Begin Date",98,10,"d",0],["Esct Percent",108,7,"n",4],["Escl Amount",115,9,"n",2],["Trgt Percent",124,7,"n",4],["Trgt Amount",131,9,"n",2]]},"CTSR":{"name":"FSA Elections","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Person Fsa Begin Date",76,10,"d",0],["Person Fsa End Date",86,10,"d",0],["Fsa Plan Amount",96,15,"n",2],["Fsa Rmn Pay Period Amount",111,8,"n",5],["Fsa Prtc Code",119,1,"t",0],["Fsa SOURCE1 ID",120,9,"i",0],["Fsa SOURCE1 Amount",129,15,"n",2],["Fsa SOURCE2 ID",144,9,"i",0],["Fsa SOURCE2 Amount",153,15,"n",2],["Carr Prcs ID",168,9,"i",0]]},"CVBL":{"name":"Conversion Balances","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0]],"group":[["Plan ID",67,9,"i",0],["Fund",76,9,"i",0,"FUND"],["Sub-Fund",85,9,"i",0,"FUND.SF"],["Source",94,9,"i",0],["Money Source",103,9,"i",0,"ACCT"],["Soft Balance",112,9,"i",0,"SBAL"],["Balance Value",121,15,"n",2],["Units",136,15,"n",0],["Accounting Posting Type Code",151,2,"t",0],["Price",153,15,"n",6],["Derived Value Code",168,1,"t",0],["Payroll Date",169,10,"d",0],["Cash In-Kind Code",179,1,"t",0]],"starts":[[67,76,85,94,103,112,121,136,151,153,168,169,179],[180,189,198,207,216,225,234,249,264,266,281,282,292],[293,302,311,320,329,338,347,362,377,379,394,395,405],[406,415,424,433,442,451,460,475,490,492,507,508,518],[519,528,537,546,555,564,573,588,603,605,620,621,631],[632,641,650,659,668,677,686,701,716,718,733,734,744],[745,754,763,772,781,790,799,814,829,831,846,847,857],[858,867,876,885,894,903,912,927,942,944,959,960,970],[971,980,989,998,1007,1016,1025,1040,1055,1057,1072,1073,1083],[1084,1093,1102,1111,1120,1129,1138,1153,1168,1170,1185,1186,1196],[1197,1206,1215,1224,1233,1242,1251,1266,1281,1283,1298,1299,1309],[1310,1319,1328,1337,1346,1355,1364,1379,1394,1396,1411,1412,1422],[1423,1432,1441,1450,1459,1468,1477,1492,1507,1509,1524,1525,1535],[1536,1545,1554,1563,1572,1581,1590,1605,1620,1622,1637,1638,1648],[1649,1658,1667,1676,1685,1694,1703,1718,1733,1735,1750,1751,1761]]},"DEDS":{"name":"Payroll Deductions","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Payroll Schedule",67,9,"i",0,"PYSC"],["Deduction",76,9,"i",0,"DEDS"],["Person Deduction Begin Date",85,10,"d",0],["Person Deduction End Date",95,10,"d",0],["Deduction Status Code",105,1,"t",0],["Deduction Amount",106,9,"n",2],["Deduction Percent",115,7,"n",4],["Deduction Goal Amount",122,15,"n",2],["Deduction Action Code",137,1,"t",0],["Flow Control Mode Code",138,1,"t",0],["Pay Period Effective Date",139,10,"d",0]]},"EEOR":{"name":"Organization and Location","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Org Category",67,9,"i",0,"EEOR"],["Org Begin Date",76,10,"d",0],["Org End Date",86,10,"d",0],["Org Code",96,6,"t",0]]},"EEST":{"name":"Employment Status","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Status Category",67,9,"i",0,"EEST"],["Begin Date",76,10,"d",0],["End Date",86,10,"d",0],["Status Code",96,6,"t",0]]},"ELEC":{"name":"DB Elections","fields":[["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["DB Election ID",76,9,"i",0],["DB Election Group ID",85,9,"i",0],["Service Period End Date",94,10,"d",0],["DB Election Use Code",104,2,"t",0],["DB Election Status Code",106,2,"t",0],["Bcd Date",108,10,"d",0],["Rfnd Bcd Date",118,10,"d",0],["Rfnd Paid Code",128,1,"t",0],["Benefit ID",129,9,"i",0]]},"ESVC":{"name":"Employment Service","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Service Definition",67,9,"i",0,"EESV"],["Employment Service Begin Date",76,10,"d",0],["Service Earned Count",94,8,"n",5],["Adjusted Service Date",110,10,"d",0],["Employment Service End Date",120,10,"d",0]]},"FVBL":{"name":"Fully Vested Balances","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Vest Prvs ID",76,9,"i",0],["Full Vsbal Percent Effective Date",85,10,"d",0],["Full Vest Balance Percent",95,7,"n",4],["Vest Account ID",102,9,"i",0]]},"HHRT":{"name":"Hours Rate","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Hours Rate Category",67,9,"i",0,"HHRT"],["Hours Rate Frequency Code",96,2,"t",0],["Employee Hours Rate Begin Date",76,10,"d",0],["Employee Hours Rate End Date",86,10,"d",0],["Hours Rate Amount",98,6,"n",2]]},"HINC":{"name":"Hours Increments","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Hours Category",67,9,"i",0,"HHIN"],["Hours Count",86,6,"n",2],["Employee Hours Increment Begin Date",76,10,"d",0],["Employee Hours Increment End Date",92,10,"d",0]]},"IVEL":{"name":"Investment Elections","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Election Group",76,9,"i",0,"IVEL"],["Fund",85,9,"i",0,"FUND"],["Investment Election Begin Date",94,10,"d",0],["Election Percent",104,4,"i",0],["Auto Rebalance Indicator",109,1,"t",0],["Auto Rebalance Frequency Code",110,1,"t",0]]},"LOAN":{"name":"Loans","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Loan Sub-Fund",76,9,"i",0,"LOAN"],["Principal Outstanding",85,9,"n",2],["Repayment Amount",94,9,"n",2],["Interest Rate",103,7,"n",4],["Repayments Remaining",110,4,"i",0],["First Repayment Due Date",114,10,"d",0],["Payroll Cycle Begin Date",124,10,"d",0],["Amortization Frequency Code",134,2,"t",0],["Original Loan Amount",136,9,"n",2],["Original Loan Effective Date",145,10,"d",0],["Original Number of Repayments",155,4,"i",0],["Loan Principal Paid Amount",159,9,"n",2],["Loan Interest Paid Amount",168,9,"n",2],["Total Loan Paid Amount",177,9,"n",2],["Loan Type Code",186,1,"t",0],["Loan Status Code",187,1,"t",0],["Tax Date",188,10,"d",0],["Last Repayment Date",198,10,"d",0],["Next Repayment Date",208,10,"d",0],["Loan Payoff Date",218,10,"d",0]]},"OVER":{"name":"Deduction Overrides","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Payment ID",67,4,"t",0],["Effective Date",71,10,"d",0],["Balance Value",81,15,"n",2],["Balance Amount",96,15,"n",2],["Repayments Type Code",111,2,"t",0],["Cmnts",113,30,"t",0],["Plan ID",143,4,"i",0]]},"PDLV":{"name":"Delivery Instructions","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Payment ID",67,9,"i",0],["Dlvr Begin Date",76,10,"d",0],["Payment Dlvr Type ID",86,9,"i",0],["Dlvr Address ID",95,9,"i",0],["Dlvr Percent",104,7,"n",4],["Dlvr Amount",111,9,"n",2],["Dlvr End Date",120,10,"d",0]]},"PINC":{"name":"Pay Increments","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Pay Increment Category",67,9,"i",0,"PYIN"],["Employee Pay Increment Begin Date",76,10,"d",0],["Pay Amount",86,15,"n",2],["Employee Pay Increment End Date",101,10,"d",0]]},"PPAT":{"name":"DB Plan Attributes","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Atrb Intn ID",76,18,"t",0],["End Date",94,10,"d",0],["Plan Atrb Lrg Amount",104,18,"n",6],["Plan Atrb Date",122,10,"d",0],["Plan Atrb",132,15,"t",0],["Begin Date",147,10,"d",0],["DB Election ID",157,9,"i",0]]},"PPCT":{"name":"Beneficiary Designations","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Beneficiary Person ID",76,15,"t",0],["Designation Reason Code",91,1,"t",0],["Priority",92,4,"i",0],["Share Numerator",96,4,"i",0],["Share Denominator",100,4,"i",0],["Amount to Receive",104,15,"n",2],["Asset Transfer Code",119,1,"t",0],["Begin Date",120,10,"d",0],["End Date",130,10,"d",0],["Non-RK First Name",144,20,"t",0],["Non-RK Last Name",164,30,"t",0],["Non-RK Birth Date",194,10,"d",0],["Relation Sequence",140,4,"i",0]]},"PPST":{"name":"Plan Status","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan Status Category",67,9,"i",0,"PPST"],["Begin Date",76,10,"d",0],["End Date",86,10,"d",0],["Plan Status Code",96,6,"t",0]]},"PRAD":{"name":"Addresses","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Address Type",67,9,"i",0,"ADDR"],["Address Begin Date",76,10,"d",0],["City Name",86,30,"t",0],["State Code",116,2,"t",0],["Zip Code",118,9,"t",0],["Country Code",127,3,"t",0],["Address Line 1",130,30,"t",0],["Address Line 2",160,30,"t",0],["Address Line 3",190,30,"t",0],["Address Line 4",220,30,"t",0],["Address Line 5",250,30,"t",0],["Address End Date",280,10,"d",0],["Account Number ID",290,20,"t",0],["Institution Name",310,30,"t",0],["Direct Rollover Recipient Code",340,1,"t",0],["ACH Number ID",341,9,"i",0],["Account Type Code",350,1,"t",0],["Non-RK First Name",351,20,"t",0],["Non-RK Last Name",371,30,"t",0],["Non-RK Birth Date",401,10,"d",0],["Relation Sequence",411,4,"i",0],["Non-RK Person ID",415,15,"t",0],["Email Address",430,100,"t",0],["Phone Number",530,30,"t",0],["Phone Number Extension",560,10,"t",0],["Phone Number Format Code",570,2,"t",0],["County",572,30,"t",0],["Bad Data Indicator",602,1,"t",0]]},"PRDP":{"name":"Dependent Coverage","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Non-RK Person ID",76,15,"t",0],["Relation Sequence",91,4,"i",0],["Non-RK First Name",95,20,"t",0],["Non-RK Last Name",115,30,"t",0],["Non-RK Birth Date",145,10,"d",0],["Plan Dpnd Begin Date",155,10,"d",0],["Plan Dpnd End Date",165,10,"d",0],["Dpnd Cv Code",175,1,"t",0]]},"PRLT":{"name":"Relationships","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Second Person ID",67,15,"t",0],["Relation Code",82,2,"t",0,"PRLT"],["Person Relation Begin Date",84,10,"d",0],["Relation Sequence",94,4,"i",0],["Non-RK First Name",98,20,"t",0],["Non-RK Last Name",118,30,"t",0],["Non-RK Birth Date",148,10,"d",0]]},"PROP":{"name":"Health and Welfare Coverage","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Person Opt Begin Date",76,10,"d",0],["Person Opt End Date",86,10,"d",0],["Opt ID",96,9,"i",0],["Opt Tax Code",105,2,"t",0],["Side Fund Amount",107,9,"n",2],["Opt Plan Rspn Code",122,1,"t",0],["Low Cost Price Amount",123,9,"n",2],["Total Plan Price Amount",132,9,"n",2],["Cv Category ID(1)",147,9,"i",0],["Dpnd QY(1)",156,4,"i",0],["Ptax Price AT(1)",160,9,"n",2],["After-Tax Price AT(1)",169,9,"n",2],["Cv Category ID(2)",178,9,"i",0],["Dpnd QY(2)",187,4,"i",0],["Ptax Price AT(2)",191,9,"n",2],["After-Tax Price AT(2)",200,9,"n",2],["Cv Category ID(3)",209,9,"i",0],["Dpnd QY(3)",218,4,"i",0],["Ptax Price AT(3)",222,9,"n",2],["After-Tax Price AT(3)",231,9,"n",2],["Cv ID(1)",240,9,"i",0],["Cv Increment QY(1)",249,4,"i",0],["Ntwr ID(1)",253,9,"i",0],["Cv AT(1)",262,15,"n",2],["Carr Prcs ID(1)",277,9,"i",0],["Cv ID(2)",286,9,"i",0],["Cv Increment QY(2)",295,4,"i",0],["Ntwr ID(2)",299,9,"i",0],["Cv AT(2)",308,15,"n",2],["Carr Prcs ID(2)",323,9,"i",0],["Cv ID(3)",332,9,"i",0],["Cv Increment QY(3)",341,4,"i",0],["Ntwr ID(3)",345,9,"i",0],["Cv AT(3)",354,15,"n",2],["Carr Prcs ID(3)",369,9,"i",0],["Cv ID(4)",378,9,"i",0],["Cv Increment QY(4)",387,4,"i",0],["Ntwr ID(4)",391,9,"i",0],["Cv AT(4)",400,15,"n",2],["Carr Prcs ID(4)",415,9,"i",0],["Cv ID(5)",424,9,"i",0],["Cv Increment QY(5)",433,4,"i",0],["Ntwr ID(5)",437,9,"i",0],["Cv AT(5)",446,15,"n",2],["Carr Prcs ID(5)",461,9,"i",0]]},"PRQE":{"name":"COBRA Information","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Person Qe Begin Date",71,10,"d",0],["Election Qb Status Code",81,1,"t",0],["Plan ID",82,9,"i",0],["Qe Election Sequence",91,4,"i",0],["Election Qe Type Code",95,2,"t",0],["Election Qe Date",97,10,"d",0],["Election Qe Ntfy Date",107,10,"d",0],["Election Prir Cv Enddt",117,10,"d",0],["Election Notc Sent Date",127,10,"d",0],["Election Election Date",137,10,"d",0],["Election Election Prdbegdt",147,10,"d",0],["Election Election Prdenddt",157,10,"d",0],["Election Cobraprdbegdt",167,10,"d",0],["Election Cobraprdenddt",177,10,"d",0]]},"PRSN":{"name":"Person","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Taxpayer ID",67,9,"t",0],["Salutation Title",76,10,"t",0],["First Name",86,20,"t",0],["Middle Name",106,20,"t",0],["Last Name",126,30,"t",0],["Last Name Suffix",156,10,"t",0],["Birth Date",166,10,"d",0],["Sex Code",177,1,"t",0],["Taxpayer ID Type",178,3,"t",0],["Employee ID",181,15,"t",0],["Relation Sequence",196,4,"i",0],["Non-RK Person ID",200,15,"t",0],["Non-RK Flag",215,1,"t",0],["Primary Language Code",216,2,"t",0],["Preferred Mail Address ID",218,9,"i",0,"ADDR"],["Preferred Email Address ID",227,9,"i",0,"ADDR"],["Preferred Form Code",236,3,"t",0],["Non-Participant Death Date",239,10,"d",0]]},"PTNS":{"name":"Payment Instructions","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Payment ID",67,9,"i",0],["Payment Instruction Begin Date",76,10,"d",0],["Payment Adjusted Code",86,1,"t",0],["DB Pmtinst Status Code",87,1,"t",0],["Payment Instruction End Date",89,10,"d",0],["DB Election ID",99,9,"i",0],["Option Form Group ID",108,9,"i",0],["Option Form ID",117,9,"i",0],["Service Period End Date",126,10,"d",0],["Option Form Change Date",136,10,"d",0],["Bcd Date",146,10,"d",0],["Rtro Period Adjusted Date",156,10,"d",0],["Option Form End Date",166,10,"d",0],["After-Tax Change Date",176,10,"d",0],["After-Tax End Date",186,10,"d",0],["Rtro Period Count",196,4,"i",0],["Plan ID",200,9,"i",0]],"group":[["Element ID",209,9,"i",0],["Benefit Start Amount",218,9,"n",2],["Benefit Continuing Start Amount",227,9,"n",2],["Benefit Change Amount",236,9,"n",2],["Benefit Continuing Change Amount",245,9,"n",2],["Benefit Pop Up Amount",254,9,"n",2],["Popu Change Amount",263,9,"n",2],["Element Other Amount",272,9,"n",2],["Rollover Available Amount",281,15,"n",2],["After-Tax Amount",296,9,"n",2],["After-Tax Change Amount",305,9,"n",2],["Capital Gain Amount",314,9,"n",2]],"starts":[[209,218,227,236,245,254,263,272,281,296,305,314],[323,332,341,350,359,368,377,386,395,410,419,428],[437,446,455,464,473,482,491,500,509,524,533,542],[551,560,569,578,587,596,605,614,623,638,647,656],[665,674,683,692,701,710,719,728,737,752,761,770],[779,788,797,806,815,824,833,842,851,866,875,884],[893,902,911,920,929,938,947,956,965,980,989,998],[1007,1016,1025,1034,1043,1052,1061,1070,1079,1094,1103,1112],[1121,1130,1139,1148,1157,1166,1175,1184,1193,1208,1217,1226],[1235,1244,1253,1262,1271,1280,1289,1298,1307,1322,1331,1340],[1349,1358,1367,1376,1385,1394,1403,1412,1421,1436,1445,1454],[1463,1472,1481,1490,1499,1508,1517,1526,1535,1550,1559,1568],[1577,1586,1595,1604,1613,1622,1631,1640,1649,1664,1673,1682],[1691,1700,1709,1718,1727,1736,1745,1754,1763,1778,1787,1796],[1805,1814,1823,1832,1841,1850,1859,1868,1877,1892,1901,1910]]},"PYRT":{"name":"Pay Rates","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Pay Rate Category",67,9,"i",0,"PYRT"],["Pay Rate Frequency Code",96,2,"t",0],["Employee Pay Rate Begin Date",76,10,"d",0],["Employee Pay Rate End Date",86,10,"d",0],["Pay Rate Amount",98,15,"n",2]]},"PYSC":{"name":"Payroll Schedules","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Payroll Type Code",67,2,"t",0],["Payroll Schedule",69,9,"i",0,"PYSC"],["Person Payroll Begin Date",78,10,"d",0],["Person Payroll End Date",88,10,"d",0],["Payroll Person ID",98,15,"t",0],["Payroll Order Code",113,1,"t",0]]},"RCON":{"name":"Excess Credit Elections","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Rcon Pool ID",67,9,"i",0],["Plan ID",76,9,"i",0],["Source",85,9,"i",0],["Person Excs Begin Date",94,10,"d",0],["Person Excs End Date",104,10,"d",0],["Person Rcon Numerator Amount",114,4,"i",0],["Person Rcon Denominator Amount",118,4,"i",0],["Person Rcon Excs Amount",122,9,"n",2],["Person Rcon Excs Code",131,1,"t",0],["Person Rmn Payprd Amount",132,9,"n",2]]},"SBHS":{"name":"Soft Balance History","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Plan ID",67,9,"i",0],["Soft Balance",76,9,"i",0,"SBAL"]],"group":[["Effective Date",85,10,"d",0],["Balance Value",95,15,"n",2],["Units",110,15,"n",0],["Price",125,13,"n",6]],"starts":[[85,95,110,125],[138,148,163,178],[191,201,216,231],[244,254,269,284],[297,307,322,337],[350,360,375,390],[403,413,428,443],[456,466,481,496],[509,519,534,549],[562,572,587,602],[615,625,640,655],[668,678,693,708],[721,731,746,761],[774,784,799,814],[827,837,852,867],[880,890,905,920],[933,943,958,973],[986,996,1011,1026],[1039,1049,1064,1079],[1092,1102,1117,1132],[1145,1155,1170,1185],[1198,1208,1223,1238],[1251,1261,1276,1291],[1304,1314,1329,1344],[1357,1367,1382,1397],[1410,1420,1435,1450],[1463,1473,1488,1503],[1516,1526,1541,1556],[1569,1579,1594,1609],[1622,1632,1647,1662],[1675,1685,1700,1715],[1728,1738,1753,1768],[1781,1791,1806,1821],[1834,1844,1859,1874],[1887,1897,1912,1927],[1940,1950,1965,1980]]},"WTHL":{"name":"Withholding Elections","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Payment ID",67,9,"i",0],["Election Fed Wthl Amount",76,9,"n",2],["Fed Wthl Addrplccd",85,1,"t",0],["Fed Wthl Code",86,1,"t",0],["Fed Taxflng Statcd",87,2,"t",0],["Fed Number Exmp Count",89,4,"i",0],["Election Fed Wthl Percent",93,7,"n",4],["Tax State Code",100,2,"t",0],["Election State Wthl Amount",102,9,"n",2],["State Wthl Add Rplccd",111,1,"t",0],["State Wthl Code",112,1,"t",0],["State Tax Flng Statcd",113,2,"t",0],["State Number Exmp Count",115,4,"i",0],["Election State Wthl Percent",119,7,"n",4],["State Nmbrprsl Exmpqy",126,4,"i",0],["Az Wthl Rate Code",130,1,"t",0],["Ma Blnd Exmp Code",131,1,"t",0],["Ov Nra Code",132,2,"t",0],["Override Dstr Code",134,2,"t",0],["Fed Mly TD1 Amount",136,9,"n",2],["Prov Mly TD1 Amount",145,9,"n",2],["Tax State Override Code",154,1,"t",0],["Instruction Begin Date",155,10,"d",0]]},"YTDC":{"name":"Year-to-Date Contributions","fields":[["Person ID",18,15,"t",0],["Person Type",33,1,"t",0],["Employee Person ID",34,15,"t",0],["Employee ID",49,9,"t",0],["Plan ID",67,4,"i",0],["Money Source",71,6,"t",0,"ACCT"],["Contribution Amt",77,15,"n",2]]}};
+
+  var ALIGHT_CHECK_CODE = "DICTCHECK";
+  var ALIGHT_PLACEHOLDER_DATES = { "2299-12-31": true, "1800-01-01": true, "1930-01-01": true, "0001-01-01": true };
+  var ALIGHT_CHECK_LAYOUT = [
+    { header: "Dictionary Tab", type: "text" },
+    { header: "ID", type: "text" },
+    { header: "Description", type: "text" },
+    { header: "Plan ID", type: "text" },
+    { header: "Convert", type: "text" },
+    { header: "Dictionary Count", type: "integer" },
+    { header: "Rows in Files", type: "integer" },
+    { header: "People in Files", type: "integer" },
+    { header: "Difference", type: "integer" },
+    { header: "Status", type: "text" }
+  ];
+  /* Lookups that do not use a tab's first column and description. */
+  var ALIGHT_DICT_LOOKUPS = {
+    "FUND.SF": { tab: "FUND", id: "SF_ID", desc: "SF_LDSC_TX" },
+    "LOAN": { tab: "LOAN", id: "LOAN_SF_ID", desc: "SF_LDSC_TX" }
+  };
+  /* The FUND tab is one row per sub-fund, so its counts line up with sub-funds. */
+  var ALIGHT_COUNT_KEY = { FUND: "FUND.SF" };
+
+  function alightLayoutColumns(code) {
+    var spec = ALIGHT_LAYOUTS[code];
+    var fields = spec.fields.concat(spec.group || []);
+    var layout = [];
+    var i;
+    for (i = 0; i < fields.length; i += 1) {
+      var f = fields[i];
+      layout.push({ header: f[0], type: f[3] === "n" ? "decimal" : (f[3] === "d" ? "date" : "text") });
+      if (f[5]) {
+        layout.push({ header: f[0].replace(/ ID$/, "") + " Name", type: "text" });
+      }
+    }
+    return layout;
+  }
+
+  function alightId(value) {
+    var text = trimValue(value).replace(/\.0+$/, "");
+    return /^\d+$/.test(text) ? (text.replace(/^0+/, "") || "0") : text;
+  }
+
+  function alightNumber(raw, decimals) {
+    var text = trimValue(raw);
+    var negative = false;
+    var last;
+    var whole;
+    var fraction;
+    if (!text) {
+      return "";
+    }
+    if (/^[-+]/.test(text)) {
+      negative = text.charAt(0) === "-";
+      text = text.substring(1);
+    } else if (/[-+]$/.test(text)) {
+      negative = text.charAt(text.length - 1) === "-";
+      text = text.substring(0, text.length - 1);
+    }
+    last = text.charAt(text.length - 1).toUpperCase();
+    if ("{ABCDEFGHI".indexOf(last) !== -1) {
+      text = text.substring(0, text.length - 1) + "{ABCDEFGHI".indexOf(last);
+    } else if ("}JKLMNOPQR".indexOf(last) !== -1) {
+      text = text.substring(0, text.length - 1) + "}JKLMNOPQR".indexOf(last);
+      negative = true;
+    }
+    if (!/^\d*\.?\d*$/.test(text) || text === ".") {
+      ParseAnomalies.note("type_mismatch_decimal", raw, { field: "Alight amount" });
+      return trimValue(raw);
+    }
+    if (text.indexOf(".") !== -1) {
+      whole = text.split(".")[0];
+      fraction = text.split(".")[1];
+    } else {
+      while (text.length < decimals) {
+        text = "0" + text;
+      }
+      whole = text.substring(0, text.length - decimals);
+      fraction = text.substring(text.length - decimals);
+    }
+    whole = whole.replace(/^0+/, "") || "0";
+    if (!/[1-9]/.test(whole + fraction)) {
+      negative = false;
+    }
+    return (negative ? "-" : "") + whole + (fraction ? "." + fraction : "");
+  }
+
+  function alightValue(raw, kind, decimals) {
+    var text = trimValue(raw);
+    if (!text) {
+      return "";
+    }
+    if (kind === "n") {
+      return alightNumber(text, decimals);
+    }
+    if (kind === "i") {
+      return alightId(text);
+    }
+    if (kind === "d") {
+      return ALIGHT_PLACEHOLDER_DATES[text] ? "" : text;
+    }
+    return text;
+  }
+
+  /* An occurrence slot is unused when every raw value is blank, all zeros, or a
+     placeholder date. */
+  function alightSlotIsEmpty(line, group, starts) {
+    var i;
+    for (i = 0; i < group.length; i += 1) {
+      var raw = trimValue(line.substring(starts[i] - 1, starts[i] - 1 + group[i][2]));
+      if (raw && !/^[0{.]+$/.test(raw) && !ALIGHT_PLACEHOLDER_DATES[raw]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function alightAppendFields(row, line, fields, starts, dictionary, tally) {
+    var i;
+    for (i = 0; i < fields.length; i += 1) {
+      var f = fields[i];
+      var start = starts ? starts[i] : f[1];
+      var value = alightValue(line.substring(start - 1, start - 1 + f[2]), f[3], f[4]);
+      row.push(value);
+      if (f[5]) {
+        var id = alightId(value);
+        var lookup = dictionary.lookups[f[5]];
+        row.push(id && lookup && lookup[id] ? lookup[id] : "");
+        if (id && f[0].indexOf("Preferred") !== 0) {
+          tally[f[5] + "|" + id] = true;
+        }
+      }
+    }
+  }
+
+  function alightCountRow(counts, tally, personId) {
+    var key;
+    for (key in tally) {
+      if (Object.prototype.hasOwnProperty.call(tally, key)) {
+        if (!counts[key]) {
+          counts[key] = { rows: 0, people: {} };
+        }
+        counts[key].rows += 1;
+        if (personId) {
+          counts[key].people[personId] = true;
+        }
+      }
+    }
+  }
+
+  function alightHeaderIndex(header, pattern) {
+    var i;
+    for (i = 0; i < header.length; i += 1) {
+      if (pattern.test(String(header[i] || ""))) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  async function readAlightDictionary(file) {
+    var entries = await readZipEntries(await readFileAsArrayBuffer(file));
+    var sharedStrings = parseSharedStrings(decodeZipText(entries["xl/sharedStrings.xml"]));
+    var sheets = parseWorkbookSheets(decodeZipText(entries["xl/workbook.xml"]), decodeZipText(entries["xl/_rels/workbook.xml.rels"]));
+    var dictionary = { lookups: {}, tabs: [] };
+    var s;
+    for (s = 0; s < sheets.length; s += 1) {
+      if (!sheets[s].path || !entries[sheets[s].path]) {
+        continue;
+      }
+      var rows = parseWorksheetRows(decodeZipText(entries[sheets[s].path]), sharedStrings);
+      if (rows.length < 2) {
+        continue;
+      }
+      var tab = trimValue(sheets[s].name).toUpperCase();
+      var header = rows[0].map(function (cell) { return trimValue(cell).toUpperCase(); });
+      var descIndex = alightHeaderIndex(header, /LDSC|LONG_D|DESCRIPTION/);
+      var countIndex = alightHeaderIndex(header, /^COUNT$/);
+      var convertIndex = alightHeaderIndex(header, /^CONVERT$/);
+      var planIndex = alightHeaderIndex(header, /PLAN_ID$/);
+      var countKey = ALIGHT_COUNT_KEY[tab] || tab;
+      var special = ALIGHT_DICT_LOOKUPS[countKey] && ALIGHT_DICT_LOOKUPS[countKey].tab === tab ? ALIGHT_DICT_LOOKUPS[countKey] : null;
+      var idIndex = special ? header.indexOf(special.id) : 0;
+      var specs = [{ key: tab, id: 0, desc: descIndex }];
+      var key;
+      for (key in ALIGHT_DICT_LOOKUPS) {
+        if (Object.prototype.hasOwnProperty.call(ALIGHT_DICT_LOOKUPS, key) && ALIGHT_DICT_LOOKUPS[key].tab === tab) {
+          var lookupSpec = { key: key, id: header.indexOf(ALIGHT_DICT_LOOKUPS[key].id), desc: header.indexOf(ALIGHT_DICT_LOOKUPS[key].desc) };
+          if (key === tab) {
+            specs[0] = lookupSpec;
+          } else {
+            specs.push(lookupSpec);
+          }
+        }
+      }
+      var r;
+      var k;
+      for (k = 0; k < specs.length; k += 1) {
+        dictionary.lookups[specs[k].key] = dictionary.lookups[specs[k].key] || {};
+      }
+      for (r = 1; r < rows.length; r += 1) {
+        var row = rows[r] || [];
+        if (!alightId(row[0])) {
+          continue;
+        }
+        for (k = 0; k < specs.length; k += 1) {
+          var lookupId = alightId(row[specs[k].id]);
+          var lookup = dictionary.lookups[specs[k].key];
+          if (lookupId && specs[k].desc !== -1 && !lookup[lookupId]) {
+            lookup[lookupId] = trimValue(row[specs[k].desc]);
+          }
+        }
+        if (countIndex !== -1) {
+          var countId = alightId(row[idIndex]);
+          dictionary.tabs.push({
+            tab: tab,
+            key: countKey + "|" + countId,
+            id: countId,
+            desc: special ? trimValue(row[header.indexOf(special.desc)]) : (descIndex !== -1 ? trimValue(row[descIndex]) : ""),
+            plan: planIndex !== -1 ? alightId(row[planIndex]) : "",
+            convert: convertIndex !== -1 ? trimValue(row[convertIndex]).toUpperCase() : "",
+            count: trimValue(row[countIndex])
+          });
+        }
+      }
+    }
+    return dictionary;
+  }
+
+  function alightLineCode(line) {
+    return trimValue(line.substring(7, 11)).toUpperCase();
+  }
+
+  async function parseAlightFileSet(source, files, runId) {
+    var grouped = {};
+    var layoutsByReport = {};
+    var foundReports = [];
+    var discardReasons = [];
+    var errors = [];
+    var totalLines = 0;
+    var acceptedLines = 0;
+    var discardedLines = 0;
+    var dictionary = { lookups: {}, tabs: [] };
+    var dictionaryName = "";
+    var textFiles = [];
+    var ignored = [];
+    var unknownCodes = {};
+    var emptyGroupLines = {};
+    var counts = {};
+    var fileIndex;
+
+    for (fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      var file = files[fileIndex];
+      if (/\.(?:xlsx|xlsm)$/i.test(file.name || "")) {
+        try {
+          dictionary = await readAlightDictionary(file);
+          dictionaryName = file.name;
+        } catch (err) {
+          errors.push(file.name + ": the Data Dictionary could not be read.");
+        }
+        continue;
+      }
+      if (runId !== parseRunId) { return null; }
+      try {
+        var lines = (await readFileAsText(file)).split(/\r\n|\n|\r/);
+        var seenCodes = {};
+        var codeCount = 0;
+        var l;
+        for (l = 0; l < lines.length && codeCount < 2; l += 1) {
+          var head = alightLineCode(lines[l]);
+          if (trimValue(lines[l]) && ALIGHT_LAYOUTS[head] && !seenCodes[head]) {
+            seenCodes[head] = true;
+            codeCount += 1;
+          }
+        }
+        textFiles.push({ name: file.name, lines: lines, combined: codeCount > 1 });
+      } catch (err) {
+        errors.push(err && err.message ? err.message : ("Unable to read " + file.name + "."));
+      }
+    }
+
+    /* A combined Records.txt already holds every line of the single-type files,
+       so reading both would count each line twice. */
+    var hasCombined = textFiles.some(function (entry) { return entry.combined; });
+    if (hasCombined) {
+      textFiles = textFiles.filter(function (entry) {
+        if (!entry.combined) {
+          ignored.push(entry.name);
+        }
+        return entry.combined;
+      });
+    }
+
+    for (fileIndex = 0; fileIndex < textFiles.length; fileIndex += 1) {
+      var entry = textFiles[fileIndex];
+      var cursor;
+      for (cursor = 0; cursor < entry.lines.length; cursor += 1) {
+        if (cursor % 20000 === 0) {
+          setLoadingState({ active: true, complete: false, percent: 5 + ((fileIndex + (cursor / entry.lines.length)) / textFiles.length) * 90, title: "Parsing Files", note: "Reading " + entry.name + " (" + (fileIndex + 1) + " of " + textFiles.length + ")." });
+          await new Promise(function (resolve) { setTimeout(resolve, 0); });
+          if (runId !== parseRunId) { return null; }
+        }
+        var line = entry.lines[cursor];
+        if (!trimValue(line)) {
+          continue;
+        }
+        totalLines += 1;
+        var code = alightLineCode(line);
+        var spec = ALIGHT_LAYOUTS[code];
+        if (!spec) {
+          unknownCodes[trimValue(code) || "(blank)"] = (unknownCodes[trimValue(code) || "(blank)"] || 0) + 1;
+          discardedLines += 1;
+          continue;
+        }
+        if (!grouped[code]) {
+          grouped[code] = [];
+          layoutsByReport[code] = alightLayoutColumns(code);
+          foundReports.push(code);
+        }
+        var personId = trimValue(line.substring(17, 32));
+        var tally = {};
+        var base = [];
+        alightAppendFields(base, line, spec.fields, null, dictionary, tally);
+        if (!spec.group) {
+          grouped[code].push(base);
+          alightCountRow(counts, tally, personId);
+          acceptedLines += 1;
+          continue;
+        }
+        var added = 0;
+        var o;
+        for (o = 0; o < spec.starts.length; o += 1) {
+          if (alightSlotIsEmpty(line, spec.group, spec.starts[o])) {
+            continue;
+          }
+          var slotTally = Object.assign({}, tally);
+          var row = base.slice();
+          alightAppendFields(row, line, spec.group, spec.starts[o], dictionary, slotTally);
+          grouped[code].push(row);
+          alightCountRow(counts, slotTally, personId);
+          added += 1;
+        }
+        if (added) {
+          acceptedLines += 1;
+        } else {
+          emptyGroupLines[code] = (emptyGroupLines[code] || 0) + 1;
+          discardedLines += 1;
+        }
+      }
+    }
+
+    var mismatches = 0;
+    if (dictionary.tabs.length) {
+      var checkRows = [];
+      var t;
+      for (t = 0; t < dictionary.tabs.length; t += 1) {
+        var item = dictionary.tabs[t];
+        var found = counts[item.key];
+        var expected = /^\d+(?:\.0+)?$/.test(item.count) ? parseInt(item.count, 10) : null;
+        var rowsFound = found ? found.rows : 0;
+        var status = expected === null ? "No count given" : (expected === rowsFound ? "Matches" : (rowsFound ? "Different" : "Not in files"));
+        if (status === "Different" || status === "Not in files") {
+          mismatches += 1;
+        }
+        checkRows.push([
+          item.tab, item.id, item.desc, item.plan, item.convert,
+          expected === null ? "" : String(expected),
+          String(rowsFound),
+          String(found ? Object.keys(found.people).length : 0),
+          expected === null ? "" : String(expected - rowsFound),
+          status
+        ]);
+      }
+      grouped[ALIGHT_CHECK_CODE] = checkRows;
+      layoutsByReport[ALIGHT_CHECK_CODE] = ALIGHT_CHECK_LAYOUT.slice();
+      foundReports.push(ALIGHT_CHECK_CODE);
+    }
+
+    var note = "Read " + textFiles.length + " Alight file" + (textFiles.length === 1 ? "" : "s") + " with " + (foundReports.length - (dictionary.tabs.length ? 1 : 0)) + " record types.";
+    if (dictionaryName) {
+      note += " Codes were named from " + dictionaryName + ".";
+      if (mismatches) {
+        note += " " + mismatches + " dictionary count" + (mismatches === 1 ? " does" : "s do") + " not match the files; see the Dictionary Check tab.";
+      }
+    } else {
+      note += " No Data Dictionary was dropped, so the Name columns are blank.";
+      discardReasons.push({ type: "message", label: "No Data Dictionary was dropped, so codes are not turned into names and counts are not checked." });
+    }
+    if (ignored.length) {
+      discardReasons.push({ type: "message", label: "Skipped because the combined file already holds these lines: " + ignored.join(", ") + "." });
+    }
+    var unknownList = Object.keys(unknownCodes).map(function (key) { return key + " (" + unknownCodes[key] + ")"; });
+    if (unknownList.length) {
+      discardReasons.push({ type: "message", label: "Lines with a record tag the layout does not know: " + unknownList.join(", ") + "." });
+    }
+    var emptyList = Object.keys(emptyGroupLines).map(function (key) { return key + " (" + emptyGroupLines[key] + ")"; });
+    if (emptyList.length) {
+      discardReasons.push({ type: "message", label: "Lines where every repeating slot was empty: " + emptyList.join(", ") + "." });
+    }
+
+    return {
+      totalLines: totalLines,
+      acceptedLines: acceptedLines,
+      discardedLines: discardedLines,
+      foundReports: foundReports.sort(),
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      layoutsByReport: layoutsByReport,
+      errors: errors,
+      loadingNote: note
+    };
+  }
+
+  function buildAlightSourceConfig() {
+    var config = {
+      label: "ALIGHT",
+      mode: "folder",
+      supportsExport: true,
+      supportsBreakdown: false,
+      summaryIncluded: false,
+      folderModeHelpText: "Alight mode is active. Drop the record files (or the one combined Records.txt) and the Data Dictionary workbook. Lines are sorted by the four-letter tag inside each line, so file names do not matter.",
+      reports: [],
+      reportNames: {},
+      layouts: {},
+      customFolderParser: parseAlightFileSet,
+      accumulateFiles: true
+    };
+    var code;
+    for (code in ALIGHT_LAYOUTS) {
+      if (Object.prototype.hasOwnProperty.call(ALIGHT_LAYOUTS, code)) {
+        config.reports.push(code);
+        config.reportNames[code] = ALIGHT_LAYOUTS[code].name;
+        config.layouts[code] = alightLayoutColumns(code);
+      }
+    }
+    config.reports.push(ALIGHT_CHECK_CODE);
+    config.reportNames[ALIGHT_CHECK_CODE] = "Dictionary Check";
+    config.layouts[ALIGHT_CHECK_CODE] = ALIGHT_CHECK_LAYOUT.slice();
+    return config;
+  }
+
+  CONFIG.ALIGHT = buildAlightSourceConfig();
 
   /* ---------- ALERUS SERVICE TERMINATION FILE SET ----------
      One .xlsx per report, single tab, header on its own row. Names are
@@ -28137,6 +28610,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     { key: "ASCENSUS", patterns: [/(?:^|[^A-Z])CONVERSION[ _-]*FILE.*\.(?:xlsx|xlsm)$/i] },
     { key: "JOHNHANCOCK", patterns: [/DISCONTINUANCE[ _-]*FILE.*\.(?:xlsx|xlsm)$/i, /^(?:[A-Za-z0-9_ -]*[0-9_ -])?(?:AC|AI|BD|DP|ID|IE|IW|LA|LH|LN|MV|RI|RM|VI|YT)\.(?:sdf|csv|txt|xls|xlsx)$/i, /ADMINISTRATIVE[ _-]*REPORT.*\.(?:csv|xls|xlsx)$/i] },
     { key: "TIAA", patterns: [/^DCNV\.(?:ACCUM|ALLOC|CYTD|HOLB|INDIC|KEY|LOAN|LOANFUND|ORIGSTAT|PYTD|SRCE1231)\.csv$/i, /^FUND_TOT_RPT.*\.(?:xlsx|xlsm)$/i] },
+    { key: "ALIGHT", patterns: [/(?:^|[ _.-])(?:12LN|BELC|CDF|CDH|CRED|CTEL|CTSR|CVBL|DEDS|EEOR|EEST|ELEC|ESVC|FVBL|HHRT|HINC|IVEL|LOAN|OVER|PDLV|PINC|PPAT|PPCT|PPST|PRAD|PRDP|PRLT|PROP|PRQE|PRSN|PTNS|PYRT|PYSC|RCON|SBHS|WTHL|YTDC|SBAL|LN12)(?:[ _.-][^\/]*)?\.(?:txt|text|dat)$/, /(?:^|[ _-])Records\.(?:txt|text|dat)$/i, /Data[ _-]*Dictionary[^\/]*\.(?:xlsx|xlsm)$/i] },
     { key: "ALERUS", patterns: [/^(?:SERVICETERM|SERVTRM)(?:BALALLOC|CONTRIB|DISBSC|DISB|LPMT|HILN|LN|PT)\b.*\.(?:xlsx|xlsm)$/i, /^Participant[ _-]*Valuation[ _-]*Summary.*\.pdf$/i] },
     { key: "AMERITAS", patterns: [/(?:^|[ _-])Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i, /(?:^|[ _-])Disburse\w*[^\/]*\.txt$/i, /Check[ _-]*Register[^\/]*\.txt$/i, /^Loan[ _-]*Distribution[^\/]*\.txt$/i, /^Loan[ _-]*Report[^\/]*\.(?:xlsx|xlsm|xls|csv)$/i, /^Investments?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /^Sources?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i] },
     { key: "PLANDOCS", patterns: [/Onboarding[ _-]*Package.*\.(?:xlsx|xlsm)$/i, /(?:^|[ _-])PRD(?:[ _-]|\.).*\.docx$/i, /Plan[ _-]*Review[ _-]*Document.*\.docx$/i, /Merger[ _-]*Compar\w*.*\.pdf$/i, /merger[^\/]*\.pdf$/i, /Sub(?:mission)?[ _-]*Pack\w*.*\.docx$/i, /(?:^|[ _-])spac\d*\.docx$/i] },
@@ -28232,6 +28706,24 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return checked > 3 && seenCount > 0;
   }
 
+  /* Alight lines carry the source letter T and a two-digit record number in 5-7,
+     a known record tag in 8-11 and TBA in 12-14. */
+  function looksLikeAlightText(text) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var checked = 0;
+    var i;
+    for (i = 0; i < lines.length && checked < 50; i += 1) {
+      if (!trimValue(lines[i]) || (i === lines.length - 1 && checked > 0)) {
+        continue;
+      }
+      checked += 1;
+      if (!/^.{4}T\d\d/.test(lines[i]) || !ALIGHT_LAYOUTS[trimValue(lines[i].substring(7, 11)).toUpperCase()] || lines[i].substring(11, 14) !== "TBA") {
+        return false;
+      }
+    }
+    return checked > 0;
+  }
+
   var millimanRecordLengths = null;
 
   function getMillimanRecordLength(code) {
@@ -28295,6 +28787,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       if (looksLikeMillimanText(head)) {
         return "MILLIMAN";
+      }
+      if (looksLikeAlightText(head)) {
+        return "ALIGHT";
       }
     }
     if (await looksLikeAmericanFundsFileSet(files)) {
