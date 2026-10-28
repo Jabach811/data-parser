@@ -1835,6 +1835,24 @@ body.app-edition.pal-navy.mode-dark{--paper:#101820;--surface:#18232f;--surface-
 #dpcExportDialog button:hover{filter:brightness(.97)}
 #dpcExportDialog button:disabled{cursor:not-allowed!important;opacity:.48!important}
 #dpcExportDialog button:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+#dpcConvDialog{width:min(560px,calc(100vw - 32px));max-height:86vh;overflow-x:hidden;padding:0;border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow-pop);font:14px/1.5 var(--font-ui)}
+#dpcConvDialog::backdrop{background:rgba(10,20,32,.48);backdrop-filter:blur(3px)}
+#dpcConvDialog .cv-head{padding:22px 24px 14px}
+#dpcConvDialog .cv-title{font-size:21px;font-weight:600;letter-spacing:-.025em}
+#dpcConvDialog .cv-note{margin-top:4px;color:var(--ink-2);font-size:13px}
+#dpcConvDialog .cv-body{padding:0 24px 20px;max-height:52vh;overflow-x:hidden;overflow-y:auto}
+#dpcConvDialog .cv-option{display:flex;gap:10px;align-items:center;margin-top:8px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+#dpcConvDialog table{width:100%;border-collapse:collapse;font-size:13px}
+#dpcConvDialog th{position:sticky;top:0;background:var(--surface);padding:8px 10px;border-bottom:1px solid var(--line);color:var(--ink-2);font-weight:600;text-align:left}
+#dpcConvDialog td{padding:8px 10px;border-bottom:1px solid var(--line-soft)}
+#dpcConvDialog .cv-amt{text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
+#dpcConvDialog .cv-pick{text-align:center}
+#dpcConvDialog .cv-foot{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;padding:16px 24px 22px;border-top:1px solid var(--line);background:var(--surface-2)}
+#dpcConvDialog .cv-count{margin-right:auto;color:var(--ink-2);font-size:13px}
+#dpcConvDialog button{min-height:39px;padding:9px 13px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink-2);font:600 13px/1.4 var(--font-ui);cursor:pointer}
+#dpcConvDialog button.cv-primary{border-color:transparent;background:var(--accent);color:var(--on-accent)}
+#dpcConvDialog button:disabled{cursor:not-allowed;opacity:.48}
+#dpcConvDialog button:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 body.density-compact .top{padding:20px 24px;gap:22px}
 body.density-compact .col{gap:12px}
 body.density-compact :is(.drop,.empty-panel,.panel){min-height:160px}
@@ -2067,7 +2085,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     <div id="dpcTotals" class="section" hidden>
       <span class="section-title">Parse summary</span>
       <div class="summary-cards">
-        <div class="summary-card"><span class="eyebrow">Participants</span><span id="participantCountText" class="v">0</span></div>
+        <div class="summary-card"><span id="participantLabelText" class="eyebrow">Participants</span><span id="participantCountText" class="v">0</span></div>
         <div class="summary-card"><span class="eyebrow">Grand total</span><span id="grandTotalText" class="v">0.00</span></div>
         <div class="summary-card"><span class="eyebrow">Discarded lines</span><span id="discardCountText" class="v">&mdash;</span></div>
         <div id="excludedFundSummary" class="summary-side" hidden></div>
@@ -8907,6 +8925,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   var discardText = document.getElementById("discardText");
   var discardCountText = document.getElementById("discardCountText");
   var participantCountText = document.getElementById("participantCountText");
+  var participantLabelText = document.getElementById("participantLabelText");
   var grandTotalText = document.getElementById("grandTotalText");
   var sourceBreakdownText = document.getElementById("sourceBreakdownText");
   var fundBreakdownText = document.getElementById("fundBreakdownText");
@@ -8940,6 +8959,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   var lastParseResult = null;
   var lastBlockedExportRequest = null;
   var activeExportRequest = null;
+  var exportConversionPlan = null;
+  var CONVERSION_TYPES = [
+    { key: "cash", label: "Cash conversion", tab: "Cash" },
+    { key: "mapping", label: "Mapping", tab: "Mapping", reReg: "N" },
+    { key: "tik", label: "Transfer in kind", tab: "TIK", reReg: "Y" }
+  ];
   var DATA_PARSER_BUILD = "Data Parser Console 2026-09-07 export guard";
   var PREVIEW_ROW_LIMIT = 10;
   var SOURCE_CARD_META = {
@@ -9408,6 +9433,19 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     sourceHeaders: ["Fund-Src"],
     fundHeaders: ["Fund-Iv"],
     amountHeaders: ["Net Cash"]
+  };
+
+  /* Alight CVBL holds one row per person, fund, sub-fund and money source.
+     Only people with a balance appear, so the count is people with balances. */
+  SUMMARY_RULES.ALIGHT = {
+    reportCode: "CVBL",
+    participantHeaders: ["Social Security Number", "Person ID"],
+    sourceHeaders: ["Money Source"],
+    fundHeaders: ["Fund"],
+    amountHeaders: ["Balance Value"],
+    /* Filled in per parse by alightLoanFunds: loans are not counted as balances. */
+    excludeFunds: [],
+    excludeLabel: "Loan Fund"
   };
 
   /* ---------- PARSE ANOMALY LEDGER ----------
@@ -12104,8 +12142,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       { header: "Status", type: "text" },
       { header: "Section", type: "text" },
       { header: "Description", type: "text" },
-      { header: "Source ID", type: "text" },
       { header: "Fund ID", type: "text" },
+      { header: "Source ID", type: "text" },
       { header: "Alloc %", type: "text" }
     ];
     for (var i = 0; i < VOYA_957_COL_LABELS.length; i += 1) {
@@ -12375,7 +12413,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return { rows: rows, participants: participants, planTotal: planTotal, planCounts: planCounts, diag: diag };
   }
 
-  // Fund rows carry a 3-character source+fund id; anything else is a subtotal line.
+  // Fund rows carry a 3-character fund+source id; anything else is a subtotal line.
   function voya957MainRows(rows) {
     return rows.filter(function (r) {
       return r.id.length === 3 && r.id.indexOf("*") === -1;
@@ -12574,6 +12612,84 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return ["Summary of Participant Accounts: check passed. " + parsed.rows.length + " rows add up to $" + formatVoyaAmount(sum) + ", matching the Grand Total on the last page."];
     }
     return ["Summary of Participant Accounts: rows add up to $" + formatVoyaAmount(sum) + " but the report's Grand Total is $" + formatVoyaAmount(parsed.grandTotal) + " (difference $" + formatVoyaAmount(sum - parsed.grandTotal) + "). Some rows may be missing or doubled."];
+  }
+
+  // 957 prints SSNs with dashes, the PF extract without; compare on the last 9 digits.
+  function voyaSsnKey(value) {
+    return String(value || "").replace(/\D/g, "").slice(-9);
+  }
+
+  /* Every Voya report that lists participants should agree on who is in the plan
+     and, where it carries a balance, on the total. The PF extract has no dollar
+     balance column, so only its headcount is compared. */
+  var VOYA_CROSS_CHECK_REPORTS = [
+    { code: VOYA_957_PARTICIPANT_REPORT, label: "957 Participant Totals", id: "SSN", amount: "End Bal" },
+    { code: VOYA_957_DETAIL_REPORT, label: "957 fund detail", id: "SSN", amount: "End Bal" },
+    { code: VOYA_SUMMARY_REPORT, label: "Summary of Participant Accounts", id: "SSN", amount: "Total Dollars" },
+    { code: "PF", label: "PF extract", id: "PF-PART-ID", amount: null }
+  ];
+
+  function tallyVoyaReport(check, rows, layouts) {
+    var idIndex = getHeaderIndex(layouts, [check.id]);
+    var amountIndex = check.amount ? getHeaderIndex(layouts, [check.amount]) : -1;
+    var ids = {};
+    var count = 0;
+    var total = 0;
+    for (var i = 0; i < rows.length; i += 1) {
+      var key = voyaSsnKey(rows[i][idIndex]);
+      if (key && !ids[key]) {
+        ids[key] = true;
+        count += 1;
+      }
+      if (amountIndex > -1) {
+        total += parseAmountValue(rows[i][amountIndex]);
+      }
+    }
+    return { label: check.label, ids: ids, count: count, total: amountIndex > -1 ? Math.round(total * 100) / 100 : null };
+  }
+
+  function buildVoyaCrossReportMessages(grouped, layoutsByReport) {
+    var tallies = [];
+    for (var i = 0; i < VOYA_CROSS_CHECK_REPORTS.length; i += 1) {
+      var check = VOYA_CROSS_CHECK_REPORTS[i];
+      if (grouped[check.code] && grouped[check.code].length && layoutsByReport[check.code]) {
+        tallies.push(tallyVoyaReport(check, grouped[check.code], layoutsByReport[check.code]));
+      }
+    }
+    if (tallies.length < 2) {
+      return [];
+    }
+    var base = tallies[0];
+    var problems = [];
+    for (i = 1; i < tallies.length; i += 1) {
+      var other = tallies[i];
+      var missing = Object.keys(base.ids).filter(function (k) { return !other.ids[k]; });
+      var extra = Object.keys(other.ids).filter(function (k) { return !base.ids[k]; });
+      var totalOff = other.total !== null && base.total !== null && Math.abs(other.total - base.total) >= 0.05;
+      if (!missing.length && !extra.length && !totalOff) {
+        continue;
+      }
+      var line = other.label + " shows " + other.count + " participant(s)" +
+        (other.total !== null ? " and $" + formatVoyaAmount(other.total) : "") +
+        ", against " + base.count + (base.total !== null ? " and $" + formatVoyaAmount(base.total) : "") + " in " + base.label + ".";
+      if (totalOff) {
+        line += " The totals are $" + formatVoyaAmount(Math.abs(other.total - base.total)) + " apart.";
+      }
+      if (missing.length) {
+        line += " Not in " + other.label + ": " + missing.slice(0, 20).map(maskVoyaSsn).join(", ") + (missing.length > 20 ? " …and " + (missing.length - 20) + " more" : "") + ".";
+      }
+      if (extra.length) {
+        line += " Only in " + other.label + ": " + extra.slice(0, 20).map(maskVoyaSsn).join(", ") + (extra.length > 20 ? " …and " + (extra.length - 20) + " more" : "") + ".";
+      }
+      problems.push(line);
+    }
+    if (!problems.length) {
+      var countOnly = tallies.filter(function (t) { return t.total === null; }).map(function (t) { return t.label; });
+      return ["Voya reports agree: " + tallies.map(function (t) { return t.label; }).join(", ") + " all show " + base.count + " participant(s)" +
+        (base.total !== null ? " and $" + formatVoyaAmount(base.total) : "") + "." +
+        (countOnly.length ? " (" + countOnly.join(", ") + ": headcount only, no balance to compare.)" : "")];
+    }
+    return ["Voya reports do not agree. Check these before exporting."].concat(problems);
   }
 
   /* ---------- VOYA T985 EMPLOYEE LOAN PAYMENT SCHEDULE ----------
@@ -13030,6 +13146,35 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
     }
 
+    var crossMessages = buildVoyaCrossReportMessages(grouped, source.layouts);
+    for (var cm = 0; cm < crossMessages.length; cm += 1) {
+      discardReasons.push({ type: "message", label: crossMessages[cm] });
+    }
+    // Headcount and grand total come from the 957 Participant Totals when it was loaded.
+    var summaryHeadline = null;
+    if (grouped[VOYA_957_PARTICIPANT_REPORT]) {
+      var headline = tallyVoyaReport(VOYA_CROSS_CHECK_REPORTS[0], grouped[VOYA_957_PARTICIPANT_REPORT], source.layouts[VOYA_957_PARTICIPANT_REPORT]);
+      summaryHeadline = { participantCount: headline.count, grandTotal: headline.total };
+      // Paychex-style 957 sets have no PF extract, so the source and fund split comes from the fund detail.
+      if (!grouped.PF && grouped[VOYA_957_DETAIL_REPORT]) {
+        var detailLayout = source.layouts[VOYA_957_DETAIL_REPORT];
+        var fundIndex = getHeaderIndex(detailLayout, ["Fund ID"]);
+        var sourceIndex = getHeaderIndex(detailLayout, ["Source ID"]);
+        var endIndex = getHeaderIndex(detailLayout, ["End Bal"]);
+        var fundMap = {};
+        var sourceMap = {};
+        grouped[VOYA_957_DETAIL_REPORT].forEach(function (r) {
+          var amount = parseAmountValue(r[endIndex]);
+          var fundKey = normalizeSummaryCodeForSource(source, "fund", r[fundIndex]);
+          var sourceKey = normalizeSummaryCodeForSource(source, "source", r[sourceIndex]);
+          if (fundKey) { fundMap[fundKey] = (fundMap[fundKey] || 0) + amount; }
+          if (sourceKey) { sourceMap[sourceKey] = (sourceMap[sourceKey] || 0) + amount; }
+        });
+        summaryHeadline.fundTotals = mapTotalsToSortedList(fundMap);
+        summaryHeadline.sourceTotals = mapTotalsToSortedList(sourceMap);
+      }
+    }
+
     return {
       totalLines: totalLines,
       acceptedLines: acceptedLines,
@@ -13042,6 +13187,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       caseNumber: validateAndFormatCaseNumber(true).formatted,
       planName: planNameInput ? trimValue(planNameInput.value) : "",
       summaryTotals: null,
+      summaryHeadline: summaryHeadline,
       layoutsByReport: source.layouts,
       errors: errors,
       loadingNote: "Parsed " + matchedFiles + " Voya file(s); skipped " + skippedFiles + "."
@@ -15456,6 +15602,312 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return dictionary;
   }
 
+  /* Records not listed here are still read (and counted on the Dictionary
+     Check) but get no tab of their own. */
+  var ALIGHT_SHOWN_RECORDS = ["CVBL", "LOAN"];
+
+  var ALIGHT_EMPLOYEE_DETAILS_LAYOUT = [
+    { header: "Person ID", type: "text" },
+    { header: "Social Security Number", type: "text" },
+    { header: "Participant Name", type: "text" },
+    { header: "Record", type: "text" },
+    { header: "Service Definition", type: "text" },
+    { header: "Service Definition Name", type: "text" },
+    { header: "Employment Service Begin Date", type: "date" },
+    { header: "Service Credit", type: "decimal" },
+    { header: "Adjusted Service Date", type: "date" },
+    { header: "Employment Service End Date", type: "date" },
+    { header: "Hours Category", type: "text" },
+    { header: "Hours Category Name", type: "text" },
+    { header: "Hours Count", type: "decimal" }
+  ];
+  var ALIGHT_INVESTMENT_ELECTIONS_LAYOUT = [
+    { header: "Person ID", type: "text" },
+    { header: "Social Security Number", type: "text" },
+    { header: "Participant Name", type: "text" },
+    { header: "Fund", type: "text" },
+    { header: "Fund Name", type: "text" },
+    { header: "Investment Election Begin Date", type: "date" },
+    { header: "Election Percent", type: "text" }
+  ];
+
+  function alightPeople(grouped, layoutsByReport) {
+    var headers = (layoutsByReport.PRSN || []).map(function (column) { return column.header; });
+    var id = headers.indexOf("Person ID");
+    var ssn = headers.indexOf("Taxpayer ID");
+    var first = headers.indexOf("First Name");
+    var last = headers.indexOf("Last Name");
+    var people = {};
+    (grouped.PRSN || []).forEach(function (row) {
+      people[row[id]] = { ssn: row[ssn] || "", name: trimValue((row[first] || "") + " " + (row[last] || "")) };
+    });
+    return people;
+  }
+
+  function alightPersonCells(people, personId) {
+    var person = people[personId] || { ssn: "", name: "" };
+    return [personId, person.ssn, person.name];
+  }
+
+  /* The named columns of one record, in the order given. */
+  function alightPick(grouped, layoutsByReport, code, headers) {
+    var layout = (layoutsByReport[code] || []).map(function (column) { return column.header; });
+    var indexes = headers.map(function (header) { return layout.indexOf(header); });
+    return (grouped[code] || []).map(function (row) {
+      return indexes.map(function (index) { return index === -1 ? "" : (row[index] || ""); });
+    });
+  }
+
+  /* Employment Service and Hours on one tab, each person's rows together. */
+  function buildAlightEmployeeDetails(grouped, layoutsByReport, people) {
+    var rows = [];
+    alightPick(grouped, layoutsByReport, "ESVC", ["Person ID", "Service Definition", "Service Definition Name", "Employment Service Begin Date", "Service Earned Count", "Adjusted Service Date", "Employment Service End Date"]).forEach(function (values) {
+      rows.push(alightPersonCells(people, values[0]).concat(["Service"], values.slice(1), ["", "", ""]));
+    });
+    alightPick(grouped, layoutsByReport, "HINC", ["Person ID", "Hours Category", "Hours Category Name", "Hours Count"]).forEach(function (values) {
+      rows.push(alightPersonCells(people, values[0]).concat(["Hours", "", "", "", "", "", ""], values.slice(1)));
+    });
+    return rows.sort(function (a, b) { return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0); });
+  }
+
+  /* Only each person's most recent elections: the rows on their latest begin date. */
+  function buildAlightInvestmentElections(grouped, layoutsByReport, people) {
+    var rows = alightPick(grouped, layoutsByReport, "IVEL", ["Person ID", "Fund", "Fund Name", "Investment Election Begin Date", "Election Percent"]);
+    var latest = {};
+    rows.forEach(function (values) {
+      if (!latest[values[0]] || values[3] > latest[values[0]]) {
+        latest[values[0]] = values[3];
+      }
+    });
+    return rows.filter(function (values) {
+      return values[3] === latest[values[0]];
+    }).map(function (values) {
+      return alightPersonCells(people, values[0]).concat(values.slice(1));
+    });
+  }
+
+  var ALIGHT_LOAN_HEADER_LAYOUT = [
+    { header: "Person ID", type: "text" },
+    { header: "Social Security Number", type: "text" },
+    { header: "Participant Name", type: "text" },
+    { header: "Plan ID", type: "text" },
+    { header: "Loan Number", type: "text" },
+    { header: "Loan Sub-Fund", type: "text" },
+    { header: "Loan Type Code", type: "text" },
+    { header: "Loan Status Code", type: "text" },
+    { header: "Default Date", type: "date" },
+    { header: "Deemed Amount", type: "decimal" },
+    { header: "Loan Amount", type: "decimal" },
+    { header: "Loan Balance", type: "decimal" },
+    { header: "Issuance Date", type: "date" },
+    { header: "Interest Rate", type: "decimal" },
+    { header: "Repayment Amount", type: "decimal" },
+    { header: "Payment Frequency", type: "text" },
+    { header: "First Payment Date", type: "date" },
+    { header: "Last Payment Date", type: "date" },
+    { header: "Next Payment Date", type: "date" },
+    { header: "Loan Payoff Date", type: "date" },
+    { header: "Repayments Remaining", type: "text" },
+    { header: "Original Number of Repayments", type: "text" },
+    { header: "Principal Paid", type: "decimal" },
+    { header: "Interest Paid", type: "decimal" }
+  ];
+  var ALIGHT_LOAN_SOURCE_LAYOUT = [
+    { header: "Person ID", type: "text" },
+    { header: "Social Security Number", type: "text" },
+    { header: "Participant Name", type: "text" },
+    { header: "Loan Number", type: "text" },
+    { header: "Loan Sub-Fund", type: "text" },
+    { header: "Source Code", type: "text" },
+    { header: "Source Name", type: "text" },
+    { header: "Loan Balance", type: "decimal" },
+    { header: "Note", type: "text" }
+  ];
+
+  function alightCents(value) {
+    var number = parseFloat(value);
+    return isNaN(number) ? 0 : Math.round(number * 100);
+  }
+
+  function alightCentsText(cents) {
+    var abs = Math.abs(cents);
+    var fraction = String(abs % 100);
+    return (cents < 0 ? "-" : "") + Math.floor(abs / 100) + "." + (fraction.length < 2 ? "0" + fraction : fraction);
+  }
+
+  /* LOAN has no money source. The loan's sub-fund (the "Loan Fund") also shows
+     up on CVBL, one row per money source, so Loan Source reads it from there.
+     CVBL cannot tell two loans in the same sub-fund apart, so when a person has
+     more than one, each loan's balance is split by that sub-fund's source mix. */
+  function buildAlightLoanReports(grouped, layoutsByReport, people) {
+    var loans = grouped.LOAN || [];
+    if (!loans.length) {
+      return null;
+    }
+    function col(code, header) {
+      var layout = layoutsByReport[code] || [];
+      var i;
+      for (i = 0; i < layout.length; i += 1) {
+        if (layout[i].header === header) {
+          return i;
+        }
+      }
+      return -1;
+    }
+    function cell(row, code, header) {
+      var index = col(code, header);
+      return index === -1 ? "" : (row[index] || "");
+    }
+
+    var funds = {};
+    (grouped.CVBL || []).forEach(function (row) {
+      var key = cell(row, "CVBL", "Person ID") + "|" + cell(row, "CVBL", "Sub-Fund");
+      var fund = funds[key] || (funds[key] = { order: [], bySource: {}, total: 0 });
+      var code = cell(row, "CVBL", "Money Source");
+      var cents = alightCents(cell(row, "CVBL", "Balance Value"));
+      if (!fund.bySource[code]) {
+        fund.bySource[code] = { name: cell(row, "CVBL", "Money Source Name"), cents: 0 };
+        fund.order.push(code);
+      }
+      fund.bySource[code].cents += cents;
+      fund.total += cents;
+    });
+
+    var byPerson = {};
+    var personOrder = [];
+    loans.forEach(function (row) {
+      var personId = cell(row, "LOAN", "Person ID");
+      if (!byPerson[personId]) {
+        byPerson[personId] = [];
+        personOrder.push(personId);
+      }
+      byPerson[personId].push(row);
+    });
+
+    var headerRows = [];
+    var sourceRows = [];
+    personOrder.forEach(function (personId) {
+      var person = people[personId] || { ssn: "", name: "" };
+      var personLoans = byPerson[personId].slice().sort(function (a, b) {
+        var left = cell(a, "LOAN", "Original Loan Effective Date");
+        var right = cell(b, "LOAN", "Original Loan Effective Date");
+        return left < right ? -1 : (left > right ? 1 : 0);
+      });
+      var bySubFund = {};
+      var subFundOrder = [];
+      personLoans.forEach(function (row, index) {
+        var loanNumber = String(index + 1);
+        var subFund = cell(row, "LOAN", "Loan Sub-Fund");
+        if (!bySubFund[subFund]) {
+          bySubFund[subFund] = [];
+          subFundOrder.push(subFund);
+        }
+        bySubFund[subFund].push({ number: loanNumber, balance: cell(row, "LOAN", "Principal Outstanding") });
+        /* Status T is a deemed loan: it defaulted on its Tax Date for the whole
+           outstanding principal. Every other loan has no default. */
+        var deemed = trimValue(cell(row, "LOAN", "Loan Status Code")).toUpperCase() === "T";
+        headerRows.push([
+          personId, person.ssn, person.name,
+          cell(row, "LOAN", "Plan ID"), loanNumber, subFund,
+          cell(row, "LOAN", "Loan Type Code"), cell(row, "LOAN", "Loan Status Code"),
+          deemed ? cell(row, "LOAN", "Tax Date") : "",
+          deemed ? cell(row, "LOAN", "Principal Outstanding") : "0.00",
+          cell(row, "LOAN", "Original Loan Amount"), cell(row, "LOAN", "Principal Outstanding"),
+          cell(row, "LOAN", "Original Loan Effective Date"),
+          cell(row, "LOAN", "Interest Rate"), cell(row, "LOAN", "Repayment Amount"),
+          cell(row, "LOAN", "Amortization Frequency Code"),
+          cell(row, "LOAN", "First Repayment Due Date"), cell(row, "LOAN", "Last Repayment Date"),
+          cell(row, "LOAN", "Next Repayment Date"), cell(row, "LOAN", "Loan Payoff Date"),
+          cell(row, "LOAN", "Repayments Remaining"), cell(row, "LOAN", "Original Number of Repayments"),
+          cell(row, "LOAN", "Loan Principal Paid Amount"), cell(row, "LOAN", "Loan Interest Paid Amount")
+        ]);
+      });
+
+      subFundOrder.forEach(function (subFund) {
+        var group = bySubFund[subFund];
+        var fund = funds[personId + "|" + subFund];
+        var loanTotal = 0;
+        group.forEach(function (loan) { loanTotal += alightCents(loan.balance); });
+        if (!fund || !fund.total) {
+          group.forEach(function (loan) {
+            sourceRows.push([personId, person.ssn, person.name, loan.number, subFund, "", "", loan.balance, "No Loan Fund balance on CVBL for this person, so the source is unknown."]);
+          });
+          return;
+        }
+        var notes = [];
+        if (group.length > 1) {
+          notes.push("Split across " + group.length + " loans in the same Loan Fund by its source mix.");
+        }
+        if (fund.total !== loanTotal) {
+          notes.push("Loan Fund on CVBL is " + alightCentsText(fund.total) + " but the loan balance is " + alightCentsText(loanTotal) + ".");
+        }
+        var note = notes.join(" ");
+        group.forEach(function (loan) {
+          var loanCents = group.length > 1 ? alightCents(loan.balance) : fund.total;
+          var given = 0;
+          fund.order.forEach(function (code, index) {
+            var share = fund.bySource[code];
+            var cents;
+            if (group.length === 1) {
+              cents = share.cents;
+            } else if (index === fund.order.length - 1) {
+              cents = loanCents - given;
+            } else {
+              cents = Math.round(loanCents * share.cents / fund.total);
+            }
+            given += cents;
+            sourceRows.push([personId, person.ssn, person.name, loan.number, subFund, code, share.name, alightCentsText(cents), note]);
+          });
+        });
+      });
+    });
+    return { header: headerRows, source: sourceRows };
+  }
+
+  /* The funds that hold loans: any fund on CVBL whose sub-fund is a loan
+     sub-fund, either from the dictionary's LOAN tab or from a LOAN record. */
+  function alightLoanFunds(grouped, layoutsByReport, dictionary) {
+    var loanSubFunds = Object.assign({}, dictionary.lookups.LOAN || {});
+    var loanHeaders = (layoutsByReport.LOAN || []).map(function (column) { return column.header; });
+    var loanSubFundIndex = loanHeaders.indexOf("Loan Sub-Fund");
+    (grouped.LOAN || []).forEach(function (row) {
+      if (loanSubFundIndex > -1 && row[loanSubFundIndex]) {
+        loanSubFunds[row[loanSubFundIndex]] = true;
+      }
+    });
+    var cvblHeaders = (layoutsByReport.CVBL || []).map(function (column) { return column.header; });
+    var fundIndex = cvblHeaders.indexOf("Fund");
+    var subFundIndex = cvblHeaders.indexOf("Sub-Fund");
+    var funds = [];
+    (grouped.CVBL || []).forEach(function (row) {
+      var fund = trimValue(row[fundIndex]).toUpperCase();
+      if (fund && loanSubFunds[row[subFundIndex]] && funds.indexOf(fund) === -1) {
+        funds.push(fund);
+      }
+    });
+    return funds;
+  }
+
+  /* CVBL only carries Alight's Person ID. Put the real SSN from PRSN beside it
+     so the balance export and participant count use SSNs. Returns how many
+     people had no PRSN record and kept their Person ID instead. */
+  function alightAddCvblSsn(grouped, layoutsByReport, people) {
+    if (!grouped.CVBL || !grouped.PRSN) {
+      return 0;
+    }
+    var cvblId = layoutsByReport.CVBL.map(function (column) { return column.header; }).indexOf("Person ID");
+    var missing = {};
+    grouped.CVBL.forEach(function (row) {
+      var ssn = people[row[cvblId]] && people[row[cvblId]].ssn;
+      if (!ssn) {
+        missing[row[cvblId]] = true;
+      }
+      row.splice(cvblId + 1, 0, ssn || row[cvblId]);
+    });
+    layoutsByReport.CVBL.splice(cvblId + 1, 0, { header: "Social Security Number", type: "text" });
+    return Object.keys(missing).length;
+  }
+
   function alightLineCode(line) {
     return trimValue(line.substring(7, 11)).toUpperCase();
   }
@@ -15578,6 +16030,35 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
     }
 
+    var recordTypeCount = foundReports.length;
+    var people = alightPeople(grouped, layoutsByReport);
+    var loanReports = buildAlightLoanReports(grouped, layoutsByReport, people);
+    if (loanReports) {
+      grouped.LOAN_HEADER = loanReports.header;
+      layoutsByReport.LOAN_HEADER = ALIGHT_LOAN_HEADER_LAYOUT.slice();
+      grouped.LOAN_SOURCE = loanReports.source;
+      layoutsByReport.LOAN_SOURCE = ALIGHT_LOAN_SOURCE_LAYOUT.slice();
+      foundReports.push("LOAN_HEADER", "LOAN_SOURCE");
+    }
+    var employeeDetails = buildAlightEmployeeDetails(grouped, layoutsByReport, people);
+    if (employeeDetails.length) {
+      grouped.EMPLOYEE_DETAILS = employeeDetails;
+      layoutsByReport.EMPLOYEE_DETAILS = ALIGHT_EMPLOYEE_DETAILS_LAYOUT.slice();
+      foundReports.push("EMPLOYEE_DETAILS");
+    }
+    var investmentElections = buildAlightInvestmentElections(grouped, layoutsByReport, people);
+    if (investmentElections.length) {
+      grouped.INVESTMENT_ELECTIONS = investmentElections;
+      layoutsByReport.INVESTMENT_ELECTIONS = ALIGHT_INVESTMENT_ELECTIONS_LAYOUT.slice();
+      foundReports.push("INVESTMENT_ELECTIONS");
+    }
+
+    SUMMARY_RULES.ALIGHT.excludeFunds = alightLoanFunds(grouped, layoutsByReport, dictionary);
+    var noSsn = alightAddCvblSsn(grouped, layoutsByReport, people);
+    if (noSsn) {
+      discardReasons.push({ type: "message", label: noSsn + " " + (noSsn === 1 ? "person" : "people") + " on CVBL had no Person record, so the Balance Export shows their Alight Person ID instead of an SSN." });
+    }
+
     var mismatches = 0;
     if (dictionary.tabs.length) {
       var checkRows = [];
@@ -15605,7 +16086,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       foundReports.push(ALIGHT_CHECK_CODE);
     }
 
-    var note = "Read " + textFiles.length + " Alight file" + (textFiles.length === 1 ? "" : "s") + " with " + (foundReports.length - (dictionary.tabs.length ? 1 : 0)) + " record types.";
+    var note = "Read " + textFiles.length + " Alight file" + (textFiles.length === 1 ? "" : "s") + " with " + recordTypeCount + " record types.";
     if (dictionaryName) {
       note += " Codes were named from " + dictionaryName + ".";
       if (mismatches) {
@@ -15650,8 +16131,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       label: "ALIGHT",
       mode: "folder",
       supportsExport: true,
-      supportsBreakdown: false,
-      summaryIncluded: false,
+      summaryIncluded: true,
+      participantLabel: "Total participants with balances",
       folderModeHelpText: "Alight mode is active. Drop the record files (or the one combined Records.txt) and the Data Dictionary workbook. Lines are sorted by the four-letter tag inside each line, so file names do not matter.",
       reports: [],
       reportNames: {},
@@ -15659,14 +16140,20 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       customFolderParser: parseAlightFileSet,
       accumulateFiles: true
     };
-    var code;
-    for (code in ALIGHT_LAYOUTS) {
-      if (Object.prototype.hasOwnProperty.call(ALIGHT_LAYOUTS, code)) {
-        config.reports.push(code);
-        config.reportNames[code] = ALIGHT_LAYOUTS[code].name;
-        config.layouts[code] = alightLayoutColumns(code);
-      }
-    }
+    ALIGHT_SHOWN_RECORDS.forEach(function (code) {
+      config.reports.push(code);
+      config.reportNames[code] = ALIGHT_LAYOUTS[code].name;
+      config.layouts[code] = alightLayoutColumns(code);
+    });
+    config.reports.push("LOAN_HEADER", "LOAN_SOURCE", "EMPLOYEE_DETAILS", "INVESTMENT_ELECTIONS");
+    config.reportNames.LOAN_HEADER = "Loan Header";
+    config.reportNames.LOAN_SOURCE = "Loan Source";
+    config.reportNames.EMPLOYEE_DETAILS = "Employee Details";
+    config.reportNames.INVESTMENT_ELECTIONS = "Investment Elections";
+    config.layouts.LOAN_HEADER = ALIGHT_LOAN_HEADER_LAYOUT.slice();
+    config.layouts.LOAN_SOURCE = ALIGHT_LOAN_SOURCE_LAYOUT.slice();
+    config.layouts.EMPLOYEE_DETAILS = ALIGHT_EMPLOYEE_DETAILS_LAYOUT.slice();
+    config.layouts.INVESTMENT_ELECTIONS = ALIGHT_INVESTMENT_ELECTIONS_LAYOUT.slice();
     config.reports.push(ALIGHT_CHECK_CODE);
     config.reportNames[ALIGHT_CHECK_CODE] = "Dictionary Check";
     config.layouts[ALIGHT_CHECK_CODE] = ALIGHT_CHECK_LAYOUT.slice();
@@ -18340,6 +18827,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       recordLength: base.recordLength,
       folderPattern: base.folderPattern || null,
       summaryIncluded: !!base.summaryIncluded,
+      participantLabel: base.participantLabel || "Participants",
       reports: mergedReports,
       layouts: mergedLayouts,
       recordRules: mergedRecordRules,
@@ -19064,6 +19552,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   function setBreakdownAvailability(source) {
     var enabled = !!source && source.supportsBreakdown !== false;
+    participantLabelText.textContent = (source && source.participantLabel) || "Participants";
     if (breakdownPanel) {
       breakdownPanel.classList.toggle("is-muted", !enabled);
     }
@@ -19139,6 +19628,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     discardText.innerHTML = "<div class=\"breakdown-empty\">No data yet.</div>";
     if (discardCountText) discardCountText.innerHTML = "&mdash;";
     participantCountText.innerHTML = "0";
+    participantLabelText.textContent = (source && source.participantLabel) || "Participants";
     grandTotalText.innerHTML = "0.00";
     sourceBreakdownText.innerHTML = "<div class=\"breakdown-empty\">No data yet.</div>";
     fundBreakdownText.innerHTML = "<div class=\"breakdown-empty\">No data yet.</div>";
@@ -22159,6 +22649,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var vested = /TOTAL VESTED BALANCE\s+(-?[\d,]*\.?\d*-?)/.exec(block);
     var status = /STATUS:\s*(\S+)/.exec(block);
     var location = /LOCATION:\s*(\S+)/.exec(block);
+    // A blank LOCATION picks up whatever prints next, like "YRS-SVC:" or the "=>" name line.
+    if (location && (/^YRS-SVC:/i.test(location[1]) || /^=>/.test(location[1]))) { location = null; }
     var comp = /401K EE:\s*(-?[\d,]*\.?\d*-?)/.exec(block);
     return [
       ssn.replace(/[^0-9]/g, ""), name, address, cityLine,
@@ -22339,6 +22831,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var sourceCode = row.id.slice(-1);
       var fundName = state.fundLookup[fundCode] || state.fundNames[fundCode] || "";
       var sourceName = state.sourceLookup[sourceCode] || state.sourceNames[sourceCode] || "";
+      // "** TOTAL" and "________" lines are printed subtotals and rules, not balances.
+      if (!row.id && /^(?:\*+\s*TOTAL\b.*|_+)$/i.test(row.desc)) { continue; }
       if (row.planTotal) {
         var amount = parseAmountValue(activity[6]);
         if (fundCode) { state.planFunds[fundCode] = (state.planFunds[fundCode] || 0) + amount; }
@@ -25511,6 +26005,21 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   }
 
   function buildSummaryTotals(result) {
+    var totals = buildRuleSummaryTotals(result);
+    // Voya's headcount and grand total come from its 957 Participant Totals, not the PF extract.
+    if (result && result.summaryHeadline) {
+      totals.available = true;
+      totals.participantCount = result.summaryHeadline.participantCount;
+      totals.grandTotal = result.summaryHeadline.grandTotal;
+      if (result.summaryHeadline.sourceTotals) {
+        totals.sourceTotals = result.summaryHeadline.sourceTotals;
+        totals.fundTotals = result.summaryHeadline.fundTotals;
+      }
+    }
+    return totals;
+  }
+
+  function buildRuleSummaryTotals(result) {
     var source = getSelectedSource();
     if (result && result.summaryTotals) {
       result.summaryTotals.available = !!(source && resolveRuleReportCode(
@@ -25632,7 +26141,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       bySource[sourceValue] = (bySource[sourceValue] || 0) + amountValue / divisor;
       found = true;
     }
-    return found ? { label: rule.excludeFunds.join(", "), bySource: bySource } : null;
+    return found ? { label: rule.excludeLabel || rule.excludeFunds.join(", "), bySource: bySource } : null;
   }
 
   function renderExcludedFundSummary(result) {
@@ -25658,6 +26167,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   function renderSummaryTotals(result) {
     var source = getSelectedSource();
+    participantLabelText.textContent = (source && source.participantLabel) || "Participants";
     renderExcludedFundSummary(result);
     if (!source) {
       setBreakdownAvailability(source);
@@ -26450,7 +26960,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return xml.replace('<pageMargins','<hyperlinks>'+links.join('')+'</hyperlinks><pageMargins');
   }
 
-  function buildCustomBalanceSheet(result, caseNumber) {
+  function buildCustomBalanceSheet(result, caseNumber, sheetNumber, split) {
     var source = getSelectedSource();
     if (!source) {
       return null;
@@ -26493,6 +27003,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (isExcludedSummaryFund(rule, fundValue)) {
         continue;
       }
+      if (split && !split.funds[normalizeSummaryCodeForSource(source, "fund", sliceSummaryCode(fundValue, rule.fundSlice))]) {
+        continue;
+      }
 
       for (c = 0; c < amountIndices.length; c += 1) {
         amountValue = parseAmountValue(currentRow[amountIndices[c]]);
@@ -26515,8 +27028,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
 
     return {
-      name: "Balance Export",
-      path: "xl/worksheets/sheet2.xml",
+      name: split ? split.name : "Balance Export",
+      path: "xl/worksheets/sheet" + sheetNumber + ".xml",
       content: worksheetXml(exportRows, [
         "<col min=\"1\" max=\"1\" width=\"18\" bestFit=\"1\" customWidth=\"1\"/>",
         "<col min=\"2\" max=\"2\" width=\"12\" bestFit=\"1\" customWidth=\"1\"/>",
@@ -26532,7 +27045,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     };
   }
 
-  function buildConvFileSheet(result, caseNumber, mappingState, sheetNumber) {
+  /* split: { funds, reReg, name }. A split CONV tab only carries its own funds and is
+     built even without a mapping file, leaving the TA fund code blank. */
+  function buildConvFileSheet(result, caseNumber, mappingState, sheetNumber, split) {
     var source = getSelectedSource();
     var summary;
     var mappingIndex;
@@ -26541,19 +27056,23 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var fundDataStartIndex = 1;
     var i;
     var rowNumber;
-    if (!source || !mappingState || mappingState.status !== "valid") {
+    var funds;
+    var hasFundMapping = !!(mappingState && mappingState.status === "valid" &&
+      mappingState.workbookSheets && mappingState.workbookSheets.fund &&
+      mappingState.fundRows && mappingState.fundRows.length);
+    if (!source || (!hasFundMapping && !(split && split.funds))) {
       return null;
     }
     summary = buildSummaryTotals(result);
-    if (!summary.fundTotals || !summary.fundTotals.length) {
-      return null;
-    }
-    if (!(mappingState.workbookSheets && mappingState.workbookSheets.fund) || !(mappingState.fundRows && mappingState.fundRows.length)) {
+    funds = (summary.fundTotals || []).filter(function (item) {
+      return !(split && split.funds) || split.funds[item.key];
+    });
+    if (!funds.length) {
       return null;
     }
 
-    rows = mappingState.fundRows || [];
-    if (mappingState.diagnostics && typeof mappingState.diagnostics.fundDataStart === "number") {
+    rows = hasFundMapping ? mappingState.fundRows : [];
+    if (hasFundMapping && mappingState.diagnostics && typeof mappingState.diagnostics.fundDataStart === "number") {
       fundDataStartIndex = Math.max(mappingState.diagnostics.fundDataStart - 1, 1);
     }
     mappingIndex = buildMappingRowIndex(rows.slice(fundDataStartIndex), 1, 0, "CIT", function (row) {
@@ -26570,14 +27089,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       textCell("G1", "Re Reg", 6) +
       "</row>");
 
-    for (i = 0; i < summary.fundTotals.length; i += 1) {
-      var item = summary.fundTotals[i];
+    for (i = 0; i < funds.length; i += 1) {
+      var item = funds[i];
       var mappingRow = mappingIndex.byPriorCode[item.key] || null;
       var priorFundCode = trimValue(item.key || "");
       var taCode = mappingRow ? trimValue(mappingRow[16] || "") : "";
       var reRegValue = mappingRow ? trimValue(mappingRow[19] || "") : "";
       var reReg = "";
-      if (reRegValue) {
+      if (split && split.reReg) {
+        reReg = split.reReg;
+      } else if (reRegValue) {
         if (reRegValue.toUpperCase() === "YES") {
           reReg = "Y";
         } else if (reRegValue.toUpperCase() === "NO") {
@@ -26599,13 +27120,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
 
     var fundGrandTotal = 0;
-    for (i = 0; i < summary.fundTotals.length; i += 1) {
-      fundGrandTotal += Number(summary.fundTotals[i].value) || 0;
+    for (i = 0; i < funds.length; i += 1) {
+      fundGrandTotal += Number(funds[i].value) || 0;
     }
-    rowNumber = summary.fundTotals.length + 2;
+    rowNumber = funds.length + 2;
     exportRows.push("<row r=\"" + rowNumber + "\">" +
       textCell("A" + rowNumber, caseNumber, 6) +
-      textCell("B" + rowNumber, "Total (" + summary.fundTotals.length + ")", 6) +
+      textCell("B" + rowNumber, "Total (" + funds.length + ")", 6) +
       textCell("C" + rowNumber, "", 6) +
       numberCell("D" + rowNumber, String(fundGrandTotal), 3) +
       textCell("E" + rowNumber, "", 6) +
@@ -26614,7 +27135,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       "</row>");
 
     return {
-      name: "CONV FILE",
+      name: split && split.name ? split.name : "CONV FILE",
       path: "xl/worksheets/sheet" + sheetNumber + ".xml",
       content: worksheetXml(exportRows, [
         "<col min=\"1\" max=\"1\" width=\"18\" bestFit=\"1\" customWidth=\"1\"/>",
@@ -27560,6 +28081,46 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           }
         }
       ],
+      ALIGHT: [
+        {
+          name: "Loan Header",
+          reports: ["LOAN_HEADER"],
+          keyMode: "ssnLoan",
+          includeIndex: true,
+          indexAfterHeader: "Social Security Number",
+          indexHeader: "Loan Index",
+          omitBaseHeaders: ["Case Number", "Report Code", "Report Name", "Plan Number", "Loan ID"],
+          outputOrder: ["Loan Amount", "Loan Start Date", "Loan Frequency", "Payment", "Outstanding Loan Balance", "Default Date", "Deemed Amount", "Interest Rate", "Final Payment Due Date"],
+          fieldsByReport: {
+            LOAN_HEADER: [
+              { output: "Loan Amount", candidates: ["Loan Amount"] },
+              { output: "Loan Start Date", candidates: ["Issuance Date"] },
+              { output: "Loan Frequency", candidates: ["Payment Frequency"] },
+              { output: "Payment", candidates: ["Repayment Amount"] },
+              { output: "Outstanding Loan Balance", candidates: ["Loan Balance"] },
+              { output: "Default Date", candidates: ["Default Date"] },
+              { output: "Deemed Amount", candidates: ["Deemed Amount"] },
+              { output: "Interest Rate", candidates: ["Interest Rate"] },
+              { output: "Final Payment Due Date", candidates: ["Loan Payoff Date"] }
+            ]
+          }
+        },
+        {
+          name: "Loan Source",
+          reports: ["LOAN_SOURCE"],
+          keyMode: "record",
+          includeMappedIndex: true,
+          indexAfterHeader: "Social Security Number",
+          indexHeader: "Loan Index",
+          omitBaseHeaders: ["Case Number", "Report Code", "Report Name", "Plan Number", "Loan ID"],
+          fieldsByReport: {
+            LOAN_SOURCE: [
+              { output: "Source Code", candidates: ["Source Code"] },
+              { output: "Loan Balance", candidates: ["Loan Balance"] }
+            ]
+          }
+        }
+      ],
       ASCENSUS: [
         {
           name: "Roth Basis",
@@ -27649,8 +28210,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           outputFields.push(baseOutputFields[c]);
         }
         if (baseOutputFields[c].header === (spec.indexAfterHeader || "Case Number") && (spec.includeIndex || spec.includeMappedIndex)) {
-          outputIndex.Index = outputFields.length;
-          outputFields.push({ header: "Index", type: "integer" });
+          outputIndex[spec.indexHeader || "Index"] = outputFields.length;
+          outputFields.push({ header: spec.indexHeader || "Index", type: "integer" });
         }
       }
       baseFieldCount = outputFields.length;
@@ -27839,6 +28400,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           values.Index = loanIndexByKey[values["Social Security Number"] + "|" + values["Loan ID"]] ||
             (values["Loan ID"] ? "" : loanIndexBySsn[values["Social Security Number"]]) || "";
         }
+        if (spec.indexHeader) {
+          values[spec.indexHeader] = values.Index;
+        }
         for (c = 0; c < (spec.derivedFields || []).length; c += 1) {
           values[spec.derivedFields[c].output] = computeDerivedValue(spec.derivedFields[c], values);
         }
@@ -27951,7 +28515,18 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     contentOverrides.push("<Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
     sheetFiles.push({ path:"xl/worksheets/sheet1.xml", content:"" });
 
-    var customSheet = fullExport ? buildCustomBalanceSheet(result, caseNumber) : null;
+    var conversionSplits = fullExport ? exportConversionSplits() : [];
+    var tikOnly = fullExport && !!exportConversionPlan && !exportConversionPlan.assignments &&
+      exportConversionPlan.types.length === 1 && exportConversionPlan.types[0] === "tik";
+    function pushSheet(sheet) {
+      sheetIndex += 1;
+      sheetDefs.push({ name: sheet.name, path: sheet.path });
+      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + sheet.path.split("/").pop() + "\"/>");
+      contentOverrides.push("<Override PartName=\"/" + sheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
+      sheetFiles.push({ path: sheet.path, content: sheet.content });
+    }
+
+    var customSheet = fullExport ? buildCustomBalanceSheet(result, caseNumber, sheetIndex + 1) : null;
     if (customSheet && worksheetDataRowCount(customSheet.content) > 0) {
       sheetIndex += 1;
       sheetDefs.push({ name: customSheet.name, path: customSheet.path });
@@ -27961,6 +28536,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         path: customSheet.path,
         content: customSheet.content
       });
+    }
+
+    for (i = 0; i < conversionSplits.length; i += 1) {
+      var splitBalanceSheet = buildCustomBalanceSheet(result, caseNumber, sheetIndex + 1, {
+        funds: conversionSplits[i].funds,
+        name: "Balance Export - " + conversionSplits[i].type.tab
+      });
+      if (splitBalanceSheet && worksheetDataRowCount(splitBalanceSheet.content) > 0) {
+        pushSheet(splitBalanceSheet);
+      }
     }
 
     var vendorSummarySheets = buildVendorSummarySheets(result, caseNumber, sheetIndex + 1, reportCodes);
@@ -28000,7 +28585,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       });
     }
 
-    var convSheet = fullExport ? buildConvFileSheet(result, caseNumber, mappingState, sheetIndex + 1) : null;
+    var convSheet = fullExport ? buildConvFileSheet(result, caseNumber, mappingState, sheetIndex + 1, tikOnly ? { reReg: "Y" } : null) : null;
     if (convSheet && worksheetDataRowCount(convSheet.content) > 0) {
       sheetIndex += 1;
       sheetDefs.push({ name: convSheet.name, path: convSheet.path });
@@ -28010,6 +28595,21 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         path: convSheet.path,
         content: convSheet.content
       });
+    }
+
+    // Cash funds get no CONV tab; mapping funds are re-registered N, transfer in kind Y.
+    for (i = 0; i < conversionSplits.length; i += 1) {
+      if (!conversionSplits[i].type.reReg) {
+        continue;
+      }
+      var splitConvSheet = buildConvFileSheet(result, caseNumber, mappingState, sheetIndex + 1, {
+        funds: conversionSplits[i].funds,
+        reReg: conversionSplits[i].type.reReg,
+        name: "CONV FILE - " + conversionSplits[i].type.tab
+      });
+      if (splitConvSheet) {
+        pushSheet(splitConvSheet);
+      }
     }
 
     var citBalanceSheet = buildCITBalancesSheet(result, caseNumber, sheetIndex + 1);
@@ -28373,6 +28973,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
     var blocked = request.mapping.key === "pending" || request.mapping.key === "invalid" || request.mapping.key === "unresolved";
     override.hidden = !blocked || request.mapping.key === "pending";
+    override.disabled = false;
     confirm.hidden = false;
     confirm.disabled = blocked;
     confirm.style.opacity = blocked ? ".48" : "1";
@@ -28481,6 +29082,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       return;
     }
+    if ((!reportCodes || !reportCodes.length) && (!exportConversionPlan || exportConversionPlan.parseResult !== lastParseResult)) {
+      openConversionDialog(function () {
+        downloadWorkbookForReports(reportCodes, suffix);
+      });
+      return;
+    }
     var mappingDecision = getExportMappingDecision();
     var exportResult = Object.assign({}, lastParseResult, { planName: exportPlanName, exportMappingLabel: mappingDecision.label });
     var files = buildWorkbookFiles(exportResult, reportCodes, caseState.formatted, currentMappingValidation);
@@ -28519,11 +29126,120 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var reusableBlockedRequest = lastBlockedExportRequest && lastBlockedExportRequest.parseResult === lastParseResult ? lastBlockedExportRequest : null;
     var reportCodes = detail.hasOwnProperty("reportCodes") ? detail.reportCodes : (reusableBlockedRequest ? reusableBlockedRequest.reportCodes : null);
     var suffix = detail.suffix || (reusableBlockedRequest ? reusableBlockedRequest.suffix : "Full Parse");
+    exportConversionPlan = null;
     downloadWorkbookForReports(reportCodes, suffix);
   });
 
   function downloadWorkbook() {
     downloadWorkbookForReports(null, "Full Parse");
+  }
+
+  // One entry per chosen type, each with the funds sent to it. Empty unless funds were split.
+  function exportConversionSplits() {
+    var plan = exportConversionPlan;
+    if (!plan || !plan.assignments) {
+      return [];
+    }
+    return CONVERSION_TYPES.filter(function (type) {
+      return plan.types.indexOf(type.key) !== -1;
+    }).map(function (type) {
+      var funds = {};
+      Object.keys(plan.assignments).forEach(function (key) {
+        if (plan.assignments[key] === type.key) {
+          funds[key] = true;
+        }
+      });
+      return { type: type, funds: funds };
+    });
+  }
+
+  function openConversionDialog(done) {
+    var dialog = document.getElementById("dpcConvDialog");
+    if (!dialog) {
+      dialog = document.createElement("dialog");
+      dialog.id = "dpcConvDialog";
+      dialog.setAttribute("aria-labelledby", "dpcConvTitle");
+      document.body.appendChild(dialog);
+    }
+    var funds = buildSummaryTotals(lastParseResult).fundTotals || [];
+    var chosen = [];
+    var assignments = {};
+
+    function head(title, note) {
+      return "<div class=\"cv-head\"><div id=\"dpcConvTitle\" class=\"cv-title\">" + title + "</div><div class=\"cv-note\">" + note + "</div></div>";
+    }
+
+    function finish(types, map) {
+      exportConversionPlan = { parseResult: lastParseResult, types: types, assignments: map };
+      dialog.close();
+      done();
+    }
+
+    function showTypes() {
+      dialog.innerHTML = head("Select conversion type", "Pick more than one to split the funds between them.") +
+        "<div class=\"cv-body\">" + CONVERSION_TYPES.map(function (type) {
+          return "<label class=\"cv-option\"><input type=\"checkbox\" value=\"" + type.key + "\"" + (chosen.indexOf(type.key) !== -1 ? " checked" : "") + "> " + type.label + "</label>";
+        }).join("") + "</div>" +
+        "<div class=\"cv-foot\"><button type=\"button\" data-cv=\"cancel\">Cancel</button><button type=\"button\" data-cv=\"skip\">Skip</button><button type=\"button\" class=\"cv-primary\" data-cv=\"next\">Continue</button></div>";
+      var boxes = Array.prototype.slice.call(dialog.querySelectorAll("input[type=checkbox]"));
+      var next = dialog.querySelector("[data-cv=next]");
+      function sync() {
+        chosen = boxes.filter(function (box) { return box.checked; }).map(function (box) { return box.value; });
+        next.disabled = !chosen.length;
+      }
+      boxes.forEach(function (box) { box.onchange = sync; });
+      sync();
+      dialog.querySelector("[data-cv=cancel]").onclick = function () { dialog.close(); };
+      dialog.querySelector("[data-cv=skip]").onclick = function () { finish([], null); };
+      next.onclick = function () {
+        if (chosen.length === 1) {
+          finish(chosen.slice(0), null);
+        } else {
+          showFunds();
+        }
+      };
+    }
+
+    function showFunds() {
+      var types = CONVERSION_TYPES.filter(function (type) { return chosen.indexOf(type.key) !== -1; });
+      var body = funds.length
+        ? "<table><thead><tr><th>Fund</th><th class=\"cv-amt\">Balance</th>" + types.map(function (type) {
+            return "<th class=\"cv-pick\">" + type.label + "</th>";
+          }).join("") + "</tr></thead><tbody>" + funds.map(function (fund, f) {
+            return "<tr><td>" + escapeHtml(fund.key) + "</td><td class=\"cv-amt\">" + formatTotalAmount(fund.value) + "</td>" + types.map(function (type) {
+              return "<td class=\"cv-pick\"><input type=\"radio\" name=\"cv-fund-" + f + "\" value=\"" + type.key + "\" aria-label=\"" + escapeHtml(fund.key + ", " + type.label) + "\"" + (assignments[fund.key] === type.key ? " checked" : "") + "></td>";
+            }).join("") + "</tr>";
+          }).join("") + "</tbody></table>"
+        : "<div class=\"cv-note\">No fund codes were found in this report, so the funds can't be split. Go back and pick one type, or skip.</div>";
+      dialog.innerHTML = head("Select funds", "Choose where each fund goes. Every fund needs a type before you can continue.") +
+        "<div class=\"cv-body\">" + body + "</div>" +
+        "<div class=\"cv-foot\"><span class=\"cv-count\"></span><button type=\"button\" data-cv=\"back\">Back</button><button type=\"button\" class=\"cv-primary\" data-cv=\"next\">Continue</button></div>";
+      var next = dialog.querySelector("[data-cv=next]");
+      var count = dialog.querySelector(".cv-count");
+      function sync() {
+        var assigned = funds.filter(function (fund) { return chosen.indexOf(assignments[fund.key]) !== -1; }).length;
+        count.textContent = funds.length ? assigned + " of " + funds.length + " funds assigned" : "";
+        next.disabled = !funds.length || assigned < funds.length;
+      }
+      dialog.querySelectorAll("input[type=radio]").forEach(function (radio) {
+        radio.onchange = function () {
+          assignments[funds[Number(radio.name.slice(8))].key] = radio.value;
+          sync();
+        };
+      });
+      sync();
+      dialog.querySelector("[data-cv=back]").onclick = showTypes;
+      next.onclick = function () {
+        var map = {};
+        funds.forEach(function (fund) { map[fund.key] = assignments[fund.key]; });
+        finish(chosen.slice(0), map);
+      };
+    }
+
+    showTypes();
+    if (!dialog.open) {
+      dialog.showModal();
+    }
   }
 
   function downloadSingleReport(reportCode) {
@@ -29296,6 +30012,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   if (exportBtn) {
     exportBtn.onclick = function () {
+      exportConversionPlan = null;
       downloadWorkbook();
     };
   }
