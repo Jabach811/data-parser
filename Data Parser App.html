@@ -20297,6 +20297,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   function buildMappingRowIndex(rows, priorFundIndex, filterIndex, filterValue, rowFilter) {
     var byPriorCode = {};
+    var rowsByPriorCode = {};
     var duplicates = [];
     var i;
     for (i = 0; i < rows.length; i += 1) {
@@ -20313,12 +20314,15 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       if (byPriorCode[priorCode]) {
         duplicates.push(priorCode);
+        rowsByPriorCode[priorCode].push(row);
         continue;
       }
       byPriorCode[priorCode] = row;
+      rowsByPriorCode[priorCode] = [row];
     }
     return {
       byPriorCode: byPriorCode,
+      rowsByPriorCode: rowsByPriorCode,
       duplicates: duplicates
     };
   }
@@ -27396,7 +27400,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     if (!funds.length) {
       return null;
     }
-    mappingIndex = mappingIndex || { byPriorCode: {} };
+    mappingIndex = mappingIndex || { byPriorCode: {}, rowsByPriorCode: {} };
 
     exportRows.push("<row r=\"1\">" +
       textCell("A1", "Case Number", 6) +
@@ -27408,34 +27412,46 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       textCell("G1", "Re Reg", 6) +
       "</row>");
 
+    rowNumber = 1;
     for (i = 0; i < funds.length; i += 1) {
       var item = funds[i];
-      var mappingRow = mappingIndex.byPriorCode[item.key] || null;
       var priorFundCode = trimValue(item.key || "");
-      var taCode = mappingRow ? trimValue(mappingRow[16] || "") : "";
-      var reRegValue = mappingRow ? trimValue(mappingRow[19] || "") : "";
-      var reReg = "";
-      if (split && split.reReg) {
-        reReg = split.reReg;
-      } else if (reRegValue) {
-        if (/^(yes|y)$/i.test(reRegValue)) {
-          reReg = "Y";
-        } else if (/^(no|n)$/i.test(reRegValue)) {
-          reReg = "N";
+      var total = Number(item.value || 0);
+      var remaining = total;
+      // A split fund gets one row per mapping row; its total is shared by the C percents, leftover pennies on the last row.
+      var mappingRows = mappingIndex.rowsByPriorCode[item.key] || [null];
+      for (var j = 0; j < mappingRows.length; j += 1) {
+        var mappingRow = mappingRows[j];
+        var amount = total;
+        if (mappingRows.length > 1) {
+          amount = j === mappingRows.length - 1 ? remaining : Math.round(total * parseMappingNumber(mappingRow[2]) * 100) / 100;
+          remaining = Math.round((remaining - amount) * 100) / 100;
         }
+        var taCode = mappingRow ? trimValue(mappingRow[16] || "") : "";
+        var reRegValue = mappingRow ? trimValue(mappingRow[19] || "") : "";
+        var reReg = "";
+        if (split && split.reReg) {
+          reReg = split.reReg;
+        } else if (reRegValue) {
+          if (/^(yes|y)$/i.test(reRegValue)) {
+            reReg = "Y";
+          } else if (/^(no|n)$/i.test(reRegValue)) {
+            reReg = "N";
+          }
+        }
+        var rowStyle = mappingRow ? 1 : 8;
+        var amountStyle = mappingRow ? 3 : 8;
+        rowNumber += 1;
+        exportRows.push("<row r=\"" + rowNumber + "\">" +
+          textCell("A" + rowNumber, caseNumber, rowStyle) +
+          textCell("B" + rowNumber, priorFundCode, rowStyle) +
+          textCell("C" + rowNumber, taCode, rowStyle) +
+          numberCell("D" + rowNumber, String(amount), amountStyle) +
+          textCell("E" + rowNumber, "", rowStyle) +
+          textCell("F" + rowNumber, "", rowStyle) +
+          textCell("G" + rowNumber, reReg, rowStyle) +
+          "</row>");
       }
-      var rowStyle = mappingRow ? 1 : 8;
-      var amountStyle = mappingRow ? 3 : 8;
-      rowNumber = i + 2;
-      exportRows.push("<row r=\"" + rowNumber + "\">" +
-        textCell("A" + rowNumber, caseNumber, rowStyle) +
-        textCell("B" + rowNumber, priorFundCode, rowStyle) +
-        textCell("C" + rowNumber, taCode, rowStyle) +
-        numberCell("D" + rowNumber, String(Number(item.value || 0)), amountStyle) +
-        textCell("E" + rowNumber, "", rowStyle) +
-        textCell("F" + rowNumber, "", rowStyle) +
-        textCell("G" + rowNumber, reReg, rowStyle) +
-        "</row>");
     }
 
     return {
