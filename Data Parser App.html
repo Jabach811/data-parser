@@ -1847,6 +1847,7 @@ body.app-edition.pal-navy.mode-dark{--paper:#101820;--surface:#18232f;--surface-
 #dpcConvDialog td{padding:8px 10px;border-bottom:1px solid var(--line-soft)}
 #dpcConvDialog .cv-amt{text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
 #dpcConvDialog .cv-pick{text-align:center}
+#dpcConvDialog .cv-miss{color:var(--warn,#9c6503);font-size:12px}
 #dpcConvDialog .cv-foot{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;padding:16px 24px 22px;border-top:1px solid var(--line);background:var(--surface-2)}
 #dpcConvDialog .cv-count{margin-right:auto;color:var(--ink-2);font-size:13px}
 #dpcConvDialog button{min-height:39px;padding:9px 13px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink-2);font:600 13px/1.4 var(--font-ui);cursor:pointer}
@@ -19087,7 +19088,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       lines.push("<div class=\"mp-section\">");
       lines.push("<div class=\"mp-section-title\">" + escapeHtml(label) + " Data</div>");
       lines.push("<div class=\"mp-stat-row\">");
-      lines.push("<span class=\"mp-stat\"><span class=\"mp-stat-lbl\">CIT rows</span>" + String(rowCount) + "</span>");
+      lines.push("<span class=\"mp-stat\"><span class=\"mp-stat-lbl\">Rows checked</span>" + String(rowCount) + "</span>");
       lines.push("<span class=\"mp-stat\"><span class=\"mp-stat-lbl\">Ignored</span>" + String(ignoredCount) + "</span>");
       if (errorRows.length) {
         lines.push("<span class=\"mp-stat is-err\"><span class=\"mp-stat-lbl\">Errors</span>" + String(errorRows.length) + "</span>");
@@ -20014,14 +20015,31 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   }
 
   // Matches "Source Map", "SOURCE MAPPING", "sourcemapping", etc. by letters only.
-  function findMappingWorkbookSheet(sheetNames, key) {
-    var i;
-    for (i = 0; i < sheetNames.length; i += 1) {
-      if (normalizeWorkbookKey(sheetNames[i] || "").indexOf(key) !== -1) {
-        return sheetNames[i];
-      }
+  // Workbooks often hold pared-down copies like "Fund Mapping TIK", so the plain tab
+  // (or one ending in Main, Original, Full, Master or All) wins, and ties go to the one with the most rows.
+  function findMappingWorkbookSheet(sheets, key, entries, sharedStrings) {
+    var matches = sheets.filter(function (sheet) {
+      return normalizeWorkbookKey(sheet.name).indexOf(key) !== -1;
+    });
+    var plain = matches.filter(function (sheet) {
+      var rest = normalizeWorkbookKey(sheet.name).replace(key + "ping", "").replace(key, "");
+      return /^(main|original|full|master|all)?$/.test(rest);
+    });
+    var pool = plain.length ? plain : matches;
+    var best = pool[0] || null;
+    var bestCount = -1;
+    if (pool.length > 1) {
+      pool.forEach(function (sheet) {
+        var count = parseWorksheetRows(decodeZipText(entries[sheet.path]), sharedStrings).filter(function (row) {
+          return (row || []).some(function (cell) { return trimValue(cell || ""); });
+        }).length;
+        if (count > bestCount) {
+          best = sheet;
+          bestCount = count;
+        }
+      });
     }
-    return "";
+    return { sheet: best, skipped: matches.filter(function (sheet) { return sheet !== best; }) };
   }
 
   function getExpectedHeaderNames(requirement) {
@@ -20167,9 +20185,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         rowSample: []
       };
     }
-    // Header names are only a heads-up; the CIT rows' data is what gets validated.
+    // Header names are only a heads-up; the rows' data is what gets validated.
     if (bestMatch.score === 0) {
-      warnings.push(sheetLabel + ": no header row found in the first 20 rows. The CIT rows were still checked.");
+      warnings.push(sheetLabel + ": no header row found in the first 20 rows. The data rows were still checked.");
     } else if (bestMatch.score < requiredHeaders.length) {
       for (i = 0; i < bestMatch.missing.length; i += 1) {
         var missingItem = bestMatch.missing[i];
@@ -20255,8 +20273,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return clean === "" || clean === "na" || clean === "n/a";
   }
 
+  // Fund Mapping rows count whatever column A says, as long as there is a prior fund code and Q isn't N/A.
   function isIgnoredFundMappingRow(row) {
-    return isCitMappingRow(row) && normalizeHeader(row && row[16] ? row[16] : "") === "na";
+    return !cleanMappingValue(row && row[1]) || normalizeHeader(row && row[16] ? row[16] : "") === "na";
   }
 
   function formatValidationValue(value) {
@@ -20308,7 +20327,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (typeof filterIndex === "number" && trimValue(row[filterIndex] || "") !== filterValue) {
         continue;
       }
-      var priorCode = trimValue(row[priorFundIndex] || "");
+      var priorCode = cleanMappingValue(row[priorFundIndex]);
       if (!priorCode) {
         continue;
       }
@@ -20470,25 +20489,18 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var groups = {};
     var groupOrder = [];
     var rowErrors = [];
-    var lowercaseCitRows = [];
     var i;
     for (i = dataStartIndex; i < sheetRows.length; i += 1) {
       var row = sheetRows[i] || [];
       var rowNumber = i + 1;
-      if (!isCitMappingRow(row)) {
-        if (isLowercaseCitMappingRow(row)) {
-          lowercaseCitRows.push(rowNumber);
-        }
-        result.ignoredCount += 1;
-        continue;
-      }
+      var priorFundCode = cleanMappingValue(row[1]);
+      // No prior fund code means a new fund with nothing coming over, so there is nothing to check.
       if (isIgnoredFundMappingRow(row)) {
         result.ignoredCount += 1;
         continue;
       }
       result.consideredCount += 1;
       var issues = [];
-      var priorFundCode = cleanMappingValue(row[1]);
       var splitRaw = cleanMappingValue(row[2]);
       var split = parseMappingNumber(row[2]);
       var rounding = normalizeHeader(cleanMappingValue(row[3]));
@@ -20496,7 +20508,6 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var fundAmountRaw = cleanMappingValue(row[5]);
       var takeover = parseMappingNumber(takeoverRaw);
       var fundAmount = parseMappingNumber(fundAmountRaw);
-      if (!priorFundCode) issues.push("B must have a prior fund code");
       if (split === null) {
         issues.push("C (fund split percent) must be a number, but has \"" + splitRaw + "\"");
       } else if (Math.abs(split - 1) < 0.000001) {
@@ -20582,9 +20593,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         });
       }
     }
-    warnLowercaseCitRows("Fund Mapping", lowercaseCitRows, result.warnings);
     if (!result.consideredCount) {
-      result.warnings.push("No CIT rows were found in the Fund Mapping data section.");
+      result.warnings.push("No rows with a prior fund code were found in the Fund Mapping data section.");
     }
     return result;
   }
@@ -20623,12 +20633,14 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var sheets = parseWorkbookSheets(workbookXml, workbookRelsXml);
     var i;
 
-    var sourceSheetName = findMappingWorkbookSheet(sheets.map(function (sheet) { return sheet.name; }), "sourcemap");
-    var fundSheetName = findMappingWorkbookSheet(sheets.map(function (sheet) { return sheet.name; }), "fundmap");
+    var sourcePick = findMappingWorkbookSheet(sheets, "sourcemap", entries, sharedStrings);
+    var fundPick = findMappingWorkbookSheet(sheets, "fundmap", entries, sharedStrings);
+    var sourceSheet = sourcePick.sheet;
+    var fundSheet = fundPick.sheet;
+    var sourceSheetName = sourceSheet ? sourceSheet.name : "";
+    var fundSheetName = fundSheet ? fundSheet.name : "";
     var errors = [];
     var warnings = [];
-    var sourceSheet;
-    var fundSheet;
     var sourceRows;
     var fundRows;
     var sourceValidation;
@@ -20644,30 +20656,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     if (!fundSheetName) {
       warnings.push("Fund Mapping tab was not found; fund mapping checks will be skipped.");
     }
+    [[sourcePick, "Source Mapping"], [fundPick, "Fund Mapping"]].forEach(function (pair) {
+      if (pair[0].sheet && pair[0].skipped.length) {
+        warnings.push(pair[1] + ": checked the \"" + pair[0].sheet.name + "\" tab and skipped " + pair[0].skipped.map(function (sheet) { return "\"" + sheet.name + "\""; }).join(", ") + ".");
+      }
+    });
     if (errors.length) {
       return {
         status: "invalid",
         fileName: fileName,
         errors: errors,
-        warnings: warnings
-      };
-    }
-
-    sourceSheet = null;
-    fundSheet = null;
-    for (i = 0; i < sheets.length; i += 1) {
-      if (sheets[i].name === sourceSheetName) {
-        sourceSheet = sheets[i];
-      }
-      if (sheets[i].name === fundSheetName) {
-        fundSheet = sheets[i];
-      }
-    }
-    if (!sourceSheet || (fundSheetName && !fundSheet)) {
-      return {
-        status: "invalid",
-        fileName: fileName,
-        errors: ["Unable to resolve workbook tabs for validation."],
         warnings: warnings
       };
     }
@@ -20733,7 +20731,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var sourceDataRows = sourceRows.slice(sourceDataStart);
       var fundDataRows = fundSheet ? fundRows.slice(fundDataStart) : [];
       var sourceRowIndex = buildMappingRowIndex(sourceDataRows, 1, 0, "CIT", isSourceMappingCitRow);
-      var fundRowIndex = fundSheet ? buildMappingRowIndex(fundDataRows, 1, 0, "CIT", function (row) {
+      var fundRowIndex = fundSheet ? buildMappingRowIndex(fundDataRows, 1, null, null, function (row) {
         return !isIgnoredFundMappingRow(row);
       }) : { byPriorCode: {}, duplicates: [] };
       sourceDataDiagnostics = validateSourceMappingRows(sourceRows, sourceDataStart);
@@ -20745,7 +20743,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       if (fundSheet) {
         for (i = fundDataStart; i < fundRows.length; i += 1) {
-          if (isCitMappingRow(fundRows[i] || []) && !isIgnoredFundMappingRow(fundRows[i] || [])) {
+          if (!isIgnoredFundMappingRow(fundRows[i] || [])) {
             fundMeta.citCount += 1;
           }
         }
@@ -25976,10 +25974,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (typeof rowFilter === "function" && !rowFilter(row)) {
         continue;
       }
-      if (!isCitMappingRow(row)) {
-        continue;
-      }
-      var code = trimValue(row[codeIndex] || "");
+      var code = cleanMappingValue(row[codeIndex]);
       if (!code) {
         continue;
       }
@@ -26187,7 +26182,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return html;
     }
 
-    if (!missingCount && !ambiguousCount && !(comparison.cash && comparison.cash.length)) {
+    if (!missingCount && !ambiguousCount) {
       html += "<div class=\"comparison-note\">All parsed input codes in this section were found in the mapping workbook.</div>";
     }
 
@@ -26209,14 +26204,6 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       html += "</div>";
     }
 
-    if (comparison.cash && comparison.cash.length) {
-      html += "<div class=\"comparison-note comparison-note-maponly\"><strong>Cash conversion</strong> These funds are not on the Fund Mapping tab, so they are treated as cash and left off the CONV file.</div>";
-      html += "<div class=\"comparison-list\">";
-      for (var c = 0; c < comparison.cash.length; c += 1) {
-        html += "<div class=\"comparison-item comparison-item-maponly\"><div class=\"comparison-item-main\"><div class=\"comparison-code comparison-code-maponly\">" + escapeHtml(comparison.cash[c].code) + "</div><div class=\"comparison-meta\">Cash &middot; not on Fund Mapping</div></div><div class=\"comparison-amount\">" + escapeHtml(formatTotalAmount(comparison.cash[c].amount)) + "</div></div>";
-      }
-      html += "</div>";
-    }
 
     // Mapping-only codes: expanded as individual cards, grey tint at bottom
     if (mappingOnlyCount) {
@@ -26286,11 +26273,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }) : null;
     var sourceComparison = compareTotalsToMapping(summary.sourceTotals, sourceIndex);
     var fundComparison = hasFundMappingSheet ? compareTotalsToMapping(summary.fundTotals, fundIndex) : null;
-    // Cash funds are left off the Fund Mapping tab on purpose, so a missing fund is not a gap.
     // A fund on more than one row is a split, not a duplicate.
     if (fundComparison) {
-      fundComparison.cash = fundComparison.missing;
-      fundComparison.missing = [];
       fundComparison.matched = fundComparison.matched.concat(fundComparison.ambiguous);
       fundComparison.ambiguous = [];
     }
@@ -27377,7 +27361,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     if (mappingState.diagnostics && typeof mappingState.diagnostics.fundDataStart === "number") {
       fundDataStartIndex = Math.max(mappingState.diagnostics.fundDataStart - 1, 1);
     }
-    return buildMappingRowIndex(mappingState.fundRows.slice(fundDataStartIndex), 1, 0, "CIT", function (row) {
+    return buildMappingRowIndex(mappingState.fundRows.slice(fundDataStartIndex), 1, null, null, function (row) {
       return !isIgnoredFundMappingRow(row);
     });
   }
@@ -29567,12 +29551,21 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var assignments = {};
     var mappingIndex = buildFundMappingIndex(currentMappingValidation);
 
-    // Cash funds are left off the Fund Mapping tab. For the rest, column T Yes is transfer in kind, No is mapped.
+    // Column T Yes is transfer in kind, No is mapped. A fund not on the Fund Mapping tab is left unpicked so nobody misses it.
     if (mappingIndex && funds.length) {
       chosen = ["cash", "mapping", "tik"];
       funds.forEach(function (fund) {
         var row = mappingIndex.byPriorCode[fund.key];
-        assignments[fund.key] = !row ? "cash" : /^y/i.test(trimValue(row[19] || "")) ? "tik" : "mapping";
+        if (row) {
+          assignments[fund.key] = /^y/i.test(trimValue(row[19] || "")) ? "tik" : "mapping";
+        }
+      });
+      // Transfer in kind funds are the few worth checking, so they go first, then the unpicked ones.
+      funds = funds.slice().sort(function (a, b) {
+        function rank(fund) {
+          return assignments[fund.key] === "tik" ? 0 : !assignments[fund.key] ? 1 : 2;
+        }
+        return rank(a) - rank(b);
       });
     }
 
@@ -29616,18 +29609,22 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var fallback = chosen.indexOf("mapping") !== -1 ? "mapping" : chosen[0];
       var fallbackLabel = types.filter(function (type) { return type.key === fallback; })[0].label;
       funds.forEach(function (fund) {
-        if (chosen.indexOf(assignments[fund.key]) === -1) {
+        if (assignments[fund.key] && chosen.indexOf(assignments[fund.key]) === -1) {
+          delete assignments[fund.key];
+        }
+        if (!mappingIndex && !assignments[fund.key]) {
           assignments[fund.key] = fallback;
         }
       });
       var note = mappingIndex
-        ? "Filled in from the Fund Mapping tab: funds not on it are Cash, and column T Yes is Transfer in kind, No is Mapping. Change any that are wrong."
+        ? "Filled in from the Fund Mapping tab: column T Yes is Transfer in kind, No is Mapping. Funds not on the tab are left for you to pick. Change any that are wrong."
         : "Every fund starts as " + fallbackLabel + ". Pick only the ones that go somewhere else.";
       var body = funds.length
         ? "<table><thead><tr><th>Fund</th><th class=\"cv-amt\">Balance</th>" + types.map(function (type) {
             return "<th class=\"cv-pick\">" + type.label + "</th>";
           }).join("") + "</tr></thead><tbody>" + funds.map(function (fund, f) {
-            return "<tr><td>" + escapeHtml(fund.key) + "</td><td class=\"cv-amt\">" + formatTotalAmount(fund.value) + "</td>" + types.map(function (type) {
+            var missing = mappingIndex && !mappingIndex.byPriorCode[fund.key] ? "<div class=\"cv-miss\">Not on Fund Mapping</div>" : "";
+            return "<tr><td>" + escapeHtml(fund.key) + missing + "</td><td class=\"cv-amt\">" + formatTotalAmount(fund.value) + "</td>" + types.map(function (type) {
               return "<td class=\"cv-pick\"><input type=\"radio\" name=\"cv-fund-" + f + "\" value=\"" + type.key + "\" aria-label=\"" + escapeHtml(fund.key + ", " + type.label) + "\"" + (assignments[fund.key] === type.key ? " checked" : "") + "></td>";
             }).join("") + "</tr>";
           }).join("") + "</tbody></table>"
@@ -29638,10 +29635,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var next = dialog.querySelector("[data-cv=next]");
       var count = dialog.querySelector(".cv-count");
       function sync() {
+        var unpicked = funds.filter(function (fund) { return !assignments[fund.key]; }).length;
         count.textContent = types.map(function (type) {
           return type.label + ": " + funds.filter(function (fund) { return assignments[fund.key] === type.key; }).length;
-        }).join(", ");
-        next.disabled = !funds.length;
+        }).join(", ") + (unpicked ? ", Not picked: " + unpicked : "");
+        next.disabled = !funds.length || unpicked > 0;
       }
       dialog.querySelectorAll("input[type=radio]").forEach(function (radio) {
         radio.onchange = function () {
