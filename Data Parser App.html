@@ -2073,7 +2073,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         </div>
 
         <div class="actions">
-          <input id="mappingFileInput" type="file" accept=".xlsx,.xlsm" hidden>
+          <input id="mappingFileInput" type="file" accept=".xlsx,.xlsm,.xls" hidden>
           <label id="mappingImportBtn" for="mappingFileInput" class="btn btn-ghost" tabindex="0"><strong>Upload Mapping File</strong></label>
           <button id="exportWorkbookBtn" class="btn btn-solid" type="button" disabled>Export Workbook</button>
         </div>
@@ -20014,10 +20014,249 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return rows;
   }
 
+  // A legacy .xls (Excel 97-2003) is one binary file holding a "Workbook" stream, not a zip.
+  // This pulls each worksheet's cell values, plus which cells use an Accounting number format.
+  function readLegacyXlsWorkbook(arrayBuffer) {
+    var stream = readCompoundFileStream(arrayBuffer, /^(workbook|book)$/i);
+    var view = new DataView(stream.buffer, stream.byteOffset, stream.byteLength);
+    var strings = [];
+    var formats = { 41: "*", 42: "*", 43: "*", 44: "*" };
+    var xfFormats = [];
+    var sheetRecords = [];
+    function readString(data, p, cch) {
+      var wide = data[p] & 1;
+      var text = "";
+      p += 1;
+      for (var k = 0; k < cch && p < data.length; k += 1) {
+        text += String.fromCharCode(wide ? data[p] | (data[p + 1] << 8) : data[p]);
+        p += wide ? 2 : 1;
+      }
+      return text;
+    }
+    function readRecord(pos) {
+      var type = view.getUint16(pos, true);
+      var length = view.getUint16(pos + 2, true);
+      var segments = [stream.subarray(pos + 4, pos + 4 + length)];
+      var next = pos + 4 + length;
+      while (next + 4 <= stream.length && view.getUint16(next, true) === 0x003C) {
+        length = view.getUint16(next + 2, true);
+        segments.push(stream.subarray(next + 4, next + 4 + length));
+        next += 4 + length;
+      }
+      return { type: type, segments: segments, data: segments[0], next: next };
+    }
+    // Long string tables run on into CONTINUE records, and each piece of text that crosses one restarts with a flags byte.
+    function readSharedStrings(segments) {
+      var seg = 0;
+      var data = segments[0];
+      var p = 8;
+      var count = data[4] | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
+      function skip(n) {
+        while (n > 0) {
+          if (p >= data.length) { seg += 1; data = segments[seg]; p = 0; }
+          var take = Math.min(n, data.length - p);
+          p += take;
+          n -= take;
+        }
+      }
+      for (var k = 0; k < count; k += 1) {
+        if (p >= data.length) { seg += 1; data = segments[seg]; p = 0; }
+        var cch = data[p] | (data[p + 1] << 8);
+        var flags = data[p + 2];
+        var wide = flags & 1;
+        var runs = 0;
+        var extra = 0;
+        p += 3;
+        if (flags & 8) { runs = data[p] | (data[p + 1] << 8); p += 2; }
+        if (flags & 4) { extra = data[p] | (data[p + 1] << 8) | (data[p + 2] << 16) | (data[p + 3] << 24); p += 4; }
+        var text = "";
+        while (text.length < cch) {
+          if (p >= data.length) { seg += 1; data = segments[seg]; wide = data[0] & 1; p = 1; }
+          text += String.fromCharCode(wide ? data[p] | (data[p + 1] << 8) : data[p]);
+          p += wide ? 2 : 1;
+        }
+        skip(runs * 4 + extra);
+        strings.push(text);
+      }
+    }
+    function decodeRk(rk) {
+      var value;
+      if (rk & 2) {
+        value = rk >> 2;
+      } else {
+        var temp = new DataView(new ArrayBuffer(8));
+        temp.setInt32(4, rk & 0xFFFFFFFC, true);
+        value = temp.getFloat64(0, true);
+      }
+      return rk & 1 ? value / 100 : value;
+    }
+    var pos = 0;
+    while (pos + 4 <= stream.length) {
+      var record = readRecord(pos);
+      var d = record.data;
+      if (record.type === 0x002F) {
+        throw new Error("This .xls file is password protected. Remove the password in Excel and upload it again.");
+      } else if (record.type === 0x0085 && d[5] === 0) {
+        sheetRecords.push({ offset: view.getUint32(pos + 4, true), name: readString(d, 7, d[6]) });
+      } else if (record.type === 0x00FC) {
+        readSharedStrings(record.segments);
+      } else if (record.type === 0x041E) {
+        formats[d[0] | (d[1] << 8)] = readString(d, 4, d[2] | (d[3] << 8));
+      } else if (record.type === 0x00E0) {
+        xfFormats.push(d[2] | (d[3] << 8));
+      } else if (record.type === 0x000A) {
+        break;
+      }
+      pos = record.next;
+    }
+    var accountingXf = xfFormats.map(function (ifmt) {
+      return ifmt >= 41 && ifmt <= 44 || /\*\s/.test(formats[ifmt] || "");
+    });
+    return sheetRecords.map(function (sheet) {
+      var rows = [];
+      var accounting = {};
+      var cursor = sheet.offset;
+      var pendingFormula = null;
+      function put(row, col, xf, value) {
+        rows[row] = rows[row] || [];
+        if (value !== null) {
+          rows[row][col] = trimValue(value);
+        }
+        if (accountingXf[xf]) {
+          accounting[col] = accounting[col] || {};
+          accounting[col][row + 1] = true;
+        }
+      }
+      while (cursor + 4 <= stream.length) {
+        var rec = readRecord(cursor);
+        var c = rec.data;
+        var cv = new DataView(c.buffer, c.byteOffset, c.byteLength);
+        var row = c.length >= 6 ? cv.getUint16(0, true) : 0;
+        var col = c.length >= 6 ? cv.getUint16(2, true) : 0;
+        var xf = c.length >= 6 ? cv.getUint16(4, true) : 0;
+        cursor = rec.next;
+        if (rec.type === 0x000A) {
+          break;
+        } else if (rec.type === 0x00FD) {
+          put(row, col, xf, strings[cv.getUint32(6, true)] || "");
+        } else if (rec.type === 0x0203) {
+          put(row, col, xf, String(cv.getFloat64(6, true)));
+        } else if (rec.type === 0x027E) {
+          put(row, col, xf, String(decodeRk(cv.getInt32(6, true))));
+        } else if (rec.type === 0x00BD) {
+          for (var m = 0; 4 + m * 6 + 6 <= c.length - 2; m += 1) {
+            put(row, col + m, cv.getUint16(4 + m * 6, true), String(decodeRk(cv.getInt32(6 + m * 6, true))));
+          }
+        } else if (rec.type === 0x0204) {
+          put(row, col, xf, readString(c, 8, cv.getUint16(6, true)));
+        } else if (rec.type === 0x0205) {
+          put(row, col, xf, c[7] ? "" : c[6] ? "TRUE" : "FALSE");
+        } else if (rec.type === 0x0201) {
+          put(row, col, xf, null);
+        } else if (rec.type === 0x00BE) {
+          for (var b = 0; 4 + b * 2 + 2 <= c.length - 2; b += 1) {
+            put(row, col + b, cv.getUint16(4 + b * 2, true), null);
+          }
+        } else if (rec.type === 0x0006) {
+          if (c[12] === 0xFF && c[13] === 0xFF) {
+            if (c[6] === 0) {
+              pendingFormula = { row: row, col: col, xf: xf };
+            } else {
+              put(row, col, xf, c[6] === 1 ? (c[8] ? "TRUE" : "FALSE") : "");
+            }
+          } else {
+            put(row, col, xf, String(cv.getFloat64(6, true)));
+          }
+        } else if (rec.type === 0x0207 && pendingFormula) {
+          put(pendingFormula.row, pendingFormula.col, pendingFormula.xf, readString(c, 2, cv.getUint16(0, true)));
+          pendingFormula = null;
+        }
+      }
+      for (var r = 0; r < rows.length; r += 1) {
+        rows[r] = rows[r] || [];
+      }
+      return { name: sheet.name, rows: rows, accounting: accounting };
+    });
+  }
+
+  // Pulls one named stream out of a Microsoft compound file (the container format behind .xls).
+  function readCompoundFileStream(arrayBuffer, namePattern) {
+    var view = new DataView(arrayBuffer);
+    var bytes = new Uint8Array(arrayBuffer);
+    var LAST = 0xFFFFFFF9;
+    var sectorSize = 1 << view.getUint16(30, true);
+    var fatSectors = [];
+    var fat = [];
+    var i;
+    var j;
+    function sectorStart(id) {
+      return (id + 1) * sectorSize;
+    }
+    for (i = 0; i < 109; i += 1) {
+      if (view.getUint32(76 + i * 4, true) <= LAST) {
+        fatSectors.push(view.getUint32(76 + i * 4, true));
+      }
+    }
+    var difat = view.getUint32(68, true);
+    for (i = 0; i < view.getUint32(72, true) && difat <= LAST; i += 1) {
+      for (j = 0; j < sectorSize / 4 - 1; j += 1) {
+        if (view.getUint32(sectorStart(difat) + j * 4, true) <= LAST) {
+          fatSectors.push(view.getUint32(sectorStart(difat) + j * 4, true));
+        }
+      }
+      difat = view.getUint32(sectorStart(difat) + sectorSize - 4, true);
+    }
+    fatSectors.forEach(function (id) {
+      for (j = 0; j < sectorSize / 4; j += 1) {
+        fat.push(view.getUint32(sectorStart(id) + j * 4, true));
+      }
+    });
+    function readChain(start, table, unit, source, offsetOf) {
+      var parts = [];
+      for (var id = start, guard = 0; id <= LAST && guard <= table.length; id = table[id], guard += 1) {
+        parts.push(source.subarray(offsetOf(id), offsetOf(id) + unit));
+      }
+      var out = new Uint8Array(parts.length * unit);
+      parts.forEach(function (part, k) { out.set(part, k * unit); });
+      return out;
+    }
+    var directory = readChain(view.getUint32(48, true), fat, sectorSize, bytes, sectorStart);
+    var dirView = new DataView(directory.buffer);
+    var root = null;
+    var found = null;
+    for (i = 0; i + 128 <= directory.length; i += 128) {
+      var nameLength = Math.max(dirView.getUint16(i + 64, true) - 2, 0);
+      var name = "";
+      for (j = 0; j < nameLength; j += 2) {
+        name += String.fromCharCode(dirView.getUint16(i + j, true));
+      }
+      var entry = { type: directory[i + 66], start: dirView.getUint32(i + 116, true), size: dirView.getUint32(i + 120, true) };
+      if (entry.type === 5) {
+        root = entry;
+      } else if (entry.type === 2 && namePattern.test(name) && !found) {
+        found = entry;
+      }
+    }
+    if (!found) {
+      throw new Error("No workbook was found inside this .xls file.");
+    }
+    if (found.size >= view.getUint32(56, true)) {
+      return readChain(found.start, fat, sectorSize, bytes, sectorStart).subarray(0, found.size);
+    }
+    var miniStream = readChain(root.start, fat, sectorSize, bytes, sectorStart);
+    var miniFatBytes = readChain(view.getUint32(60, true), fat, sectorSize, bytes, sectorStart);
+    var miniFatView = new DataView(miniFatBytes.buffer);
+    var miniFat = [];
+    for (i = 0; i + 4 <= miniFatBytes.length; i += 4) {
+      miniFat.push(miniFatView.getUint32(i, true));
+    }
+    return readChain(found.start, miniFat, 64, miniStream, function (id) { return id * 64; }).subarray(0, found.size);
+  }
+
   // Matches "Source Map", "SOURCE MAPPING", "sourcemapping", etc. by letters only.
   // Workbooks often hold pared-down copies like "Fund Mapping TIK", so the plain tab
   // (or one ending in Main, Original, Full, Master or All) wins, and ties go to the one with the most rows.
-  function findMappingWorkbookSheet(sheets, key, entries, sharedStrings) {
+  function findMappingWorkbookSheet(sheets, key, rowsOf) {
     var matches = sheets.filter(function (sheet) {
       return normalizeWorkbookKey(sheet.name).indexOf(key) !== -1;
     });
@@ -20030,7 +20269,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var bestCount = -1;
     if (pool.length > 1) {
       pool.forEach(function (sheet) {
-        var count = parseWorksheetRows(decodeZipText(entries[sheet.path]), sharedStrings).filter(function (row) {
+        var count = rowsOf(sheet).filter(function (row) {
           return (row || []).some(function (cell) { return trimValue(cell || ""); });
         }).length;
         if (count > bestCount) {
@@ -20266,6 +20505,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   function isFourCharacterText(value) {
     return trimValue(value || "").length === 4;
+  }
+
+  // TR Ref No is the date it was made (YYYYMMDD) plus 6 letters or numbers, like 20260928922GSK.
+  function isTrRefNumber(value) {
+    var match = /^(\d{4})(\d{2})(\d{2})[A-Za-z0-9]{6}$/.exec(value);
+    var date = match ? new Date(+match[1], match[2] - 1, +match[3]) : null;
+    return !!date && date.getMonth() === match[2] - 1 && date.getDate() === +match[3];
   }
 
   function isDescriptorBlankValue(value) {
@@ -20518,8 +20764,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (takeoverRaw && takeover === null) issues.push("E (takeover amount) must be a number, but has \"" + takeoverRaw + "\"");
       if (fundAmountRaw && fundAmount === null) issues.push("F (fund amount) must be a number, but has \"" + fundAmountRaw + "\"");
       if (accountingRefRows && accountingRefRows[rowNumber]) {
-        issues.push("G (TR Ref No) is in Accounting format. Change it to Number format");
+        issues.push("G (TR Ref No) is in Accounting format. Change it to Text format");
       }
+      var refNo = cleanMappingValue(row[6]);
+      if (refNo && !isTrRefNumber(refNo)) issues.push("G (TR Ref No) \"" + refNo + "\" must be the 8-digit date it was made plus 6 letters or numbers, like 20260928922GSK");
       if (!isDescriptorBlankValue(row[16]) && !isFourCharacterText(row[16])) issues.push("Q must be a 4-character text string");
       if (!isBlankOrYesNoValue(row[19])) issues.push("T (Re-Reg) must be Y, N, Yes or No");
       if (priorFundCode) {
@@ -20599,7 +20847,55 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return result;
   }
 
-  function buildValidatedMappingState(payload, fileName, sourceSheetName, fundSheetName, sourceRows, fundRows, sourceMeta, fundMeta, warnings, diagnostics) {
+  // The optional SOURCE_I table on Source Mapping lists each source with its SRC_I. It is found by its
+  // headings, so it still works after a save as .xls. The Rollover row's SRC_I fills Source I in the CONV file.
+  function findRolloverSourceI(sourceRows) {
+    var header = -1;
+    var cols = {};
+    var i;
+    for (i = 0; i < sourceRows.length && header < 0; i += 1) {
+      cols = {};
+      (sourceRows[i] || []).forEach(function (cell, index) {
+        var key = normalizeHeader(cell);
+        if (/^(srci|report1nm|report2nm|docnm)$/.test(key)) {
+          cols[key] = index;
+        }
+      });
+      if (cols.srci !== undefined && (cols.report1nm !== undefined || cols.report2nm !== undefined || cols.docnm !== undefined)) {
+        header = i;
+      }
+    }
+    if (header < 0) {
+      return { value: "", warning: "" };
+    }
+    var nameCols = ["report1nm", "report2nm", "docnm"].filter(function (key) { return cols[key] !== undefined; });
+    var matches = [];
+    for (i = header + 1; i < sourceRows.length; i += 1) {
+      var row = sourceRows[i] || [];
+      var labels = nameCols.map(function (key) { return trimValue(row[cols[key]] || ""); });
+      var srcI = trimValue(row[cols.srci] || "");
+      if (!labels.join("") && !srcI) {
+        break;
+      }
+      if (/rollover/i.test(labels.join(" "))) {
+        matches.push({ srcI: srcI, rowNumber: i + 1, plain: labels.every(function (label) { return !label || normalizeHeader(label) === "rollover"; }) });
+      }
+    }
+    var plain = matches.filter(function (match) { return match.plain; });
+    var pick = matches.length === 1 ? matches[0] : plain.length === 1 ? plain[0] : null;
+    if (!matches.length) {
+      return { value: "", warning: "SOURCE_I table has no Rollover row, so Source I is left blank in the CONV file." };
+    }
+    if (!pick) {
+      return { value: "", warning: "SOURCE_I table has more than one Rollover row (rows " + matches.map(function (match) { return match.rowNumber; }).join(", ") + "), so Source I is left blank in the CONV file." };
+    }
+    if (!/^\d+$/.test(pick.srcI)) {
+      return { value: "", warning: "SOURCE_I table: the Rollover SRC_I on row " + pick.rowNumber + " is \"" + pick.srcI + "\". Excel has rounded or changed it. Format the cell as Text, retype the full number, and upload again. Source I is left blank in the CONV file until then." };
+    }
+    return { value: pick.srcI, warning: "" };
+  }
+
+  function buildValidatedMappingState(payload,fileName, sourceSheetName, fundSheetName, sourceRows, fundRows, sourceMeta, fundMeta, warnings, diagnostics) {
     return {
       status: "valid",
       fileName: fileName,
@@ -20626,15 +20922,29 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   }
 
   async function validateMappingWorkbook(fileBuffer, fileName) {
-    var entries = await readZipEntries(fileBuffer);
-    var workbookXml = decodeZipText(entries["xl/workbook.xml"]);
-    var workbookRelsXml = decodeZipText(entries["xl/_rels/workbook.xml.rels"]);
-    var sharedStrings = parseSharedStrings(decodeZipText(entries["xl/sharedStrings.xml"]));
-    var sheets = parseWorkbookSheets(workbookXml, workbookRelsXml);
+    var head = new Uint8Array(fileBuffer, 0, Math.min(4, fileBuffer.byteLength));
+    var sheets;
+    var rowsOf;
+    var accountingRowsOf;
     var i;
+    if (head[0] === 0xD0 && head[1] === 0xCF && head[2] === 0x11 && head[3] === 0xE0) {
+      try {
+        sheets = readLegacyXlsWorkbook(fileBuffer);
+      } catch (err) {
+        throw new Error(/password|workbook was found/.test(err.message) ? err.message : "Unable to read this .xls file. Open it in Excel, save it as .xlsx, and upload it again.");
+      }
+      rowsOf = function (sheet) { return sheet.rows; };
+      accountingRowsOf = function (sheet, columnIndex) { return sheet.accounting[columnIndex] || {}; };
+    } else {
+      var entries = await readZipEntries(fileBuffer);
+      var sharedStrings = parseSharedStrings(decodeZipText(entries["xl/sharedStrings.xml"]));
+      sheets = parseWorkbookSheets(decodeZipText(entries["xl/workbook.xml"]), decodeZipText(entries["xl/_rels/workbook.xml.rels"]));
+      rowsOf = function (sheet) { return parseWorksheetRows(decodeZipText(entries[sheet.path]), sharedStrings); };
+      accountingRowsOf = function (sheet, columnIndex) { return findAccountingFormatRows(entries, sheet.path, columnIndex); };
+    }
 
-    var sourcePick = findMappingWorkbookSheet(sheets, "sourcemap", entries, sharedStrings);
-    var fundPick = findMappingWorkbookSheet(sheets, "fundmap", entries, sharedStrings);
+    var sourcePick = findMappingWorkbookSheet(sheets, "sourcemap", rowsOf);
+    var fundPick = findMappingWorkbookSheet(sheets, "fundmap", rowsOf);
     var sourceSheet = sourcePick.sheet;
     var fundSheet = fundPick.sheet;
     var sourceSheetName = sourceSheet ? sourceSheet.name : "";
@@ -20670,8 +20980,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       };
     }
 
-    sourceRows = parseWorksheetRows(decodeZipText(entries[sourceSheet.path]), sharedStrings);
-    fundRows = fundSheet ? parseWorksheetRows(decodeZipText(entries[fundSheet.path]), sharedStrings) : [];
+    sourceRows = rowsOf(sourceSheet);
+    fundRows = fundSheet ? rowsOf(fundSheet) : [];
 
     sourceValidation = validateMappingSheet("Source Mapping", sourceRows, [
       { index: 1, letter: "B", name: "Prior Source Code", aliases: ["Previous Source Code"] },
@@ -20735,7 +21045,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         return !isIgnoredFundMappingRow(row);
       }) : { byPriorCode: {}, duplicates: [] };
       sourceDataDiagnostics = validateSourceMappingRows(sourceRows, sourceDataStart);
-      fundDataDiagnostics = fundSheet ? validateFundMappingRows(fundRows, fundDataStart, findAccountingFormatRows(entries, fundSheet.path, 6)) : null;
+      fundDataDiagnostics = fundSheet ? validateFundMappingRows(fundRows, fundDataStart, accountingRowsOf(fundSheet, 6)) : null;
       for (i = sourceDataStart; i < sourceRows.length; i += 1) {
         if (isCitMappingRow(sourceRows[i] || [])) {
           sourceMeta.citCount += 1;
@@ -20784,6 +21094,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
             fund: fundSheetName
           }
         };
+      }
+      var rolloverSourceI = findRolloverSourceI(sourceRows);
+      if (rolloverSourceI.warning) {
+        warnings.push(rolloverSourceI.warning);
       }
       return buildValidatedMappingState(
         null,
@@ -27385,6 +27699,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return null;
     }
     mappingIndex = mappingIndex || { byPriorCode: {}, rowsByPriorCode: {} };
+    var sourceI = mappingState && mappingState.sourceRows ? findRolloverSourceI(mappingState.sourceRows).value : "";
 
     exportRows.push("<row r=\"1\">" +
       textCell("A1", "Case Number", 6) +
@@ -27431,8 +27746,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           textCell("B" + rowNumber, priorFundCode, rowStyle) +
           textCell("C" + rowNumber, taCode, rowStyle) +
           numberCell("D" + rowNumber, String(amount), amountStyle) +
-          textCell("E" + rowNumber, "", rowStyle) +
-          textCell("F" + rowNumber, "", rowStyle) +
+          textCell("E" + rowNumber, mappingRow ? cleanMappingValue(mappingRow[6]) : "", rowStyle) +
+          textCell("F" + rowNumber, sourceI, rowStyle) +
           textCell("G" + rowNumber, reReg, rowStyle) +
           "</row>");
       }
