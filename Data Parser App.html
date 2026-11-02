@@ -10606,7 +10606,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "MONEY TYPE", start: 136, length: 3, type: "text" },
           { header: "SEQUENCE NUMBER", start: 139, length: 4, type: "integer" },
-          { header: "INVESTMENT OPTION", start: 143, length: 7, type: "text" },
+          { header: "INVESTMENT OPTION", start: 143, length: 7, type: "text", trimLastChar: true },
           { header: "AMOUNT", start: 150, length: 18, type: "decimal" },
           { header: "UNITS/SHARES", start: 168, length: 18, type: "decimal" },
           { header: "ITD COST", start: 222, length: 18, type: "decimal" },
@@ -10626,7 +10626,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           { header: "SUFFIX", start: 121, length: 15, type: "text" },
           { header: "MONEY TYPE", start: 136, length: 3, type: "text" },
           { header: "SEQUENCE NUMBER", start: 139, length: 4, type: "integer" },
-          { header: "INVESTMENT OPTION", start: 143, length: 7, type: "text" },
+          { header: "INVESTMENT OPTION", start: 143, length: 7, type: "text", trimLastChar: true },
           { header: "PERCENT", start: 150, length: 7, type: "decimal" },
           { header: "DEFAULT INDICATOR", start: 157, length: 1, type: "text" },
           { header: "MODEL NUMBER", start: 158, length: 3, type: "text" }
@@ -25571,9 +25571,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
     clean = clean.replace(/\s+/g, " ");
     clean = clean.replace(/\s+\d+\s*$/, "");
-    if (type === "fund") {
-      clean = clean.replace(/^([A-Z][A-Z0-9]*[A-Z])\d+$/, "$1");
-    } else if (type === "source") {
+    // Fund codes like IA35R6 and SGDTQ0 end in a real digit; the BALANC layout already drops the glued-on qual.
+    if (type === "source") {
       clean = clean.replace(/^([A-Z][A-Z0-9]*[A-Z])\d+$/, "$1");
       clean = clean.split(" ")[0] || clean;
     }
@@ -28075,6 +28074,49 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     };
   }
 
+  // Source totals of just the given funds, read from the balance rows. Null when the vendor's rows can't be split by fund.
+  function sourceTotalsForFunds(result, funds) {
+    var source = getSelectedSource();
+    var rule = source ? SUMMARY_RULES[source.key] : null;
+    var activeCode = rule ? resolveRuleReportCode(rule, result.layoutsByReport, result.grouped) : "";
+    // A Voya 957 set without a PF extract gets its totals from the 957 fund detail, so split that the same way.
+    if (!activeCode && result.summaryHeadline && result.summaryHeadline.fundTotals && result.grouped[VOYA_957_DETAIL_REPORT]) {
+      activeCode = VOYA_957_DETAIL_REPORT;
+      rule = { sourceHeaders: ["Source ID"], fundHeaders: ["Fund ID"], amountHeaders: ["End Bal"] };
+    }
+    var rows = activeCode ? result.grouped[activeCode] || [] : [];
+    if (!rows.length) {
+      return null;
+    }
+    var layouts = result.layoutsByReport[activeCode];
+    var sourceIndex = getHeaderIndex(layouts, rule.sourceHeaders || []);
+    var fundIndex = getHeaderIndex(layouts, rule.fundHeaders || []);
+    var amountIndices = getHeaderIndices(layouts, rule.amountHeaders || []);
+    var divisor = rule.amountDivisor || 1;
+    var bySource = {};
+    if (sourceIndex < 0 || fundIndex < 0) {
+      return null;
+    }
+    for (var i = 0; i < rows.length; i += 1) {
+      var fundValue = normalizeSummaryCodeForSource(source, "fund", sliceSummaryCode(rows[i][fundIndex], rule.fundSlice));
+      if (!funds[fundValue]) {
+        continue;
+      }
+      var sourceValue = normalizeSummaryCodeForSource(source, "source", sliceSummaryCode(rows[i][sourceIndex], rule.sourceSlice));
+      var amountValue = 0;
+      for (var c = 0; c < amountIndices.length; c += 1) {
+        amountValue = parseAmountValue(rows[i][amountIndices[c]]);
+        if (amountValue !== 0) {
+          break;
+        }
+      }
+      bySource[sourceValue] = (bySource[sourceValue] || 0) + amountValue / divisor;
+    }
+    return bySource;
+  }
+
+  /* Source and Fund side by side so they're easy to compare to the wire. Transfer in kind
+     funds aren't in the wire, so they come out of both and get their own table to the right. */
   function buildFundSourceBreakdownSheet(result, caseNumber, sheetNumber) {
     var source = getSelectedSource();
     if (!source || source.supportsBreakdown === false) {
@@ -28085,54 +28127,95 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return null;
     }
     var caseValue = trimValue(caseNumber || result.caseNumber || "");
-    var rows = [];
-
-    rows.push("<row r=\"1\">" +
-      textCell("A1", "Case Number", 6) +
-      textCell("B1", "Type", 6) +
-      textCell("C1", "Code", 6) +
-      textCell("D1", "Total", 6) +
-      "</row>");
-
-    function pushBreakdownBlock(label, list) {
-      var i;
-      var rowNumber;
-      var blockTotal = 0;
-      for (i = 0; i < list.length; i += 1) {
-        rowNumber = rows.length + 1;
-        blockTotal += Number(list[i].value) || 0;
-        rows.push("<row r=\"" + rowNumber + "\">" +
-          textCell("A" + rowNumber, caseValue, 1) +
-          textCell("B" + rowNumber, label, 1) +
-          textCell("C" + rowNumber, list[i].key, 1) +
-          numberCell("D" + rowNumber, String(list[i].value), 3) +
-          "</row>");
+    var assignments = exportConversionPlan && exportConversionPlan.assignments;
+    var tikFunds = {};
+    var tikList = [];
+    var fundList = [];
+    var sourceList = summary.sourceTotals;
+    var sourceNote = "";
+    summary.fundTotals.forEach(function (item) {
+      if (assignments && assignments[item.key] === "tik") {
+        tikFunds[item.key] = true;
+        tikList.push(item);
+      } else {
+        fundList.push(item);
       }
-      if (!list.length) { return; }
-      rowNumber = rows.length + 1;
-      rows.push("<row r=\"" + rowNumber + "\">" +
-        textCell("A" + rowNumber, caseValue, 6) +
-        textCell("B" + rowNumber, label, 6) +
-        textCell("C" + rowNumber, label + " Total (" + list.length + ")", 6) +
-        numberCell("D" + rowNumber, String(blockTotal), 3) +
-        "</row>");
+    });
+    if (tikList.length) {
+      var tikBySource = sourceTotalsForFunds(result, tikFunds);
+      var sourceKeys = {};
+      sourceList.forEach(function (item) { sourceKeys[item.key] = true; });
+      if (tikBySource && Object.keys(tikBySource).every(function (key) { return sourceKeys[key]; })) {
+        sourceList = sourceList.map(function (item) {
+          return tikBySource[item.key] ? { key: item.key, value: Math.round((item.value - tikBySource[item.key]) * 100) / 100 } : item;
+        }).filter(function (item) {
+          return Math.abs(item.value) >= 0.005;
+        }).sort(function (a, b) {
+          return b.value - a.value;
+        });
+      } else {
+        sourceNote = "Still includes TIK funds";
+      }
     }
 
-    pushBreakdownBlock("Source", summary.sourceTotals);
-    pushBreakdownBlock("Fund", summary.fundTotals);
+    var cellsByRow = [];
+    function addTable(firstColumn, label, list, totalLabel, note) {
+      var cols = [0, 1, 2, 3].map(function (offset) { return columnLetter(firstColumn + offset); });
+      var total = 0;
+      function put(rowIndex, cells) {
+        cellsByRow[rowIndex] = (cellsByRow[rowIndex] || "") + cells;
+      }
+      if (!list.length) {
+        return;
+      }
+      put(0, textCell(cols[0] + "1", "Case Number", 6) + textCell(cols[1] + "1", "Type", 6) +
+        textCell(cols[2] + "1", "Code", 6) + textCell(cols[3] + "1", "Total", 6));
+      list.forEach(function (item, i) {
+        var rowNumber = i + 2;
+        total += Number(item.value) || 0;
+        put(i + 1, textCell(cols[0] + rowNumber, caseValue, 1) + textCell(cols[1] + rowNumber, label, 1) +
+          textCell(cols[2] + rowNumber, item.key, 1) + numberCell(cols[3] + rowNumber, String(item.value), 3));
+      });
+      var totalRow = list.length + 2;
+      put(list.length + 1, textCell(cols[0] + totalRow, caseValue, 6) + textCell(cols[1] + totalRow, label, 6) +
+        textCell(cols[2] + totalRow, totalLabel + " (" + list.length + ")", 6) +
+        numberCell(cols[3] + totalRow, String(Math.round(total * 100) / 100), 3));
+      if (note) {
+        put(list.length + 2, textCell(cols[2] + (totalRow + 1), note, 1));
+      }
+    }
+
+    addTable(1, "Source", sourceList, "Source Total", sourceNote);
+    addTable(6, "Fund", fundList, "Fund Total");
+    addTable(11, "TIK", tikList, "TIK Total, not in wire");
+
+    var rows = [];
+    for (var r = 0; r < cellsByRow.length; r += 1) {
+      rows.push("<row r=\"" + (r + 1) + "\">" + (cellsByRow[r] || "") + "</row>");
+    }
+    var lastColumn = tikList.length ? 14 : 9;
 
     return {
       name: "Fund and Source Breakdown",
       path: "xl/worksheets/sheet" + sheetNumber + ".xml",
       content: worksheetXml(rows, [
-        "<col min=\"1\" max=\"1\" width=\"18\" bestFit=\"1\" customWidth=\"1\"/>",
-        "<col min=\"2\" max=\"2\" width=\"12\" bestFit=\"1\" customWidth=\"1\"/>",
-        "<col min=\"3\" max=\"3\" width=\"18\" bestFit=\"1\" customWidth=\"1\"/>",
-        "<col min=\"4\" max=\"4\" width=\"16\" bestFit=\"1\" customWidth=\"1\"/>"
+        "<col min=\"1\" max=\"1\" width=\"18\" customWidth=\"1\"/>",
+        "<col min=\"2\" max=\"2\" width=\"10\" customWidth=\"1\"/>",
+        "<col min=\"3\" max=\"3\" width=\"24\" customWidth=\"1\"/>",
+        "<col min=\"4\" max=\"4\" width=\"16\" customWidth=\"1\"/>",
+        "<col min=\"5\" max=\"5\" width=\"4\" customWidth=\"1\"/>",
+        "<col min=\"6\" max=\"6\" width=\"18\" customWidth=\"1\"/>",
+        "<col min=\"7\" max=\"7\" width=\"10\" customWidth=\"1\"/>",
+        "<col min=\"8\" max=\"8\" width=\"24\" customWidth=\"1\"/>",
+        "<col min=\"9\" max=\"9\" width=\"16\" customWidth=\"1\"/>",
+        "<col min=\"10\" max=\"10\" width=\"4\" customWidth=\"1\"/>",
+        "<col min=\"11\" max=\"11\" width=\"18\" customWidth=\"1\"/>",
+        "<col min=\"12\" max=\"12\" width=\"10\" customWidth=\"1\"/>",
+        "<col min=\"13\" max=\"13\" width=\"28\" customWidth=\"1\"/>",
+        "<col min=\"14\" max=\"14\" width=\"16\" customWidth=\"1\"/>"
       ], {
         freezeTopRow: true,
-        autoFilterRef: worksheetRange(rows.length, 4),
-        dimensionRef: worksheetRange(rows.length, 4)
+        dimensionRef: worksheetRange(rows.length, lastColumn)
       })
     };
   }
@@ -29216,6 +29299,18 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       sheetFiles.push({ path: sheet.path, content: sheet.content });
     }
 
+    var breakdownSheet = fullExport ? buildFundSourceBreakdownSheet(result, caseNumber, sheetIndex + 1) : null;
+    if (breakdownSheet && worksheetDataRowCount(breakdownSheet.content) > 0) {
+      sheetIndex += 1;
+      sheetDefs.push({ name: breakdownSheet.name, path: breakdownSheet.path });
+      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + breakdownSheet.path.split("/").pop() + "\"/>");
+      contentOverrides.push("<Override PartName=\"/" + breakdownSheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
+      sheetFiles.push({
+        path: breakdownSheet.path,
+        content: breakdownSheet.content
+      });
+    }
+
     var customSheet = fullExport ? buildCustomBalanceSheet(result, caseNumber, sheetIndex + 1) : null;
     if (customSheet && worksheetDataRowCount(customSheet.content) > 0) {
       sheetIndex += 1;
@@ -29236,43 +29331,6 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (splitBalanceSheet && worksheetDataRowCount(splitBalanceSheet.content) > 0) {
         pushSheet(splitBalanceSheet);
       }
-    }
-
-    var vendorSummarySheets = buildVendorSummarySheets(result, caseNumber, sheetIndex + 1, reportCodes);
-    for (i = 0; i < vendorSummarySheets.length; i += 1) {
-      var vendorSummarySheet = vendorSummarySheets[i];
-      sheetIndex += 1;
-      sheetDefs.push({ name: vendorSummarySheet.name, path: vendorSummarySheet.path });
-      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + vendorSummarySheet.path.split("/").pop() + "\"/>");
-      contentOverrides.push("<Override PartName=\"/" + vendorSummarySheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
-      sheetFiles.push({
-        path: vendorSummarySheet.path,
-        content: vendorSummarySheet.content
-      });
-    }
-
-    var rolloverSheet = fullExport ? buildSpecialRolloverSheet(result, caseNumber, sheetIndex + 1) : null;
-    if (rolloverSheet) {
-      sheetIndex += 1;
-      sheetDefs.push({ name: rolloverSheet.name, path: rolloverSheet.path });
-      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + rolloverSheet.path.split("/").pop() + "\"/>");
-      contentOverrides.push("<Override PartName=\"/" + rolloverSheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
-      sheetFiles.push({
-        path: rolloverSheet.path,
-        content: rolloverSheet.content
-      });
-    }
-
-    var breakdownSheet = fullExport ? buildFundSourceBreakdownSheet(result, caseNumber, sheetIndex + 1) : null;
-    if (breakdownSheet && worksheetDataRowCount(breakdownSheet.content) > 0) {
-      sheetIndex += 1;
-      sheetDefs.push({ name: breakdownSheet.name, path: breakdownSheet.path });
-      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + breakdownSheet.path.split("/").pop() + "\"/>");
-      contentOverrides.push("<Override PartName=\"/" + breakdownSheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
-      sheetFiles.push({
-        path: breakdownSheet.path,
-        content: breakdownSheet.content
-      });
     }
 
     // Cash funds use participants' current elections, so they never go on a CONV tab.
@@ -29310,6 +29368,31 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (splitConvSheet) {
         pushSheet(splitConvSheet);
       }
+    }
+
+    var vendorSummarySheets = buildVendorSummarySheets(result, caseNumber, sheetIndex + 1, reportCodes);
+    for (i = 0; i < vendorSummarySheets.length; i += 1) {
+      var vendorSummarySheet = vendorSummarySheets[i];
+      sheetIndex += 1;
+      sheetDefs.push({ name: vendorSummarySheet.name, path: vendorSummarySheet.path });
+      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + vendorSummarySheet.path.split("/").pop() + "\"/>");
+      contentOverrides.push("<Override PartName=\"/" + vendorSummarySheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
+      sheetFiles.push({
+        path: vendorSummarySheet.path,
+        content: vendorSummarySheet.content
+      });
+    }
+
+    var rolloverSheet = fullExport ? buildSpecialRolloverSheet(result, caseNumber, sheetIndex + 1) : null;
+    if (rolloverSheet) {
+      sheetIndex += 1;
+      sheetDefs.push({ name: rolloverSheet.name, path: rolloverSheet.path });
+      workbookRels.push("<Relationship Id=\"rId" + sheetIndex + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/" + rolloverSheet.path.split("/").pop() + "\"/>");
+      contentOverrides.push("<Override PartName=\"/" + rolloverSheet.path + "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
+      sheetFiles.push({
+        path: rolloverSheet.path,
+        content: rolloverSheet.content
+      });
     }
 
     var citBalanceSheet = buildCITBalancesSheet(result, caseNumber, sheetIndex + 1);
