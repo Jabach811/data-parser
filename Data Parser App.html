@@ -1306,6 +1306,7 @@ input::placeholder{color:var(--faint)}
   transition:background .15s ease,border-color .15s ease;
 }
 .drop:hover,.drop.is-dragover{background:var(--drop-bg-hover);border-color:var(--focus)}
+#dpcFileCard.is-dragover{background:var(--drop-bg-hover);border-color:var(--focus)}
 .drop svg{color:var(--accent)}
 .drop-title{font:600 15px/1.3 var(--font-ui);color:var(--accent)}
 .drop-sub{font:400 12px/1.4 var(--font-ui);color:var(--ink-3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1437,7 +1438,7 @@ input::placeholder{color:var(--faint)}
 .bottom{border-top:1px solid var(--line);padding:22px 32px 26px}
 .waiting{display:flex;align-items:center;justify-content:center;min-height:110px;border-radius:10px;background:var(--fill);font:400 12.5px/1.4 var(--font-ui);color:var(--ink-3);text-align:center;padding:16px}
 .table-card{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
-.tabs{display:flex;align-items:flex-end;gap:2px;padding:8px 10px 0;border-bottom:1px solid var(--line-mid);background:var(--tint);overflow-x:auto}
+.tabs{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2px;padding:8px 10px 0;border-bottom:1px solid var(--line-mid);background:var(--tint)}
 .tab{font:500 12px/1 var(--font-ui);white-space:nowrap;color:var(--ink-3);background:none;border:none;padding:9px 14px;cursor:pointer;border-radius:7px 7px 0 0}
 .tab:hover{color:var(--accent)}
 .tab.is-active{font-weight:600;color:var(--accent);background:var(--surface);border:1px solid var(--line-mid);border-bottom:none;margin-bottom:-1px}
@@ -1784,7 +1785,6 @@ body.app-edition.pal-navy.mode-dark{--paper:#101820;--surface:#18232f;--surface-
 .bottom{padding:24px 28px 28px;background:var(--surface)}
 .table-card{border-radius:10px;border-color:var(--line)}
 /* The full report list remains the navigation; the active report has a real title. */
-.tabs{display:none}
 .report-card{flex-direction:column}
 .report-card-head{padding:16px 18px;background:var(--surface);border-top:0;border-bottom:1px solid var(--line);align-items:center}
 .report-card-head h3{display:block;margin:0 0 4px;font:600 15px/1.4 var(--font-ui);letter-spacing:-.015em;color:var(--ink);overflow-wrap:anywhere}
@@ -1835,12 +1835,12 @@ body.app-edition.pal-navy.mode-dark{--paper:#101820;--surface:#18232f;--surface-
 #dpcExportDialog button:hover{filter:brightness(.97)}
 #dpcExportDialog button:disabled{cursor:not-allowed!important;opacity:.48!important}
 #dpcExportDialog button:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
-#dpcConvDialog{width:min(560px,calc(100vw - 32px));max-height:86vh;overflow-x:hidden;padding:0;border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow-pop);font:14px/1.5 var(--font-ui)}
+#dpcConvDialog{width:min(560px,calc(100vw - 32px));max-height:94vh;overflow-x:hidden;padding:0;border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow-pop);font:14px/1.5 var(--font-ui)}
 #dpcConvDialog::backdrop{background:rgba(10,20,32,.48);backdrop-filter:blur(3px)}
 #dpcConvDialog .cv-head{padding:22px 24px 14px}
 #dpcConvDialog .cv-title{font-size:21px;font-weight:600;letter-spacing:-.025em}
 #dpcConvDialog .cv-note{margin-top:4px;color:var(--ink-2);font-size:13px}
-#dpcConvDialog .cv-body{padding:0 24px 20px;max-height:52vh;overflow-x:hidden;overflow-y:auto}
+#dpcConvDialog .cv-body{padding:0 24px 20px;max-height:72vh;overflow-x:hidden;overflow-y:auto}
 #dpcConvDialog .cv-option{display:flex;gap:10px;align-items:center;margin-top:8px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
 #dpcConvDialog table{width:100%;border-collapse:collapse;font-size:13px}
 #dpcConvDialog th{position:sticky;top:0;background:var(--surface);padding:8px 10px;border-bottom:1px solid var(--line);color:var(--ink-2);font-weight:600;text-align:left}
@@ -2097,7 +2097,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         <span>Discarded<b id="discardedLinesText">0</b></span>
         <span>Anomalies<b id="anomalyCountText">0</b></span>
       </div>
-      <details class="fold">
+      <details class="fold" open>
         <summary>Source totals, fund totals and discarded lines</summary>
         <div class="fold-body">
           <div class="two-col">
@@ -13240,8 +13240,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       reportNames: reportNames,
       layouts: layouts,
       recordRules: recordRules,
-      customFolderParser: parseVoyaFolderSource,
-      accumulateFiles: true
+      customFolderParser: parseVoyaFolderSource
     };
   }
 
@@ -13252,13 +13251,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       supportsExport: true,
       supportsBreakdown: true,
       summaryIncluded: true,
-      folderModeHelpText: "Paychex file picker mode is active. Select the balance extract and loan extract text files, and the app will classify them automatically.",
-      reports: ["BALANCES", "ELECTIONS", "LOAN_HEADER", "LOAN_SOURCE"],
+      folderModeHelpText: "Paychex file picker mode is active. Select the Paychex valuation, loans, Roth, census and auto-enroll files (or the older balance and loan extracts), and the app will classify them automatically.",
+      reports: ["BALANCES", "ELECTIONS", "LOAN_HEADER", "LOAN_SOURCE", "ROTH", "CENSUS", "AUTO_ENROLL"],
       reportNames: {
         BALANCES: "Balances",
         ELECTIONS: "Elections",
         LOAN_HEADER: "Loan Header",
-        LOAN_SOURCE: "Loan Source"
+        LOAN_SOURCE: "Loan Source",
+        ROTH: "Roth",
+        CENSUS: "Census",
+        AUTO_ENROLL: "Auto Enroll"
       },
       layouts: {
         BALANCES: [
@@ -13285,6 +13287,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         LOAN_SOURCE: [
           { header: "Participant Id", type: "text" },
           { header: "Participant Name", type: "text" },
+          { header: "Loan Number", type: "text" },
           { header: "Status", type: "text" },
           { header: "Status Code", type: "text" },
           { header: "Description", type: "text" },
@@ -13324,7 +13327,48 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           { header: "Loan Status", type: "text" },
           { header: "Next Payment Amount", type: "decimal" },
           { header: "Next Payment Date", type: "date" },
-          { header: "Last Payment Date", type: "date" }
+          { header: "Last Payment Date", type: "date" },
+          { header: "Deemed Amount", type: "decimal" },
+          { header: "Final Payment Due Date", type: "date" }
+        ],
+        ROTH: [
+          { header: "Participant Id", type: "text" },
+          { header: "Participant Name", type: "text" },
+          { header: "Net Roth", type: "decimal" },
+          { header: "First Roth Deferral", type: "date" },
+          { header: "As Of Date", type: "date" }
+        ],
+        AUTO_ENROLL: [
+          { header: "Participant Id", type: "text" },
+          { header: "Participant Name", type: "text" },
+          { header: "Last 4 SSN", type: "text" },
+          { header: "Employment Status", type: "text" },
+          { header: "Hire Date", type: "date" },
+          { header: "Rehire Date", type: "date" },
+          { header: "Autoenroll Date", type: "date" },
+          { header: "Opt Out Date", type: "date" },
+          { header: "Auto Increase Date", type: "date" },
+          { header: "Autoenroll Status", type: "text" },
+          { header: "Description", type: "text" },
+          { header: "Dedn Start Date", type: "date" },
+          { header: "Dedn End Date", type: "date" },
+          { header: "Pre-Tax Percent", type: "decimal" },
+          { header: "Pre-Tax Flat Dollar", type: "decimal" },
+          { header: "Roth Percent", type: "decimal" },
+          { header: "Roth Flat Dollar", type: "decimal" }
+        ],
+        CENSUS: [
+          { header: "Participant Id", type: "text" },
+          { header: "Participant Name", type: "text" },
+          { header: "Date of Birth", type: "date" },
+          { header: "Date of Hire", type: "date" },
+          { header: "Date of Rehire", type: "date" },
+          { header: "Employee Status", type: "text" },
+          { header: "Term/Inact Date", type: "date" },
+          { header: "Address", type: "text" },
+          { header: "City", type: "text" },
+          { header: "State", type: "text" },
+          { header: "Zip", type: "text" }
         ]
       },
       customFolderParser: parsePaychexFolderSource
@@ -13830,6 +13874,551 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     };
   }
 
+  /* The newer Paychex reports (######_Valuation_MMDDYYYY.txt and
+     ######_Loans_MMDDYYYY.txt) print dollars with "$", dates as M/D/YYYY or
+     "November 2, 2026", and percents like "100.%". */
+  function parsePaychexDollar(raw) {
+    return parsePaychexNumber(String(raw || "").replace(/\$/g, ""));
+  }
+
+  function normalizePaychexReportDate(value) {
+    var clean = trimValue(value || "");
+    var slash = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slash) {
+      return slash[3] + "-" + ("0" + slash[1]).slice(-2) + "-" + ("0" + slash[2]).slice(-2);
+    }
+    var parsed = new Date(clean + " 00:00:00");
+    if (/^[A-Za-z]+\s+\d{1,2},\s*\d{4}$/.test(clean) && !isNaN(parsed.getTime())) {
+      return parsed.getFullYear() + "-" + ("0" + (parsed.getMonth() + 1)).slice(-2) + "-" + ("0" + parsed.getDate()).slice(-2);
+    }
+    return "";
+  }
+
+  function parsePaychexValuationText(text) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var holdings = [];
+    var participant = null;
+    var planName = "";
+    var asOfDate = "";
+    var lastFund = null;
+    var section = "detail";
+    var planTotalFunds = {};
+    var planTotalSources = {};
+    var rothBasis = [];
+    var amountPattern = "(\\(?-?\\$?-?[0-9,]*\\.\\d{2}\\)?-?)";
+
+    for (var i = 0; i < lines.length; i += 1) {
+      var line = trimValue(lines[i] || "");
+      if (!line || /^[=\-]+$/.test(line)) {
+        continue;
+      }
+      var clientMatch = line.match(/^Client:\s*(.+)$/i);
+      if (clientMatch) {
+        planName = trimValue(clientMatch[1]);
+        continue;
+      }
+      var dateMatch = line.match(/^Date:\s*(.+)$/i);
+      if (dateMatch) {
+        asOfDate = normalizePaychexReportDate(dateMatch[1]);
+        continue;
+      }
+      if (/^\*{3}\s*GRAND TOTAL/i.test(line)) {
+        section = "footer";
+        participant = null;
+        continue;
+      }
+      if (/^\*{3}\s*TOTAL BY SOURCE/i.test(line)) {
+        section = "sourceTotals";
+        continue;
+      }
+      if (/^\*{3}\s*TOTAL BY FUND/i.test(line)) {
+        section = "fundTotals";
+        continue;
+      }
+      if (/^SOURCE KEY/i.test(line)) {
+        section = "footer";
+        continue;
+      }
+      if (section === "sourceTotals") {
+        var sourceTotal = line.match(new RegExp("^([A-Z0-9])\\s+" + amountPattern + "$"));
+        if (sourceTotal) {
+          planTotalSources[sourceTotal[1]] = (planTotalSources[sourceTotal[1]] || 0) + parsePaychexDollar(sourceTotal[2]);
+        }
+        continue;
+      }
+      if (section === "fundTotals") {
+        var fundTotal = line.match(new RegExp("\\[([A-Z0-9]+)\\]\\s+" + amountPattern + "$"));
+        if (fundTotal) {
+          planTotalFunds[fundTotal[1]] = (planTotalFunds[fundTotal[1]] || 0) + parsePaychexDollar(fundTotal[2]);
+        }
+        continue;
+      }
+      if (section !== "detail") {
+        continue;
+      }
+      var participantMatch = line.match(/^(.*\S)\s+(\d{3}-\d{2}-\d{4})$/);
+      if (participantMatch) {
+        participant = {
+          participantId: participantMatch[2],
+          participantName: trimValue(participantMatch[1])
+        };
+        lastFund = null;
+        continue;
+      }
+      if (!participant) {
+        continue;
+      }
+      var netRothMatch = line.match(/^Net Roth:\s*(\S+)/i);
+      if (netRothMatch) {
+        rothBasis.push({
+          "Participant Id": participant.participantId,
+          "Participant Name": participant.participantName,
+          "Net Roth": parsePaychexDollar(netRothMatch[1]),
+          "As Of Date": asOfDate
+        });
+        continue;
+      }
+      var holdingMatch = line.match(new RegExp("^(?:([A-Z0-9]{2,8})\\s+(.+?)\\s+)?([A-Z0-9])\\s+" + amountPattern + "\\s+(-?[0-9.]+)\\s*%$"));
+      if (!holdingMatch) {
+        continue;
+      }
+      if (holdingMatch[1]) {
+        lastFund = { code: holdingMatch[1], name: trimValue(holdingMatch[2]) };
+      }
+      if (!lastFund) {
+        continue;
+      }
+      var amount = parsePaychexDollar(holdingMatch[4]);
+      holdings.push({
+        "Participant Id": participant.participantId,
+        "Participant Name": participant.participantName,
+        "Status": "",
+        "Status Code": "",
+        "Description": lastFund.name,
+        "Row ID": lastFund.code,
+        "Fund Code": lastFund.code,
+        "Source Code": holdingMatch[3],
+        "Allocation Percent": parsePaychexNumber(holdingMatch[5]),
+        "Begin Balance": 0,
+        "Contribution": 0,
+        "Earnings": 0,
+        "Payments": 0,
+        "Loans Activity": 0,
+        "Other Amount": 0,
+        "Other Activity Code": "",
+        "End Balance": amount,
+        "Current Balance": amount,
+        "As Of Date": asOfDate
+      });
+    }
+
+    /* Each line already carries its own fund and source, so the election is
+       taken as printed instead of being added up across sources. */
+    var elections = holdings.filter(function (holding) {
+      return Number(holding["Allocation Percent"] || 0) !== 0;
+    }).map(function (holding) {
+      return {
+        "Participant Id": holding["Participant Id"],
+        "Participant Name": holding["Participant Name"],
+        "Fund Code": holding["Fund Code"],
+        "Source Code": holding["Source Code"],
+        "Percent": holding["Allocation Percent"],
+        "As Of Date": holding["As Of Date"]
+      };
+    });
+
+    return {
+      planName: planName,
+      asOfDate: asOfDate,
+      holdings: holdings,
+      elections: elections,
+      rothBasis: rothBasis,
+      nonBlankLineCount: lines.filter(function (lineItem) { return !!trimValue(lineItem); }).length,
+      planTotalFunds: planTotalFunds,
+      planTotalSources: planTotalSources
+    };
+  }
+
+  function paychexFrequencyFromTerm(paymentCount, termMonths) {
+    if (!paymentCount || !termMonths) {
+      return "";
+    }
+    var perYear = Math.round(paymentCount * 12 / termMonths);
+    var names = { 52: "WEEKLY", 26: "BI WEEKLY", 24: "SEMI MONTHLY", 12: "MONTHLY", 4: "QUARTERLY" };
+    return names[perYear] ? perYear + "-" + names[perYear] : "";
+  }
+
+  function parsePaychexLoanReportText(text) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var loans = [];
+    var planName = "";
+    var currentLoan = null;
+    var inAmortizationSection = false;
+    var amountPattern = "(\\(?-?\\$?-?[0-9,]*\\.\\d{2}\\)?-?)";
+    var scheduleRow = new RegExp("^(\\d{1,2}\\/\\d{1,2}\\/\\d{4})\\s+" + amountPattern + "\\s+" + amountPattern + "\\s+" + amountPattern + "\\s+" + amountPattern + "$");
+
+    function finishLoan() {
+      if (!currentLoan) {
+        return;
+      }
+      currentLoan["Payment Frequency"] = paychexFrequencyFromTerm(currentLoan._paymentCount, currentLoan._termMonths);
+      delete currentLoan._paymentCount;
+      delete currentLoan._termMonths;
+    }
+
+    for (var i = 0; i < lines.length; i += 1) {
+      var line = trimValue(lines[i] || "");
+      if (!line || /^[=\-]+$/.test(line)) {
+        continue;
+      }
+      var planMatch = line.match(/^PLAN:\s*(.+)$/i);
+      if (planMatch) {
+        planName = trimValue(planMatch[1]);
+        continue;
+      }
+      if (/^(LOAN SUMMARY|PLAN LOAN SUMMARY)$/i.test(line)) {
+        finishLoan();
+        currentLoan = null;
+        inAmortizationSection = false;
+        continue;
+      }
+      if (/^AMORTIZATION SCHEDULE$/i.test(line)) {
+        inAmortizationSection = true;
+        continue;
+      }
+      var field = line.match(/^([A-Za-z ]+):\s*(.*)$/);
+      if (field && !inAmortizationSection) {
+        var label = trimValue(field[1]).toUpperCase();
+        var value = trimValue(field[2]);
+        if (label === "PARTICIPANT") {
+          currentLoan = {
+            "Participant Id": "",
+            "Participant Name": value,
+            "Loan Number": "",
+            "Loan Payroll Number Code": "",
+            "Loan Amount": 0,
+            "Loan Balance": 0,
+            "Issuance Date": "",
+            "Interest Rate": 0,
+            "Payment Frequency": "",
+            "Loan Status": "",
+            "Next Payment Amount": 0,
+            "Next Payment Date": "",
+            "Last Payment Date": "",
+            asOfDate: "",
+            amortizationSchedule: [],
+            amortizationTotal: null
+          };
+          loans.push(currentLoan);
+          continue;
+        }
+        if (!currentLoan) {
+          continue;
+        }
+        if (label === "SSN") { currentLoan["Participant Id"] = value; }
+        else if (label === "LOAN NUMBER") { currentLoan["Loan Number"] = value; currentLoan["Loan Payroll Number Code"] = value; }
+        else if (label === "ORIGINAL AMOUNT") { currentLoan["Loan Amount"] = parsePaychexDollar(value); }
+        else if (label === "CURRENT BALANCE") { currentLoan["Loan Balance"] = parsePaychexDollar(value); }
+        else if (label === "INTEREST RATE") { currentLoan["Interest Rate"] = parsePaychexNumber(value.replace(/%/g, "")); }
+        else if (label === "LOAN TERM") { currentLoan._termMonths = parsePaychexNumber(value); }
+        else if (label === "NUMBER PAYMENTS") { currentLoan._paymentCount = parsePaychexNumber(value); }
+        else if (label === "PAYMENT AMOUNT") { currentLoan["Next Payment Amount"] = parsePaychexDollar(value); }
+        else if (label === "ISSUE DATE") { currentLoan["Issuance Date"] = normalizePaychexReportDate(value); }
+        continue;
+      }
+      if (!currentLoan || !inAmortizationSection) {
+        continue;
+      }
+      var row = line.match(scheduleRow);
+      if (row) {
+        currentLoan.amortizationSchedule.push({
+          paymentNumber: currentLoan.amortizationSchedule.length + 1,
+          paymentDate: normalizePaychexReportDate(row[1]),
+          paymentAmount: parsePaychexDollar(row[2]),
+          amountToPrincipal: parsePaychexDollar(row[3]),
+          amountToInterest: parsePaychexDollar(row[4]),
+          balance: parsePaychexDollar(row[5])
+        });
+      }
+    }
+    finishLoan();
+
+    return {
+      planName: planName,
+      asOfDate: "",
+      loans: loans,
+      nonBlankLineCount: lines.filter(function (lineItem) { return !!trimValue(lineItem); }).length
+    };
+  }
+
+  /* One Roth row per person: Net Roth from the valuation file, plus the
+     earliest first Roth deferral date from the Roth PDF. */
+  function mergePaychexRoth(rothBasisRecords, rothDeferrals) {
+    var byId = {};
+    var order = [];
+    function rowFor(record) {
+      var id = record["Participant Id"];
+      if (!byId[id]) {
+        byId[id] = { "Participant Id": id, "Participant Name": record["Participant Name"], "Net Roth": 0, "First Roth Deferral": "", "As Of Date": "" };
+        order.push(id);
+      }
+      return byId[id];
+    }
+    rothBasisRecords.forEach(function (record) {
+      var row = rowFor(record);
+      row["Net Roth"] += Number(record["Net Roth"] || 0);
+      row["As Of Date"] = record["As Of Date"];
+    });
+    rothDeferrals.forEach(function (record) {
+      var row = rowFor(record);
+      var date = record["First Roth Deferral"];
+      if (date && (!row["First Roth Deferral"] || date < row["First Roth Deferral"])) {
+        row["First Roth Deferral"] = date;
+      }
+    });
+    return order.map(function (id) { return byId[id]; }).filter(function (row) {
+      return row["Net Roth"] !== 0 || row["First Roth Deferral"];
+    });
+  }
+
+  function formatPaychexSsn(digits) {
+    return digits.substring(0, 3) + "-" + digits.substring(3, 5) + "-" + digits.substring(5);
+  }
+
+  /* Roth Establishment Report: one line per first Roth deferral,
+     e.g. "Doe, Jane A 123456789 7/19/2024". */
+  function parsePaychexRothPdfText(text) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var deferrals = [];
+    for (var i = 0; i < lines.length; i += 1) {
+      var match = trimValue(lines[i] || "").match(/^(.+?)\s+(\d{9})\s+(\d{1,2}\/\d{1,2}\/\d{4})$/);
+      if (match) {
+        deferrals.push({
+          "Participant Id": formatPaychexSsn(match[2]),
+          "Participant Name": trimValue(match[1]),
+          "First Roth Deferral": normalizePaychexReportDate(match[3])
+        });
+      }
+    }
+    return {
+      deferrals: deferrals,
+      nonBlankLineCount: lines.filter(function (lineItem) { return !!trimValue(lineItem); }).length
+    };
+  }
+
+  /* Employee Census Report: each person is a main line (name, SSN, birth,
+     hire, rehire, status, term date) followed by an "Address:" line. The
+     text is read with tabs between PDF cells so street and city stay apart. */
+  function parsePaychexCensusPdfText(text) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var people = [];
+    var planName = "";
+    var unread = [];
+    var current = null;
+    var date = "(\\d{1,2}\\/\\d{1,2}\\/\\d{4})";
+    var mainLine = new RegExp("^(.+?)\\s*(\\d{9})\\s+" + date + "\\s+" + date + "(?:\\s+" + date + ")?\\s*([A-Za-z][A-Za-z /-]*?)(?:\\s*" + date + ")?$");
+
+    for (var i = 0; i < lines.length; i += 1) {
+      var cells = String(lines[i] || "").split("\t").map(trimValue).filter(Boolean);
+      var flat = cells.join(" ");
+      if (!flat) {
+        continue;
+      }
+      if (/^Employee Census Report$/i.test(flat)) {
+        if (!planName && i + 1 < lines.length) {
+          planName = trimValue(String(lines[i + 1] || "").replace(/\t/g, " "));
+        }
+        continue;
+      }
+      if (/^Address:/i.test(flat)) {
+        if (current) {
+          cells[0] = trimValue(cells[0].replace(/^Address:/i, ""));
+          if (!cells[0]) {
+            cells.shift();
+          }
+          /* The PDF reader sometimes glues neighboring cells together
+             ("Cedar Rapids IA"), so state and zip come off the end of the
+             whole line, then the last remaining cell is the city. */
+          var joined = cells.join("\t");
+          var tail = joined.match(/[\t ]([A-Z]{2})[\t ]+(\d{5})(?:[\t -]+(\d{4}))?$/);
+          if (tail) {
+            current["State"] = tail[1];
+            current["Zip"] = tail[2] + (tail[3] ? "-" + tail[3] : "");
+            joined = joined.slice(0, tail.index);
+          }
+          cells = joined.split("\t").map(trimValue).filter(Boolean);
+          if (cells.length >= 2) {
+            current["City"] = cells.pop();
+          }
+          current["Address"] = cells.join(" ");
+          current = null;
+        }
+        continue;
+      }
+      var match = flat.match(mainLine);
+      if (!match) {
+        if (/\b\d{9}\b/.test(flat)) {
+          unread.push(flat.replace(/\b\d{5}(\d{4})\b/, "xxx-xx-$1"));
+        }
+        continue;
+      }
+      current = {
+        "Participant Id": formatPaychexSsn(match[2]),
+        "Participant Name": trimValue(match[1]),
+        "Date of Birth": normalizePaychexReportDate(match[3]),
+        "Date of Hire": normalizePaychexReportDate(match[4]),
+        "Date of Rehire": normalizePaychexReportDate(match[5] || ""),
+        "Employee Status": trimValue(match[6]),
+        "Term/Inact Date": normalizePaychexReportDate(match[7] || ""),
+        "Address": "",
+        "City": "",
+        "State": "",
+        "Zip": ""
+      };
+      people.push(current);
+    }
+    return {
+      planName: planName,
+      people: people,
+      unread: unread,
+      nonBlankLineCount: lines.filter(function (lineItem) { return !!trimValue(lineItem); }).length
+    };
+  }
+
+  /* Auto-enroll spreadsheet: one row per deduction (pre-tax and Roth are
+     separate rows). Only the last 4 of the SSN is given, so the full SSN is
+     filled in later from the other reports. */
+  function parsePaychexAutoEnrollRows(sheetRows) {
+    var headerRowIndex = -1;
+    var columns = {};
+    var people = [];
+    var columnAliases = {
+      "Participant Name": ["name", "participantname", "employeename"],
+      "Last 4 SSN": ["last4ssn", "ssnlast4", "last4"],
+      "Employment Status": ["employmentstatus"],
+      "Hire Date": ["hiredate"],
+      "Rehire Date": ["rehiredate"],
+      "Autoenroll Date": ["autoenrolldate", "autoenrollmentdate"],
+      "Opt Out Date": ["optoutdate"],
+      "Auto Increase Date": ["autoincreasedate"],
+      "Autoenroll Status": ["autoenrollstatus", "autoenrollmentstatus"],
+      "Description": ["descriptiondefinition", "description"],
+      "Dedn Start Date": ["dednstartdate", "deductionstartdate"],
+      "Dedn End Date": ["dednenddate", "deductionenddate"],
+      "Pre-Tax Percent": ["pretaxdednamount", "pretaxdeductionamount"],
+      "Pre-Tax Flat Dollar": ["pretaxflatdollar"],
+      "Roth Percent": ["rothdednamount", "rothdeductionamount"],
+      "Roth Flat Dollar": ["rothflatdollar"]
+    };
+    var dateHeaders = ["Hire Date", "Rehire Date", "Autoenroll Date", "Opt Out Date", "Auto Increase Date", "Dedn Start Date", "Dedn End Date"];
+
+    function headerKey(value) {
+      return trimValue(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    function sheetDate(value) {
+      var clean = trimValue(value || "");
+      if (/^\d+(\.\d+)?$/.test(clean) && Number(clean) >= 1) {
+        return new Date(Date.UTC(1899, 11, 30) + Math.floor(Number(clean)) * 86400000).toISOString().slice(0, 10);
+      }
+      return normalizePaychexReportDate(clean);
+    }
+
+    /* Zero is left blank so the pre-tax and Roth rows merge cleanly. A percent
+       cell stores 3% as 0.03. */
+    function sheetAmount(value, isPercent) {
+      var clean = trimValue(value || "");
+      var hasPercentSign = clean.indexOf("%") !== -1;
+      var number = Number(clean.replace(/[$,%\s]/g, ""));
+      if (!clean || isNaN(number) || number === 0) {
+        return "";
+      }
+      if (isPercent && !hasPercentSign && Math.abs(number) < 1) {
+        number = number * 100;
+      }
+      return String(Math.round(number * 10000) / 10000);
+    }
+
+    for (var r = 0; r < sheetRows.length && headerRowIndex === -1; r += 1) {
+      var keys = (sheetRows[r] || []).map(headerKey);
+      if (keys.indexOf("last4ssn") !== -1 || (keys.indexOf("name") !== -1 && keys.indexOf("autoenrollstatus") !== -1)) {
+        headerRowIndex = r;
+        Object.keys(columnAliases).forEach(function (header) {
+          for (var a = 0; a < columnAliases[header].length; a += 1) {
+            var index = keys.indexOf(columnAliases[header][a]);
+            if (index !== -1) {
+              columns[header] = index;
+              return;
+            }
+          }
+        });
+      }
+    }
+    if (headerRowIndex === -1) {
+      return { people: [], nonBlankLineCount: 0, headerFound: false };
+    }
+    var nonBlankLineCount = 1;
+    for (var i = headerRowIndex + 1; i < sheetRows.length; i += 1) {
+      var cells = sheetRows[i] || [];
+      if (!cells.some(function (cell) { return !!trimValue(cell || ""); })) {
+        continue;
+      }
+      nonBlankLineCount += 1;
+      var person = { "Participant Id": "" };
+      Object.keys(columns).forEach(function (header) {
+        var raw = cells[columns[header]];
+        if (dateHeaders.indexOf(header) !== -1) {
+          person[header] = sheetDate(raw);
+        } else if (/Percent$/.test(header)) {
+          person[header] = sheetAmount(raw, true);
+        } else if (/Flat Dollar$/.test(header)) {
+          person[header] = sheetAmount(raw, false);
+        } else {
+          person[header] = trimValue(raw || "");
+        }
+      });
+      var lastFour = String(person["Last 4 SSN"] || "").replace(/[^0-9]/g, "");
+      person["Last 4 SSN"] = lastFour ? ("0000" + lastFour).slice(-4) : "";
+      if (person["Participant Name"] || person["Last 4 SSN"]) {
+        people.push(person);
+      }
+    }
+    return { people: people, nonBlankLineCount: nonBlankLineCount, headerFound: true };
+  }
+
+  /* Fills in the full SSN by matching the last 4 digits plus at least one
+     word of the name against people found in the other Paychex reports. */
+  function resolvePaychexAutoEnrollIds(autoEnrollRecords, knownPeople) {
+    var byLastFour = {};
+    var unmatched = [];
+    function nameWords(name) {
+      return String(name || "").toLowerCase().split(/[^a-z]+/).filter(function (word) { return word.length > 1; });
+    }
+    knownPeople.forEach(function (person) {
+      var digits = String(person["Participant Id"] || "").replace(/[^0-9]/g, "");
+      if (digits.length !== 9) {
+        return;
+      }
+      var lastFour = digits.slice(-4);
+      byLastFour[lastFour] = byLastFour[lastFour] || {};
+      byLastFour[lastFour][person["Participant Id"]] = byLastFour[lastFour][person["Participant Id"]] || [];
+      Array.prototype.push.apply(byLastFour[lastFour][person["Participant Id"]], nameWords(person["Participant Name"]));
+    });
+    autoEnrollRecords.forEach(function (record) {
+      var words = nameWords(record["Participant Name"]);
+      var candidates = byLastFour[record["Last 4 SSN"]] || {};
+      var matches = Object.keys(candidates).filter(function (id) {
+        return words.some(function (word) { return candidates[id].indexOf(word) !== -1; });
+      });
+      if (matches.length === 1) {
+        record["Participant Id"] = matches[0];
+      } else {
+        unmatched.push(record);
+      }
+    });
+    return unmatched;
+  }
+
   async function parsePaychexFolderSource(source, files, runId) {
     var grouped = {};
     var foundReports = [];
@@ -13845,11 +14434,19 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var loanSourceRecords = [];
     var electionRecords = [];
     var loanRecords = [];
+    var seenLoanKeys = {};
+    var duplicateLoanNotes = [];
     var amortizationSchedules = [];
     var allAsOfDates = {};
     var summaryPlanTotalFunds = null;
     var summaryPlanTotalSources = null;
-    var paychexReportNamePattern = /^\d{6}(M|LN)\.txt$/i;
+    var rothBasisRecords = [];
+    var rothDeferrals = [];
+    var censusRecords = [];
+    var autoEnrollRecords = [];
+    var sawValuation = false;
+    var sawLoanReport = false;
+    var paychexReportNamePattern = /^\d{6}(?:(M|LN)\.txt|_(?:Valuation|Loans)_\d{8}\.txt|_(?:Roth|Census)_\d{8}\.pdf|_AutoEnroll_\d{8}\.xlsx)$/i;
 
     function pushGrouped(code, rows) {
       if (!rows || !rows.length) {
@@ -13866,6 +14463,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     function isPaychexLoanSourceRecord(record) {
       var fundCode = trimValue(record && record["Fund Code"] || "").toUpperCase();
       return fundCode === "LO" || fundCode === "L0";
+    }
+
+    function isPaychexLoanFundRecord(record) {
+      return trimValue(record["Fund Code"] || "").toUpperCase() === "LOAN";
     }
 
     for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
@@ -13886,6 +14487,36 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". The name doesn't match a Paychex report name." });
           continue;
         }
+        if (/_Roth_\d{8}\.pdf$/i.test(file.name)) {
+          matchedFiles += 1;
+          var rothParse = parsePaychexRothPdfText(await extractPdfText(await file.arrayBuffer()));
+          totalLines += rothParse.nonBlankLineCount;
+          Array.prototype.push.apply(rothDeferrals, rothParse.deferrals);
+          continue;
+        }
+        if (/_Census_\d{8}\.pdf$/i.test(file.name)) {
+          matchedFiles += 1;
+          var censusParse = parsePaychexCensusPdfText(await extractPdfText(await file.arrayBuffer(), "\t"));
+          totalLines += censusParse.nonBlankLineCount;
+          planName = planName || censusParse.planName;
+          Array.prototype.push.apply(censusRecords, censusParse.people);
+          censusParse.unread.forEach(function (lineText) {
+            discardReasons.push({ type: "message", label: "Census line not read: " + lineText });
+          });
+          continue;
+        }
+        if (/_AutoEnroll_\d{8}\.xlsx$/i.test(file.name)) {
+          var autoEnrollParse = parsePaychexAutoEnrollRows(await readFirstSheetRows(file));
+          if (!autoEnrollParse.headerFound) {
+            skippedFiles += 1;
+            discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". No auto-enroll header row (Name, Last 4 SSN) was found." });
+            continue;
+          }
+          matchedFiles += 1;
+          totalLines += autoEnrollParse.nonBlankLineCount;
+          Array.prototype.push.apply(autoEnrollRecords, autoEnrollParse.people);
+          continue;
+        }
         var text = await new Promise(function (resolve, reject) {
           var reader = new FileReader();
           reader.onload = function (event) {
@@ -13896,8 +14527,24 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           };
           reader.readAsText(file);
         });
-        if (!/\.txt$/i.test(file.name)) {
-          skippedFiles += 1;
+        if (text.indexOf("CLIENT LIQUIDATION/TRANSFER VALUATION") !== -1) {
+          matchedFiles += 1;
+          sawValuation = true;
+          var valuationParse = parsePaychexValuationText(text);
+          totalLines += valuationParse.nonBlankLineCount;
+          planName = planName || valuationParse.planName;
+          if (valuationParse.asOfDate) {
+            allAsOfDates[valuationParse.asOfDate] = true;
+          }
+          Array.prototype.push.apply(balanceRecords, valuationParse.holdings);
+          Array.prototype.push.apply(electionRecords, valuationParse.elections);
+          Array.prototype.push.apply(rothBasisRecords, valuationParse.rothBasis);
+          if (Object.keys(valuationParse.planTotalFunds).length > 0) {
+            summaryPlanTotalFunds = valuationParse.planTotalFunds;
+          }
+          if (Object.keys(valuationParse.planTotalSources).length > 0) {
+            summaryPlanTotalSources = valuationParse.planTotalSources;
+          }
           continue;
         }
         if (text.indexOf("PARTICIPANT VALUATION SUMMARY") !== -1) {
@@ -13925,9 +14572,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           }
           continue;
         }
-        if (text.indexOf("EMPLOYEE LOAN PAYMENT SCHEDULE") !== -1) {
+        var isLoanReport = /_Loans_\d{8}\.txt$/i.test(file.name);
+        if (isLoanReport || text.indexOf("EMPLOYEE LOAN PAYMENT SCHEDULE") !== -1) {
           matchedFiles += 1;
-          var loanParse = parsePaychexLoanText(text);
+          sawLoanReport = sawLoanReport || isLoanReport;
+          var loanParse = isLoanReport ? parsePaychexLoanReportText(text) : parsePaychexLoanText(text);
           totalLines += loanParse.nonBlankLineCount;
           planName = planName || loanParse.planName;
           if (loanParse.asOfDate) {
@@ -13935,6 +14584,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           }
           for (var loanIndex = 0; loanIndex < loanParse.loans.length; loanIndex += 1) {
             var loan = loanParse.loans[loanIndex];
+            /* Paychex sometimes prints the same loan twice; keep the first. */
+            var loanKey = String(loan["Participant Id"] || "").replace(/\D/g, "") + "|" + loan["Loan Number"];
+            if (seenLoanKeys[loanKey]) {
+              duplicateLoanNotes.push(loan["Participant Name"] + " loan " + loan["Loan Number"]);
+              continue;
+            }
+            seenLoanKeys[loanKey] = true;
             loanRecords.push({
               "Participant Id": loan["Participant Id"],
               "Participant Name": loan["Participant Name"],
@@ -13948,7 +14604,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
               "Loan Status": loan["Loan Status"],
               "Next Payment Amount": loan["Next Payment Amount"],
               "Next Payment Date": loan["Next Payment Date"],
-              "Last Payment Date": loan["Last Payment Date"]
+              "Last Payment Date": loan["Last Payment Date"],
+              "Deemed Amount": "0",
+              "Final Payment Due Date": loan.amortizationSchedule.length ? loan.amortizationSchedule[loan.amortizationSchedule.length - 1].paymentDate : ""
             });
             amortizationSchedules.push({
               participantId: loan["Participant Id"],
@@ -13963,9 +14621,78 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           continue;
         }
         skippedFiles += 1;
-        discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". It isn't a Paychex balance or loan report." });
+        discardReasons.push({ type: "message", label: "Skipped file: " + file.name + ". It isn't a Paychex valuation, balance or loan report." });
       } catch (err) {
         errors.push(err.message);
+      }
+    }
+
+    if (sawLoanReport && !sawValuation) {
+      errors.push("Balance file needed to complete the loans. The loan report has no source split; it comes from the balance (valuation) file.");
+    }
+    if (sawValuation && !sawLoanReport && balanceRecords.some(isPaychexLoanFundRecord)) {
+      errors.push("Loan report needed to complete the loans. The balance file has loan money, but the loan details come from the loan report.");
+    }
+
+    if (duplicateLoanNotes.length) {
+      discardReasons.push({ type: "message", label: "Skipped " + duplicateLoanNotes.length + " repeated loan(s) in the loan report, keeping the first copy of each: " + duplicateLoanNotes.join("; ") });
+    }
+
+    /* The loan report has no source split. The valuation's LOAN fund has it, but
+       for all of a person's loans together, so each loan's balance is split across
+       the sources in the same proportions as that person's LOAN lines. */
+    if (sawLoanReport && sawValuation) {
+      var loansBySsn = {};
+      var loanHoldingsBySsn = {};
+      var loanMismatchNotes = [];
+      loanRecords.forEach(function (loanRecord) {
+        var key = String(loanRecord["Participant Id"] || "").replace(/\D/g, "");
+        (loansBySsn[key] = loansBySsn[key] || []).push(loanRecord);
+      });
+      balanceRecords.filter(isPaychexLoanFundRecord).forEach(function (holding) {
+        var key = String(holding["Participant Id"] || "").replace(/\D/g, "");
+        (loanHoldingsBySsn[key] = loanHoldingsBySsn[key] || []).push(holding);
+      });
+      Object.keys(loansBySsn).forEach(function (key) {
+        if (!loanHoldingsBySsn[key]) {
+          discardReasons.push({ type: "message", label: "Loan for " + loansBySsn[key][0]["Participant Name"] + " has no LOAN money in the balance file, so it has no Loan Source rows." });
+        }
+      });
+      Object.keys(loanHoldingsBySsn).forEach(function (key) {
+        var holdings = loanHoldingsBySsn[key];
+        var loans = loansBySsn[key] || [];
+        var totalBalance = loans.reduce(function (sum, loanRecord) { return sum + (Number(loanRecord["Loan Balance"]) || 0); }, 0);
+        if (!totalBalance || !holdings.some(function (holding) { return Number(holding["Current Balance"]); })) {
+          discardReasons.push({ type: "message", label: "LOAN money for " + holdings[0]["Participant Name"] + " has no matching loan balance in the loan report, so it was not split." });
+          return;
+        }
+        /* For some people (seen with two loans) the LOAN lines add up to double the loan
+           report, so the LOAN lines only give each source's share; the dollars come from
+           the loan report. */
+        var allLines = holdings.reduce(function (sum, holding) { return sum + (Number(holding["Current Balance"]) || 0); }, 0);
+        if (Math.abs(allLines - totalBalance) >= 0.01) {
+          loanMismatchNotes.push(holdings[0]["Participant Name"] + " (LOAN lines $" + allLines.toFixed(2) + ", loan report $" + totalBalance.toFixed(2) + ")");
+        }
+        loans.forEach(function (loanRecord) {
+          var loanBalance = Number(loanRecord["Loan Balance"]) || 0;
+          var remaining = loanBalance;
+          holdings.forEach(function (holding, holdingIndex) {
+            /* The last source takes what's left, so the pieces add back to the exact loan balance. */
+            var share = holdingIndex === holdings.length - 1
+              ? remaining
+              : Math.round((Number(holding["Current Balance"]) || 0) * loanBalance / allLines * 100) / 100;
+            remaining = Math.round((remaining - share) * 100) / 100;
+            loanSourceRecords.push(Object.assign({}, holding, {
+              "Participant Id": loanRecord["Participant Id"],
+              "Loan Number": loanRecord["Loan Number"],
+              "End Balance": share,
+              "Current Balance": share
+            }));
+          });
+        });
+      });
+      if (loanMismatchNotes.length) {
+        discardReasons.push({ type: "message", label: "LOAN lines in the balance file don't match the loan report for " + loanMismatchNotes.length + " person(s). Loan Source uses the loan report amounts, split by source in the same proportions: " + loanMismatchNotes.join("; ") });
       }
     }
 
@@ -13973,6 +14700,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     pushGrouped("ELECTIONS", buildPaychexLayoutRows(source.layouts.ELECTIONS, electionRecords));
     pushGrouped("LOAN_HEADER", buildPaychexLayoutRows(source.layouts.LOAN_HEADER, loanRecords));
     pushGrouped("LOAN_SOURCE", buildPaychexLayoutRows(source.layouts.LOAN_SOURCE, loanSourceRecords));
+    pushGrouped("ROTH", buildPaychexLayoutRows(source.layouts.ROTH, mergePaychexRoth(rothBasisRecords, rothDeferrals)));
+    pushGrouped("CENSUS", buildPaychexLayoutRows(source.layouts.CENSUS, censusRecords));
+    resolvePaychexAutoEnrollIds(autoEnrollRecords, censusRecords.concat(balanceRecords, electionRecords, rothBasisRecords, rothDeferrals, loanRecords)).forEach(function (record) {
+      discardReasons.push({ type: "message", label: "Auto-enroll row kept without a full SSN (no single match on last 4 + name): " + record["Participant Name"] + " (xxx-xx-" + record["Last 4 SSN"] + ")" });
+    });
+    pushGrouped("AUTO_ENROLL", buildPaychexLayoutRows(source.layouts.AUTO_ENROLL, autoEnrollRecords));
 
     discardedLines = Math.max(totalLines - acceptedLines, 0);
     if (discardedLines > 0) {
@@ -15327,8 +16060,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         BENE: [{ header: "SSN", type: "text" }],
         CASH: [{ header: "Transaction date", type: "date" }]
       },
-      customFolderParser: parseJohnHancockSource,
-      accumulateFiles: true
+      customFolderParser: parseJohnHancockSource
     };
   }
 
@@ -15360,8 +16092,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       reports: [],
       reportNames: {},
       layouts: {},
-      customFolderParser: parseTiaaFileSet,
-      accumulateFiles: true
+      customFolderParser: parseTiaaFileSet
     };
     addFileSetToSourceConfig(config, TIAA_FILE_SET);
     return config;
@@ -16143,8 +16874,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       reports: [],
       reportNames: {},
       layouts: {},
-      customFolderParser: parseAlightFileSet,
-      accumulateFiles: true
+      customFolderParser: parseAlightFileSet
     };
     ALIGHT_SHOWN_RECORDS.forEach(function (code) {
       config.reports.push(code);
@@ -16204,8 +16934,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       reports: [],
       reportNames: {},
       layouts: {},
-      customFolderParser: parseAlerusFileSet,
-      accumulateFiles: true
+      customFolderParser: parseAlerusFileSet
     };
     addFileSetToSourceConfig(config, ALERUS_FILE_SET);
     return config;
@@ -16308,8 +17037,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       reports: [],
       reportNames: {},
       layouts: {},
-      customFolderParser: parseAmeritasReports,
-      accumulateFiles: true
+      customFolderParser: parseAmeritasReports
     };
     var order = ["CENSUS", "BAL", "FUNDBAL", "SRCBAL", "VEST", "ROTH", "DISB", "CHKREG", "LOANDIST", "LOANRPT"];
     for (var i = 0; i < order.length; i += 1) {
@@ -17322,7 +18050,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return pdfJsLoaderPromise;
   }
 
-  async function extractPdfTextWithPdfJs(arrayBuffer) {
+  async function extractPdfTextWithPdfJs(arrayBuffer, itemSeparator) {
     var pdfjsLib = await loadPdfJsLibrary();
     var loadingTask = pdfjsLib.getDocument({
       data: arrayBuffer,
@@ -17341,7 +18069,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
       function pushLine() {
         if (currentLine.length) {
-          lines.push(currentLine.join(" ").replace(/\s+/g, " ").trim());
+          lines.push(itemSeparator ? currentLine.join(itemSeparator).replace(/ +/g, " ").trim() : currentLine.join(" ").replace(/\s+/g, " ").trim());
           currentLine = [];
         }
       }
@@ -17462,9 +18190,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return extracted.join("\n");
   }
 
-  async function extractPdfText(arrayBuffer) {
+  async function extractPdfText(arrayBuffer, itemSeparator) {
     try {
-      var pdfJsText = await extractPdfTextWithPdfJs(arrayBuffer);
+      var pdfJsText = await extractPdfTextWithPdfJs(arrayBuffer, itemSeparator);
       if (trimValue(pdfJsText)) {
         return pdfJsText;
       }
@@ -18562,7 +19290,6 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   CONFIG.FIDELITY.customFolderParser = parseFidelityFolderSource;
   CONFIG.EMPOWER.customFolderParser = parseEmpowerFolderSource;
   CONFIG.ADP.customFolderParser = parseAdpFolderSource;
-  CONFIG.ADP.accumulateFiles = true;
   CONFIG.PAYCHEX = buildPaychexSourceConfig();
   CONFIG.ONEAMERICA = buildOneAmericaSourceConfig();
   CONFIG.VANGUARD = buildVanguardSourceConfig();
@@ -25370,6 +26097,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
     updateExportRailState();
     renderComparisonPanel();
+    if (lastParseResult) {
+      renderReportBlocks(lastParseResult);
+    }
   }
 
   function buildReportCardHtml(reportCode, reportLabel, rows, layouts, showAll) {
@@ -25387,7 +26117,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       "</div>" +
       "<div class=\"report-card-actions\">" +
       (rows.length > PREVIEW_ROW_LIMIT ? "<button class=\"report-toggle\" type=\"button\" data-toggle-report=\"" + escapeHtml(reportCode) + "\">" + (showAll ? "Show Less" : "Show All") + "</button>" : "") +
-      "<button class=\"report-download\" type=\"button\" data-download-report=\"" + escapeHtml(reportCode) + "\">Download Report</button>" +
+      (reportCode.indexOf("sheet:") === 0 ? "" : "<button class=\"report-download\" type=\"button\" data-download-report=\"" + escapeHtml(reportCode) + "\">Download Report</button>") +
       "</div>" +
       "</div>" +
       "<div class=\"report-table-wrap\">" + tableHtml(headers, visibleRows) + "</div>" +
@@ -25409,6 +26139,29 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (rows && rows.length && layouts) {
         blocks.push(buildReportCardHtml(code, formatReportLabel(source, code), rows, layouts, !!expandedReports[code]));
       }
+    }
+    /* The sheets the export builds on top of the parsed reports (CONV FILE, balances, basis, elections...). */
+    if (blocks.length && source.supportsExport !== false) {
+      var files = buildWorkbookFiles(result, null, validateAndFormatCaseNumber(false).formatted, currentMappingValidation);
+      files.exportManifest.forEach(function (sheet, sheetIndex) {
+        if (sheet.name === "Title Page" || !sheet.rowCount || source.reports.indexOf(sheet.name) !== -1) {
+          return;
+        }
+        var grid = parseWorksheetRows(files[files.length - files.exportManifest.length + sheetIndex].content, []);
+        var key = "sheet:" + sheet.name;
+        var headers = grid.shift() || [];
+        var width = grid.reduce(function (max, row) { return Math.max(max, row.length); }, headers.length);
+        for (var h = 0; h < width; h += 1) {
+          headers[h] = headers[h] || "";
+        }
+        blocks.push(buildReportCardHtml(key, sheet.name, grid.map(function (row) {
+          var cells = [];
+          for (var c = 0; c < width; c += 1) {
+            cells.push(row[c] || "");
+          }
+          return cells;
+        }), headers.map(function (header) { return { header: header }; }), !!expandedReports[key]));
+      });
     }
     reportOutputs.innerHTML = blocks.length ? blocks.join("") : "No parsed reports.";
   }
@@ -26178,8 +26931,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return list;
   }
 
+  /* LOAN holds outstanding loan balances for every vendor, and loans are never in the wire. */
   function isExcludedSummaryFund(rule, fundValue) {
-    return !!(rule && rule.excludeFunds) && rule.excludeFunds.indexOf(trimValue(fundValue || "").toUpperCase()) > -1;
+    var code = trimValue(fundValue || "").toUpperCase();
+    return code === "LOAN" || (!!(rule && rule.excludeFunds) && rule.excludeFunds.indexOf(code) > -1);
   }
 
   function createSummaryAccumulator(source, layoutsByReport) {
@@ -26724,12 +27479,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     };
   }
 
-  /* Funds left out of the totals (Fidelity PS86) still get shown on their own,
+  /* Funds left out of the totals (Fidelity PS86, LOAN) still get shown on their own,
      split by the source they sit in, so the gap against a vendor report is explained. */
   function buildExcludedFundTotals(result) {
     var source = getSelectedSource();
     var rule = source && source.supportsBreakdown !== false ? SUMMARY_RULES[source.key] : null;
-    var activeCode = rule && rule.excludeFunds ? resolveRuleReportCode(rule, result.layoutsByReport, result.grouped) : "";
+    var activeCode = rule ? resolveRuleReportCode(rule, result.layoutsByReport, result.grouped) : "";
     if (!activeCode) {
       return null;
     }
@@ -26740,12 +27495,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var amountIndices = getHeaderIndices(layouts, rule.amountHeaders || []);
     var divisor = rule.amountDivisor || 1;
     var bySource = {};
-    var found = false;
+    var foundCodes = {};
     for (var i = 0; fundIndex > -1 && i < rows.length; i += 1) {
       var fundValue = normalizeSummaryCodeForSource(source, "fund", sliceSummaryCode(rows[i][fundIndex], rule.fundSlice));
       if (!isExcludedSummaryFund(rule, fundValue)) {
         continue;
       }
+      foundCodes[trimValue(fundValue).toUpperCase()] = true;
       var sourceValue = sourceIndex > -1 ? normalizeSummaryCodeForSource(source, "source", sliceSummaryCode(rows[i][sourceIndex], rule.sourceSlice)) : "";
       var amountValue = 0;
       for (var c = 0; c < amountIndices.length; c += 1) {
@@ -26755,9 +27511,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         }
       }
       bySource[sourceValue] = (bySource[sourceValue] || 0) + amountValue / divisor;
-      found = true;
     }
-    return found ? { label: rule.excludeLabel || rule.excludeFunds.join(", "), bySource: bySource } : null;
+    var codes = Object.keys(foundCodes);
+    return codes.length ? { label: rule.excludeLabel || codes.join(", "), bySource: bySource } : null;
   }
 
   function renderExcludedFundSummary(result) {
@@ -26910,6 +27666,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         if (computedSourceMap.hasOwnProperty(key)) { allSourceKeys[key] = true; }
       }
     }
+    /* LOAN is kept out of the computed totals, so the summary's LOAN line is not compared. */
+    delete allFundKeys.LOAN;
     var fundPass = true;
     var sourcePass = true;
     for (key in allFundKeys) {
@@ -28573,18 +29331,15 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         },
         {
           name: "Roth Basis",
-          reports: ["ITD", "PYEB"],
+          reports: ["ITD"],
+          moneyTypes: ["RTH", "RRO"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
           fieldsByReport: {
             ITD: [
-              { output: "AMOUNT", candidates: ["AMOUNT"] },
-              { output: "ROTH FIRST CONTRIBUTION DATE", candidates: ["ROTH FIRST CONTRIBUTION DATE"] }
-            ],
-            PYEB: [
-              { output: "BASIS", candidates: ["BASIS"] },
-              { output: "VALUE", candidates: ["VALUE"] },
-              { output: "MONEY TYPE", candidates: ["MONEY TYPE"] },
-              { output: "BALANCE", candidates: ["BALANCE"] }
+              { output: "Roth Contribution Basis", candidates: ["AVAILABLE HARDSHIP AMOUNT"], moneyTypes: ["RTH"] },
+              { output: "Roth Hardship Amount", candidates: ["AVAILABLE HARDSHIP AMOUNT"], moneyTypes: ["RTH"] },
+              { output: "Roth Rollover", candidates: ["TAX-FREE AMOUNT"], moneyTypes: ["RRO"], rolloverAmountCandidates: ["AMOUNT"] },
+              { output: "Roth First Contribution Date", candidates: ["ROTH FIRST CONTRIBUTION DATE"], yearOnly: true }
             ]
           }
         },
@@ -28631,7 +29386,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       PAYCHEX: [
         {
           name: "Deferrals",
-          reports: ["ELECTIONS"],
+          reports: ["ELECTIONS", "AUTO_ENROLL"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
           fieldsByReport: {
             ELECTIONS: [
@@ -28639,6 +29394,27 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
               { output: "Fund Code", candidates: ["Fund Code"] },
               { output: "Percent", candidates: ["Percent"] },
               { output: "As Of Date", candidates: ["As Of Date"] }
+            ],
+            AUTO_ENROLL: [
+              { output: "Pre-Tax Deferral Percent", candidates: ["Pre-Tax Percent"] },
+              { output: "Pre-Tax Deferral Dollar", candidates: ["Pre-Tax Flat Dollar"] },
+              { output: "Roth Deferral Percent", candidates: ["Roth Percent"] },
+              { output: "Roth Deferral Dollar", candidates: ["Roth Flat Dollar"] },
+              { output: "Auto Enroll Status", candidates: ["Autoenroll Status"] },
+              { output: "Auto Enroll Date", candidates: ["Autoenroll Date"] },
+              { output: "Opt Out Date", candidates: ["Opt Out Date"] },
+              { output: "Auto Increase Date", candidates: ["Auto Increase Date"] }
+            ]
+          }
+        },
+        {
+          name: "Roth Basis",
+          reports: ["ROTH"],
+          omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
+          fieldsByReport: {
+            ROTH: [
+              { output: "Roth Contribution Basis", candidates: ["Net Roth"] },
+              { output: "Roth First Contribution Date", candidates: ["First Roth Deferral"], yearOnly: true }
             ]
           }
         },
@@ -28657,7 +29433,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
               { output: "Payment Frequency", candidates: ["Payment Frequency"] },
               { output: "Next Payment Amount", candidates: ["Next Payment Amount"] },
               { output: "Loan Balance", candidates: ["Loan Balance"] },
-              { output: "Interest Rate", candidates: ["Interest Rate"] }
+              { output: "Deemed Amount", candidates: ["Deemed Amount"] },
+              { output: "Interest Rate", candidates: ["Interest Rate"] },
+              { output: "Final Payment Due Date", candidates: ["Final Payment Due Date"] }
             ]
           }
         },
@@ -28962,6 +29740,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var headerCells = [];
       var dataCells = [];
       var currentRow;
+      var fieldValue;
       var values;
       var typed;
       var ref;
@@ -29082,7 +29861,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
               addOutputField(fieldSpec.output, fieldSpec.yearOnly ? "text" : (match && match.field ? match.field.type : "text"));
             }
             if (match) {
-              reportFieldMap[report].push({ output: fieldSpec.output, index: match.index, type: match.field.type, yearOnly: !!fieldSpec.yearOnly });
+              reportFieldMap[report].push({
+                output: fieldSpec.output,
+                index: match.index,
+                type: match.field.type,
+                yearOnly: !!fieldSpec.yearOnly,
+                moneyTypes: fieldSpec.moneyTypes,
+                rolloverAmountIndex: fieldSpec.rolloverAmountCandidates
+                  ? (getFieldByCandidates(layouts, fieldSpec.rolloverAmountCandidates) || { index: -1 }).index
+                  : -1
+              });
             }
           }
         }
@@ -29127,6 +29915,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         }
         for (c = 0; c < reportRows.length; c += 1) {
           currentRow = reportRows[c] || [];
+          var moneyTypeValue = trimValue(getHeaderValueByCandidates(currentRow, layouts, ["MONEY TYPE"]) || "").toUpperCase();
+          if (spec.moneyTypes && spec.moneyTypes.indexOf(moneyTypeValue) === -1) {
+            continue;
+          }
           var ssnValue = getHeaderValueByCandidates(currentRow, layouts, spec.participantCandidates || participantCandidates);
           var loanIdValue = getHeaderValueByCandidates(currentRow, layouts, spec.loanIdCandidates || loanIdCandidates);
           var rowKey = makeSummaryRowKey(ssnValue, loanIdValue, report, c);
@@ -29145,7 +29937,23 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           appendSummaryValue(values, "Loan ID", loanIdValue);
           for (rowNumber = 0; rowNumber < reportFieldMap[report].length; rowNumber += 1) {
             field = reportFieldMap[report][rowNumber];
-            appendSummaryValue(values, field.output, field.yearOnly ? isoDateYear(currentRow[field.index]) : currentRow[field.index]);
+            if (field.moneyTypes && field.moneyTypes.indexOf(moneyTypeValue) === -1) {
+              continue;
+            }
+            fieldValue = field.yearOnly ? isoDateYear(currentRow[field.index]) : currentRow[field.index];
+            /* Roth rollover: flip a negative tax-free amount to positive; otherwise
+               use amount minus tax-free amount, even if that comes out negative. */
+            if (field.rolloverAmountIndex >= 0 && trimValue(fieldValue || "") !== "") {
+              fieldValue = Number(fieldValue) < 0
+                ? Math.abs(Number(fieldValue)).toFixed(2)
+                : (Number(currentRow[field.rolloverAmountIndex] || 0) - Number(fieldValue)).toFixed(2);
+            }
+            /* A participant can have several lines of one money type where only
+               one carries the amount; keep the zeros out of the merged cell. */
+            if (field.moneyTypes && trimValue(fieldValue || "") !== "" && Number(fieldValue) === 0) {
+              continue;
+            }
+            appendSummaryValue(values, field.output, fieldValue);
           }
         }
       }
@@ -30152,7 +30960,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     { key: "ADP", patterns: [/^\d{6}_EXTRAC(?:$|[^A-Z0-9])/i, /^\d{6}_REPORT(?:$|[^A-Z0-9])/i] },
     { key: "NATIONWIDE", patterns: [/^NWI/i, /^\d{5}\s*-\s*Plan Summary Report\.pdf$/i] },
     { key: "NEWPORT", patterns: [/^['’]?PME/i, /Liquidation Report.*\.pdf$/i] },
-    { key: "PAYCHEX", patterns: [/^\d{6}(?:M|LN)\.txt$/i] },
+    { key: "PAYCHEX", patterns: [/^\d{6}(?:M|LN)\.txt$/i, /^\d{6}_(?:Valuation|Loans)_\d{8}\.txt$/i, /^\d{6}_(?:Roth|Census)_\d{8}\.pdf$/i, /^\d{6}_AutoEnroll_\d{8}\.xlsx$/i] },
     { key: "ONEAMERICA", patterns: [/^[A-Z]\d{5}(?:PV|LN)\.TXT$/i] },
     { key: "VANGUARD", patterns: [/^ENTJ767.*\.txt$/i, /^ENTJ768.*-PAYROLL-PART\.txt$/i] },
     { key: "PRINCIPAL", patterns: [/^\d-\d{5}\b.*\.(?:xlsx|xlsm)$/i, /DE[ _-]*CONVERSION[ _-]*FILE.*\.(?:xlsx|xlsm)$/i, /^\d{5,6}\b[^\/]*\bfinal[ _-]*(?:report|file)\b[^\/]*\.(?:xlsx|xlsm)$/i] },
@@ -30161,7 +30969,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     { key: "TIAA", patterns: [/^DCNV\.(?:ACCUM|ALLOC|CYTD|HOLB|INDIC|KEY|LOAN|LOANFUND|ORIGSTAT|PYTD|SRCE1231)\.csv$/i, /^FUND_TOT_RPT.*\.(?:xlsx|xlsm)$/i] },
     { key: "ALIGHT", patterns: [/(?:^|[ _.-])(?:12LN|BELC|CDF|CDH|CRED|CTEL|CTSR|CVBL|DEDS|EEOR|EEST|ELEC|ESVC|FVBL|HHRT|HINC|IVEL|LOAN|OVER|PDLV|PINC|PPAT|PPCT|PPST|PRAD|PRDP|PRLT|PROP|PRQE|PRSN|PTNS|PYRT|PYSC|RCON|SBHS|WTHL|YTDC|SBAL|LN12)(?:[ _.-][^\/]*)?\.(?:txt|text|dat)$/, /(?:^|[ _-])Records\.(?:txt|text|dat)$/i, /Data[ _-]*Dictionary[^\/]*\.(?:xlsx|xlsm)$/i] },
     { key: "ALERUS", patterns: [/^(?:SERVICETERM|SERVTRM)(?:BALALLOC|CONTRIB|DISBSC|DISB|LPMT|HILN|LN|PT)\b.*\.(?:xlsx|xlsm)$/i, /^Participant[ _-]*Valuation[ _-]*Summary.*\.pdf$/i] },
-    { key: "AMERITAS", patterns: [/(?:^|[ _-])Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i, /(?:^|[ _-])Disburse\w*[^\/]*\.txt$/i, /Check[ _-]*Register[^\/]*\.txt$/i, /^Loan[ _-]*Distribution[^\/]*\.txt$/i, /^Loan[ _-]*Report[^\/]*\.(?:xlsx|xlsm|xls|csv)$/i, /^Investments?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /^Sources?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i] },
+    { key: "AMERITAS", patterns: [/^(?!\d{6}_Valuation_\d{8}\.txt$).*(?:^|[ _-])Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i, /(?:^|[ _-])Disburse\w*[^\/]*\.txt$/i, /Check[ _-]*Register[^\/]*\.txt$/i, /^Loan[ _-]*Distribution[^\/]*\.txt$/i, /^Loan[ _-]*Report[^\/]*\.(?:xlsx|xlsm|xls|csv)$/i, /^Investments?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /^Sources?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i] },
     { key: "PLANDOCS", patterns: [/Onboarding[ _-]*Package.*\.(?:xlsx|xlsm)$/i, /(?:^|[ _-])PRD(?:[ _-]|\.).*\.docx$/i, /Plan[ _-]*Review[ _-]*Document.*\.docx$/i, /Merger[ _-]*Compar\w*.*\.pdf$/i, /merger[^\/]*\.pdf$/i, /Sub(?:mission)?[ _-]*Pack\w*.*\.docx$/i, /(?:^|[ _-])spac\d*\.docx$/i] },
     { key: "BASEREMIT", patterns: [/base[ _-]*data.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /remit\w*.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /payroll.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /^\d{8}\d*[ _-]?[A-Z]{2}[\d_-]{5,}\.(?:xlsx|xls|csv|txt|text|dat)$/i] },
     { key: "MILLIMAN", patterns: [/^EXPORT\.\d{8}\.\d+(?:\.(?:txt|text|dat))?$/i, /milliman[^\/]*\.(?:txt|text|dat)$/i] },
@@ -30559,7 +31367,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   function mergeAccumulatedFiles(vendorKey, files) {
     var config = CONFIG[vendorKey];
-    if (!config || !config.accumulateFiles) {
+    if (!usesSelectedFileSet(config)) {
       accumulatedVendorKey = vendorKey || "";
       accumulatedFiles = Array.prototype.slice.call(files || []);
       announceActiveFiles(accumulatedFiles);
@@ -30625,8 +31433,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   window.addEventListener("dragover", function (event) { event.preventDefault(); });
   window.addEventListener("drop", function (event) { event.preventDefault(); });
 
-  var fileDropZone = document.getElementById("fileDropZone");
-  if (fileDropZone) {
+  // The file card stays a drop target after the first load, so later drops add files.
+  [document.getElementById("fileDropZone"), document.getElementById("dpcFileCard")].forEach(function (fileDropZone) {
+    if (!fileDropZone) {
+      return;
+    }
     var dropDepth = 0;
     var setDragOver = function (on) {
       fileDropZone.classList.toggle("is-dragover", !!on);
@@ -30656,7 +31467,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       queueIncomingFiles(dropped);
     });
-  }
+  });
 
   dataSourceSelect.onchange = function () {
     var source = getSelectedSource();
@@ -30759,7 +31570,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return;
     }
     var code = target && target.getAttribute ? target.getAttribute("data-toggle-report") : "";
-    if (!code || !lastParseResult || !lastParseResult.grouped[code]) {
+    if (!code || !lastParseResult || (!lastParseResult.grouped[code] && code.indexOf("sheet:") !== 0)) {
       return;
     }
     expandedReports[code] = !expandedReports[code];
