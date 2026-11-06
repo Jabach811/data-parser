@@ -12115,6 +12115,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   var VOYA_957_SSN_RE = /^\s{0,10}(\d{3}-\d{2}-\d{4})(\s|$)/;
   var VOYA_957_STATUS_RE = /STATUS:\s+(\S+)/;
   var VOYA_957_EE_RE = /401K EE:\s*([\d,]+\.\d{2})/;
+  var VOYA_957_NET_ROTH_RE = /NET ROTH:\s*([\d,]+\.\d{2})(-)?/;
   var VOYA_957_MONEY_RE = /^(\d[\d,]*\.\d+|\.\d+)(-)?([A-Z])?$/;
   var VOYA_957_CODE_RE = /^[A-Z]$/;
   var VOYA_SUMMARY_SSN_RE = /^(.+?)\s+(\d{3}-\d{2}-\d{4})\s*$/;
@@ -12279,7 +12280,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         diag.ssnLines += 1;
         flushParticipant();
         planMode = false;
-        p = { ssn: ssnM[1], name: "", status: "", ee: null, endBal: null };
+        p = { ssn: ssnM[1], name: "", status: "", ee: null, netRoth: null, endBal: null };
         var sm0 = line.match(VOYA_957_STATUS_RE);
         if (sm0) { p.status = sm0[1]; }
         section = "Allocation";
@@ -12299,6 +12300,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           if (sm1) { p.status = sm1[1]; }
           var em1 = t.match(VOYA_957_EE_RE);
           if (em1) { p.ee = parseFloat(em1[1].replace(/,/g, "")); }
+          var nr1 = t.match(VOYA_957_NET_ROTH_RE);
+          if (nr1) { p.netRoth = parseFloat(nr1[1].replace(/,/g, "")) * (nr1[2] ? -1 : 1); }
         }
         expectName = false;
         pendingRow = null;
@@ -12320,10 +12323,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         pendingRow = null;
         continue;
       }
-      if (/401K EE:/.test(t)) {
+      if (/401K EE:|NET ROTH:/.test(t)) {
         if (p) {
           var em2 = t.match(VOYA_957_EE_RE);
           if (em2) { p.ee = parseFloat(em2[1].replace(/,/g, "")); }
+          var nr2 = t.match(VOYA_957_NET_ROTH_RE);
+          if (nr2) { p.netRoth = parseFloat(nr2[1].replace(/,/g, "")) * (nr2[2] ? -1 : 1); }
         }
         pendingRow = null;
         continue;
@@ -19293,6 +19298,227 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   CONFIG.PAYCHEX = buildPaychexSourceConfig();
   CONFIG.ONEAMERICA = buildOneAmericaSourceConfig();
   CONFIG.VANGUARD = buildVanguardSourceConfig();
+
+  /* ---------- 957 PRIOR YEAR BALANCES ----------
+     The RPT-957 Participant Valuation Summary is the same printout whichever
+     recordkeeper sends it, so the PDF gets its own source rather than a vendor.
+     It is reduced to one line per person with their totals for the year. */
+  var RPT957_REPORT = "PRIORYR";
+
+  SOURCE_CARD_META.RPT957 = {
+    accent: "#5a6b2f",
+    accentStrong: "#83964f",
+    accentSoft: "rgba(90,107,47,.18)",
+    glassTop: "rgba(250,252,245,.86)",
+    glassBottom: "rgba(236,241,224,.78)",
+    note: "RPT-957 valuation summary PDF, any vendor",
+    icon: SOURCE_CARD_META.AMERITAS.icon
+  };
+  SOURCE_RUNTIME_CONFIG.RPT957 = {
+    cardMeta: SOURCE_CARD_META.RPT957,
+    fileAccept: ".pdf",
+    filePickerHelpText: "957 mode is active. Drop the RPT-957 Participant Valuation Summary PDF. Each person comes out as one line with their totals for the year.",
+    normalizers: {}
+  };
+
+  // The PDF is a monospaced printout. Rebuilding each line on a character grid
+  // keeps amounts under their column headings, which the 957 reader depends on.
+  async function extract957PdfText(arrayBuffer, maxPages) {
+    var pdfjsLib = await loadPdfJsLibrary();
+    var pdf = await pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true, useSystemFonts: true }).promise;
+    var pageCount = maxPages ? Math.min(maxPages, pdf.numPages) : pdf.numPages;
+    var out = [];
+    for (var pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+      var page = await pdf.getPage(pageNumber);
+      var viewport = page.getViewport({ scale: 1 });
+      var content = await page.getTextContent();
+      var placed = [];
+      var widths = [];
+      var i;
+      for (i = 0; i < content.items.length; i += 1) {
+        var item = content.items[i];
+        if (!item || !item.str || !item.str.trim()) { continue; }
+        var tr = pdfjsLib.Util.transform(viewport.transform, item.transform);
+        placed.push({ x: tr[4], y: tr[5], w: item.width || 0, str: item.str });
+        if (item.width && item.str.length >= 3) { widths.push(item.width / item.str.length); }
+      }
+      widths.sort(function (a, b) { return a - b; });
+      var charW = widths.length ? widths[Math.floor(widths.length / 2)] : 6;
+      placed.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+      var groups = [];
+      for (i = 0; i < placed.length; i += 1) {
+        var last = groups.length ? groups[groups.length - 1] : null;
+        if (last && Math.abs(last.y - placed[i].y) <= 2) {
+          last.items.push(placed[i]);
+        } else {
+          groups.push({ y: placed[i].y, items: [placed[i]] });
+        }
+      }
+      var pageLines = [];
+      var margin = Infinity;
+      for (i = 0; i < groups.length; i += 1) {
+        groups[i].items.sort(function (a, b) { return a.x - b.x; });
+        var line = "";
+        for (var k = 0; k < groups[i].items.length; k += 1) {
+          var it = groups[i].items[k];
+          var col = it.w ? Math.round((it.x + it.w) / charW) - it.str.length : Math.round(it.x / charW);
+          col = Math.max(col, line.length ? line.length + 1 : 0);
+          while (line.length < col) { line += " "; }
+          line += it.str;
+        }
+        pageLines.push(line);
+        margin = Math.min(margin, line.length - line.replace(/^ +/, "").length);
+      }
+      for (i = 0; i < pageLines.length; i += 1) {
+        out.push(pageLines[i].slice(margin).replace(/\s+$/, ""));
+      }
+      page.cleanup();
+    }
+    return out.join("\n");
+  }
+
+  async function looks957PdfSet(files) {
+    if (!CONFIG.RPT957 || !files.length) {
+      return false;
+    }
+    for (var i = 0; i < files.length; i += 1) {
+      if (!/\.pdf$/i.test(files[i].name || "")) {
+        return false;
+      }
+      try {
+        if (!looksLikeVoya957Text(await extract957PdfText(await files[i].arrayBuffer(), 1))) {
+          return false;
+        }
+      } catch (err) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function parse957PriorYearSource(source, files, runId) {
+    var grouped = {};
+    var discardReasons = [];
+    var errors = [];
+    var totalLines = 0;
+    var matchedFiles = 0;
+    var skippedFiles = 0;
+    var cols = VOYA_957_COLS;
+
+    for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      if (runId !== parseRunId) { return null; }
+      var file = files[fileIndex];
+      var fileName = file.name || "";
+      setLoadingState({
+        active: true,
+        complete: false,
+        percent: 5 + ((fileIndex / files.length) * 90),
+        title: "Parsing Files",
+        note: "Reading " + fileName + " (" + (fileIndex + 1) + " of " + files.length + ")."
+      });
+      var text;
+      try {
+        text = /\.pdf$/i.test(fileName) ? await extract957PdfText(await file.arrayBuffer()) : await file.text();
+      } catch (err) {
+        errors.push(err.message);
+        continue;
+      }
+      if (!looksLikeVoya957Text(text)) {
+        skippedFiles += 1;
+        discardReasons.push({ type: "message", label: "Skipped " + fileName + ": it is not an RPT-957 Participant Valuation Summary." });
+        continue;
+      }
+      matchedFiles += 1;
+      var parsed = parseVoya957Text(text);
+      totalLines += parsed.diag.lines;
+
+      // One-fund people print no "** TOTAL" line, so their total is their fund rows added up.
+      var sums = {};
+      voya957MainRows(parsed.rows).forEach(function (r) {
+        var s = sums[r.ssn] || (sums[r.ssn] = { beg: 0, contrib: 0, earnings: 0, payments: 0, loans: 0, other: 0, end: 0 });
+        for (var c = 0; c < cols.length; c += 1) { s[cols[c]] += r[cols[c]]; }
+      });
+      var rowsOut = [];
+      parsed.participants.forEach(function (pp) {
+        var s = sums[pp.ssn];
+        if (!s) { return; }
+        if (pp.endBal === null) { pp.endBal = Math.round(s.end * 100) / 100; }
+        rowsOut.push([pp.ssn, pp.name, pp.status,
+          pp.ee === null ? "" : pp.ee.toFixed(2),
+          pp.netRoth === null ? "" : pp.netRoth.toFixed(2)]
+          .concat(cols.map(function (c) { return (Math.round(s[c] * 100) / 100).toFixed(2); })));
+        if (/HOLDING/i.test(pp.name)) {
+          discardReasons.push({ type: "message", label: maskVoyaSsn(pp.ssn) + " \"" + pp.name + "\" is a plan holding account, not a person. Its $" + formatVoyaAmount(s.end) + " is on its own line so the plan total still ties." });
+        }
+      });
+      grouped[RPT957_REPORT] = (grouped[RPT957_REPORT] || []).concat(rowsOut);
+
+      var asOf = text.match(/AS OF\s+(\d{4}\/\d{2}\/\d{2})/);
+      if (asOf) {
+        discardReasons.push({ type: "message", label: fileName + ": End Bal is as of " + asOf[1] + "." });
+      }
+      if (!rowsOut.length) {
+        discardReasons.push({ type: "message", label: "957 report: no participant fund rows were found in " + fileName + ". Lines read " + parsed.diag.lines + ", participant ID lines " + parsed.diag.ssnLines + ", column headers locked on " + parsed.diag.anchorsSet + ", money lines parsed " + parsed.diag.dataLines + "." });
+      } else {
+        buildVoya957ReconMessages(parsed).forEach(function (m) {
+          discardReasons.push({ type: "message", label: m });
+        });
+      }
+    }
+
+    var people = grouped[RPT957_REPORT] || [];
+    var grandTotal = 0;
+    people.forEach(function (r) { grandTotal += parseFloat(r[r.length - 1]); });
+
+    return {
+      totalLines: totalLines,
+      acceptedLines: people.length,
+      discardedLines: 0,
+      foundReports: people.length ? [RPT957_REPORT] : [],
+      discardReasons: discardReasons,
+      grouped: grouped,
+      sourceLabel: source.label,
+      currentFileName: currentFolderName,
+      caseNumber: validateAndFormatCaseNumber(true).formatted,
+      planName: planNameInput ? trimValue(planNameInput.value) : "",
+      summaryTotals: null,
+      summaryHeadline: people.length ? { participantCount: people.length, grandTotal: Math.round(grandTotal * 100) / 100 } : null,
+      layoutsByReport: source.layouts,
+      errors: errors,
+      loadingNote: "Parsed " + matchedFiles + " 957 file(s); skipped " + skippedFiles + "."
+    };
+  }
+
+  function build957SourceConfig() {
+    var layout = [
+      { header: "SSN", type: "text" },
+      { header: "Participant", type: "text" },
+      { header: "Status", type: "text" },
+      { header: "401K EE", type: "decimal" },
+      { header: "Net Roth", type: "decimal" }
+    ];
+    for (var i = 0; i < VOYA_957_COL_LABELS.length; i += 1) {
+      layout.push({ header: VOYA_957_COL_LABELS[i], type: "decimal" });
+    }
+    var reportNames = {};
+    var layouts = {};
+    reportNames[RPT957_REPORT] = "Prior Year Balances";
+    layouts[RPT957_REPORT] = layout;
+    return {
+      label: "957 PRIOR YEAR",
+      mode: "folder",
+      supportsExport: true,
+      autoSummaries: false,
+      summaryIncluded: false,
+      folderModeHelpText: SOURCE_RUNTIME_CONFIG.RPT957.filePickerHelpText,
+      reports: [RPT957_REPORT],
+      reportNames: reportNames,
+      layouts: layouts,
+      customFolderParser: parse957PriorYearSource
+    };
+  }
+
+  CONFIG.RPT957 = build957SourceConfig();
   applySourceRuntimeConfig();
 
   function ensureReportNames() {
@@ -19553,6 +19779,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       normalizers: base.normalizers || {},
       supportsExport: base.supportsExport !== false,
       supportsBreakdown: base.supportsBreakdown !== false,
+      autoSummaries: base.autoSummaries !== false,
       folderModeHelpText: base.folderModeHelpText || "",
       customFolderParser: base.customFolderParser || null,
       resolveRecord: base.resolveRecord || null,
@@ -28727,6 +28954,47 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
   }
 
+  /* Fidelity's 18R basis covers all of a person's Roth money, rollover included.
+     The Source Mapping names tell which source codes are Roth rollover and which
+     are regular Roth, so each person's 77 balances can be split between them. */
+  function fidelityRothBalancesBySsn(result) {
+    var mappingState = currentMappingValidation;
+    var balanceLayouts = result.layoutsByReport["77"] || [];
+    var balanceRows = result.grouped["77"] || [];
+    var ssnIndex = getHeaderIndex(balanceLayouts, ["Social Security Number"]);
+    var sourceIndex = getHeaderIndex(balanceLayouts, ["Source"]);
+    var amountIndex = getHeaderIndex(balanceLayouts, ["Cash/Market Value"]);
+    var kinds = {};
+    var people = {};
+    var sourceRows;
+    var start;
+    var kind;
+    var ssn;
+    var r;
+    if (!mappingState || !mappingState.sourceRows || ssnIndex === -1 || sourceIndex === -1 || amountIndex === -1) {
+      return null;
+    }
+    sourceRows = mappingState.sourceRows;
+    start = mappingState.diagnostics && typeof mappingState.diagnostics.sourceDataStart === "number" ? Math.max(mappingState.diagnostics.sourceDataStart - 1, 1) : 1;
+    for (r = start; r < sourceRows.length; r += 1) {
+      var row = sourceRows[r] || [];
+      var label = [row[2], row[3], row[4], row[9]].map(function (cell) { return trimValue(cell == null ? "" : cell); }).join(" ");
+      if (isCitMappingRow(row) && cleanMappingValue(row[1]) && /roth/i.test(label)) {
+        kinds[cleanMappingValue(row[1])] = /roll\s*-?\s*(over|in)/i.test(label) ? "rollover" : "roth";
+      }
+    }
+    for (r = 0; r < balanceRows.length; r += 1) {
+      kind = kinds[trimValue(balanceRows[r][sourceIndex])];
+      ssn = trimValue(balanceRows[r][ssnIndex]);
+      if (!kind || !ssn) {
+        continue;
+      }
+      people[ssn] = people[ssn] || { roth: 0, rollover: 0 };
+      people[ssn][kind] += parseAmountValue(balanceRows[r][amountIndex]);
+    }
+    return people;
+  }
+
   /* Special rollover plans hold their Roth money as fund PS86, and PS86 only
      ever sits in the Roth source. Every other source counts as Non-Roth. */
   function buildSpecialRolloverSheet(result, caseNumber, sheetNumber) {
@@ -28990,15 +29258,25 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         },
         {
           name: "Roth Basis",
-          reports: ["07DR", "18R"],
+          reports: ["16", "07DR", "18R"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
+          outputOrder: ["Hardship Available", "Roth Contribution", "Roth Hardship", "First Year Contributions", "Roth Rollover"],
+          rothRolloverSplit: true,
+          derivedFields: [
+            { output: "Hardship Available", type: "decimal", kind: "difference", from: "Post 12/31/88 Contributions", minus: "Post 12/31/88 Withdrawals" },
+            { output: "Roth Hardship", type: "decimal", kind: "difference", from: "Roth Gross", minus: "Roth Contribution" }
+          ],
           fieldsByReport: {
+            "16": [
+              { output: "Post 12/31/88 Contributions", candidates: ["Post 12/31/88 Contributions"], internal: true, sum: true },
+              { output: "Post 12/31/88 Withdrawals", candidates: ["Post 12/31/88 Withdrawals"], internal: true, sum: true }
+            ],
             "07DR": [
-              { output: "Date of 1st Roth Contribution", candidates: ["Date Of 1st Roth Contribution"], yearOnly: true }
+              { output: "First Year Contributions", candidates: ["Date Of 1st Roth Contribution"], yearOnly: true }
             ],
             "18R": [
-              { output: "Roth Gross", candidates: ["Roth Gross"] },
-              { output: "Contribution Basis", candidates: ["Contribution Basis", "Roth Rpt"] }
+              { output: "Roth Gross", candidates: ["Roth Gross"], internal: true, sum: true },
+              { output: "Roth Contribution", candidates: ["Contribution Basis", "Roth Rpt"], sum: true }
             ]
           }
         },
@@ -29696,7 +29974,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return sheets;
     }
     specs = (specsBySource[source.key] || []).slice(0);
-    appendAutoSummarySpecs(specs, source);
+    if (source.autoSummaries) {
+      appendAutoSummarySpecs(specs, source);
+    }
     if (!specs.length) {
       return sheets;
     }
@@ -29749,6 +30029,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var omittedHeaders = {};
       var baseFieldCount;
       var orderedFields;
+      var deemedHeaders = [];
+      var rothBalances = spec.rothRolloverSplit ? fidelityRothBalancesBySsn(result) : null;
 
       for (c = 0; c < (spec.omitBaseHeaders || []).length; c += 1) {
         omittedHeaders[spec.omitBaseHeaders[c]] = true;
@@ -29792,6 +30074,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       function computeDerivedValue(derived, values) {
         var principal;
         var percent;
+        if (derived.kind === "difference") {
+          if (trimValue(values[derived.from] == null ? "" : values[derived.from]) === "") {
+            return "";
+          }
+          return (Number(values[derived.from]) - Number(values[derived.minus] || 0)).toFixed(2);
+        }
         if (derived.kind !== "loanSplitAmount") {
           return "";
         }
@@ -29861,11 +30149,15 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
               addOutputField(fieldSpec.output, fieldSpec.yearOnly ? "text" : (match && match.field ? match.field.type : "text"));
             }
             if (match) {
+              if (fieldSpec.internal && spec.derivedFields) {
+                hasOutputDataFields = true;
+              }
               reportFieldMap[report].push({
                 output: fieldSpec.output,
                 index: match.index,
                 type: match.field.type,
                 yearOnly: !!fieldSpec.yearOnly,
+                sum: !!fieldSpec.sum,
                 moneyTypes: fieldSpec.moneyTypes,
                 rolloverAmountIndex: fieldSpec.rolloverAmountCandidates
                   ? (getFieldByCandidates(layouts, fieldSpec.rolloverAmountCandidates) || { index: -1 }).index
@@ -29879,6 +30171,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (hasOutputDataFields) {
         for (r = 0; r < (spec.derivedFields || []).length; r += 1) {
           addOutputField(spec.derivedFields[r].output, spec.derivedFields[r].type || "decimal");
+        }
+        if (spec.rothRolloverSplit) {
+          addOutputField("Roth Rollover", "decimal");
         }
       }
 
@@ -29901,6 +30196,15 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
       if (!hasOutputDataFields) {
         return null;
+      }
+
+      /* Deemed Amount is a required amount on the loan header: a loan that was
+         never deemed shows 0.00, not a blank, even when the vendor has no field. */
+      for (c = 0; c < outputFields.length; c += 1) {
+        if (/deemed amount/i.test(outputFields[c].header)) {
+          outputFields[c].type = "decimal";
+          deemedHeaders.push(outputFields[c].header);
+        }
       }
 
       for (r = 0; r < spec.reports.length; r += 1) {
@@ -29953,6 +30257,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
             if (field.moneyTypes && trimValue(fieldValue || "") !== "" && Number(fieldValue) === 0) {
               continue;
             }
+            /* Some reports send one line per source; add those up per person. */
+            if (field.sum) {
+              if (trimValue(fieldValue == null ? "" : String(fieldValue)) !== "") {
+                values[field.output] = (Number(values[field.output] || 0) + Number(fieldValue)).toFixed(2);
+              }
+              continue;
+            }
             appendSummaryValue(values, field.output, fieldValue);
           }
         }
@@ -29983,6 +30294,23 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         }
         for (c = 0; c < (spec.derivedFields || []).length; c += 1) {
           values[spec.derivedFields[c].output] = computeDerivedValue(spec.derivedFields[c], values);
+        }
+        /* Rollover money takes its balance; the Roth basis keeps only the regular
+           Roth share of the person's balance. */
+        var rothSplit = rothBalances && rothBalances[trimValue(values["Social Security Number"] || "")];
+        if (rothSplit && rothSplit.rollover) {
+          var regularShare = rothSplit.roth / (rothSplit.roth + rothSplit.rollover);
+          values["Roth Rollover"] = rothSplit.rollover.toFixed(2);
+          ["Roth Contribution", "Roth Hardship"].forEach(function (header) {
+            if (trimValue(values[header] == null ? "" : values[header]) !== "") {
+              values[header] = regularShare > 0 ? (Number(values[header]) * regularShare).toFixed(2) : "";
+            }
+          });
+        }
+        for (c = 0; c < deemedHeaders.length; c += 1) {
+          if (trimValue(values[deemedHeaders[c]] || "") === "") {
+            values[deemedHeaders[c]] = "0.00";
+          }
         }
         rows.push(values);
       }
@@ -31157,6 +31485,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
     if (await looksLikeAmericanFundsFileSet(files)) {
       return "AMERICANFUNDS";
+    }
+    if (await looks957PdfSet(files)) {
+      return "RPT957";
     }
     return "";
   }
