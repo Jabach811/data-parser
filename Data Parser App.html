@@ -1809,6 +1809,8 @@ body.app-edition.pal-navy.mode-dark{--paper:#101820;--surface:#18232f;--surface-
 .vp-table td{font-size:13px;line-height:1.5;padding:10px;color:var(--ink)}
 .console .mp-header-label,.console .comparison-section-title strong{font-size:15px;color:var(--ink)}
 .console .mp-header-status{font:600 11px/1.4 var(--font-ui);letter-spacing:0}
+.console .mp-header,.console .mp-header-text{flex-wrap:wrap}
+.console .mp-header-actions{margin-left:auto}
 .console .mp-sheet-name{font-size:14px;color:var(--ink)}
 .console .mp-open-window,.comparison-open-window{font-size:12px;min-height:32px}
 .mp-sheet-desc,.mp-error-row,.mp-error-row-issues,.mp-error-row-preview,.mp-warnings,.mp-more{font-size:13px;line-height:1.6}
@@ -9233,8 +9235,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   };
   SOURCE_RUNTIME_CONFIG.ALERUS = {
     cardMeta: SOURCE_CARD_META.ALERUS,
-    fileAccept: ".xlsx,.xlsm,.pdf",
-    filePickerHelpText: "Alerus mode is active. Drop the service termination workbooks and, if you have it, the Participant Valuation Summary PDF. They can arrive in batches.",
+    fileAccept: ".csv,.xlsx,.xlsm,.pdf",
+    filePickerHelpText: "Alerus mode is active. Drop the service termination CSV files, one at a time or together, and, if you have it, the Participant Valuation Summary PDF.",
     normalizers: {}
   };
   SOURCE_RUNTIME_CONFIG.AMERITAS = {
@@ -16033,6 +16035,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return "";
     }
     var code = match[1].toUpperCase();
+    code = (fileSet.aliases && fileSet.aliases[code]) || code;
     for (var i = 0; i < fileSet.members.length; i += 1) {
       if (fileSet.members[i].code === code) {
         return code;
@@ -16344,9 +16347,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return dictionary;
   }
 
-  /* Records not listed here are still read (and counted on the Dictionary
-     Check) but get no tab of their own. */
-  var ALIGHT_SHOWN_RECORDS = ["CVBL", "LOAN"];
+  /* Every record gets its own tab, with balances and loans first. */
+  var ALIGHT_SHOWN_RECORDS = ["CVBL", "LOAN"].concat(Object.keys(ALIGHT_LAYOUTS).filter(function (code) {
+    return code !== "CVBL" && code !== "LOAN";
+  }));
 
   var ALIGHT_EMPLOYEE_DETAILS_LAYOUT = [
     { header: "Person ID", type: "text" },
@@ -16703,14 +16707,27 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
 
     /* A combined Records.txt already holds every line of the single-type files,
-       so reading both would count each line twice. */
+       so reading both would count each line twice. Lines are compared one by one
+       because a single-type file with one stray record also looks combined, and
+       must not cost the other files their data. */
     var hasCombined = textFiles.some(function (entry) { return entry.combined; });
     if (hasCombined) {
-      textFiles = textFiles.filter(function (entry) {
-        if (!entry.combined) {
-          ignored.push(entry.name);
+      var combinedLines = {};
+      textFiles.forEach(function (entry) {
+        if (entry.combined) {
+          entry.lines.forEach(function (text) { combinedLines[text.replace(/\s+$/, "")] = true; });
         }
-        return entry.combined;
+      });
+      textFiles = textFiles.filter(function (entry) {
+        if (entry.combined) {
+          return true;
+        }
+        entry.lines = entry.lines.filter(function (text) { return !combinedLines[text.replace(/\s+$/, "")]; });
+        if (entry.lines.some(function (text) { return trimValue(text); })) {
+          return true;
+        }
+        ignored.push(entry.name);
+        return false;
       });
     }
 
@@ -16898,21 +16915,25 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     config.reports.push(ALIGHT_CHECK_CODE);
     config.reportNames[ALIGHT_CHECK_CODE] = "Dictionary Check";
     config.layouts[ALIGHT_CHECK_CODE] = ALIGHT_CHECK_LAYOUT.slice();
+    // Raw record tabs are for reading only; the export's rollup sheets must not pick them up.
+    config.autoSummaryReports = ["CVBL", "LOAN", "LOAN_HEADER", "LOAN_SOURCE", "EMPLOYEE_DETAILS", "INVESTMENT_ELECTIONS", ALIGHT_CHECK_CODE];
     return config;
   }
 
   CONFIG.ALIGHT = buildAlightSourceConfig();
 
   /* ---------- ALERUS SERVICE TERMINATION FILE SET ----------
-     One .xlsx per report, single tab, header on its own row. Names are
-     SERVICETERM<code> or SERVTRM<code> followed by plan number and run date.
+     One .csv (or .xlsx) per report, header on its own row. Names are
+     SERVICETERM<code>, SERVTERM<code> or SERVTRM<code> followed by plan number
+     and run date. LOAN and LOANPMT are the same reports as LN and LPMT.
      BALALLOC can arrive split across PART1, PART2, ... and the parts are
      appended to one report. The Participant Valuation Summary PDF is the plan
      summary report and is held for reference, not parsed. */
 
   var ALERUS_FILE_SET = {
     label: "Alerus",
-    match: /^(?:SERVICETERM|SERVTRM)(BALALLOC|CONTRIB|DISBSC|DISB|LPMT|HILN|LN|PT)\b.*\.(?:xlsx|xlsm)$/i,
+    match: /^(?:SERVICETERM|SERVTERM|SERVTRM)(BALALLOC|CONTRIB|DISBSC|DISB|LOANPMT|LPMT|HILN|LOAN|LN|PT)\b.*\.(?:csv|xlsx|xlsm)$/i,
+    aliases: { LOAN: "LN", LOANPMT: "LPMT" },
     members: [
       { code: "PT", name: "Alerus Participant Census" },
       { code: "BALALLOC", name: "Alerus Balances and Allocations" },
@@ -16927,7 +16948,18 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   var ALERUS_SUMMARY_PATTERN = /PARTICIPANT[ _-]*VALUATION[ _-]*SUMMARY.*\.pdf$/i;
   var ALERUS_SSN_KEYS = ["ssn"];
-  var ALERUS_DECIMAL_HINTS = /(amt|amount|balance|mktval|principal|interest|rate|contributions|distributed|month|pre87|post86|hardship|rothdeferrals|allocation|vested)/;
+  var ALERUS_PLACEHOLDER_SSN = "000000001";
+  var ALERUS_DECIMAL_HINTS = /(amt|amount|balance|mktval|principal|interest|rate|contributions|distributed|month|pre87|post86|hardship|rothdeferrals|rothqualdist|cntrb|aftertax|allocation|vested)/;
+  var ALERUS_LEGENDS = {
+    LN: {
+      status: { "1": "Normal Payoff", "2": "Discharged", "3": "Defaulted", "4": "Refinance", "5": "Transferred", "6": "Reversed", "7": "Pending Foreclosure", "8": "Deemed Distributed", "A": "Active Deemed Distributed", "B": "Pending Deemed Distributed", "C": "Offset Deemed Distributed" },
+      pmtfreq: { "3": "Quarterly", "4": "Monthly", "5": "Semi Monthly", "6": "Biweekly", "7": "Weekly", "8": "Daily", "9": "Biweekly Plus", "A": "Weekly Plus" },
+      genorresid: { "0": "General", "1": "Residential" }
+    },
+    PT: {
+      status: { "": "Active & Eligible", "0": "Active & Eligible", "1": "Active; Awaits Suspension", "2": "Rehire; prior term", "3": "Ineligible", "4": "Eligible; not participating", "5": "Contribution; QVEC only", "6": "Break in Service", "7": "Suspended; contributions only", "8": "Suspended; pre-tax contributions only", "9": "ER contributions only", "10": "Suspended from EE only", "11": "Suspended from ER only", "12": "Suspended from EE & ER", "13": "Suspended from Forf Allocation", "14": "Suspended from Forf & EE", "15": "Suspended from Forf & ER", "16": "Suspended from Forf, EE and ER", "20": "Retired & Recv Installment Payments", "30": "Term & Awaiting Pmt", "31": "Term Pd Out", "32": "Term w/ pmt deferred", "33": "Term w/pending Forf allocation", "34": "Pending term" }
+    }
+  };
 
   function buildAlerusSourceConfig() {
     var config = {
@@ -16935,7 +16967,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       mode: "folder",
       supportsExport: true,
       supportsBreakdown: true,
-      folderModeHelpText: "Alerus mode is active. Drop the service termination workbooks (PT, BALALLOC, CONTRIB, DISB, DISBSC, LN, LPMT, HILN). They can arrive in batches, split BALALLOC parts are joined, and the app tracks which ones are still outstanding.",
+      folderModeHelpText: "Alerus mode is active. Drop the service termination CSV files (PT, BALALLOC, CONTRIB, DISB, DISBSC, LOAN, LOANPMT, HILN), one at a time or together. Split BALALLOC parts are joined, and the app tracks which ones are still outstanding.",
       reports: [],
       reportNames: {},
       layouts: {},
@@ -16991,7 +17023,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     ],
     ROTH: [
       { header: "SSN", type: "text" }, { header: "Name", type: "text" },
-      { header: "Roth Contribution", type: "text" }, { header: "First Roth Date", type: "text" }
+      { header: "Roth Contribution", type: "decimal" }, { header: "First Roth Date", type: "text" }
     ],
     DISB: [
       { header: "SSN", type: "text" }, { header: "Name", type: "text" },
@@ -18966,6 +18998,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
             var field = fields[k];
             row.push(formatCleanValue(trimValue(line.substring(field.start - 1, field.start - 1 + field.length)), field.type, field));
           }
+          // ADP prints the sign of an amount as its own one-character field just before it.
+          for (k = 0; k + 1 < fields.length; k += 1) {
+            if (/Sign$/.test(fields[k].header) && row[k] === "-" && fields[k + 1].start === fields[k].start + fields[k].length && trimValue(row[k + 1]) !== "" && !isNaN(Number(row[k + 1]))) {
+              row[k + 1] = formatCleanValue(String(-Number(row[k + 1])), fields[k + 1].type, fields[k + 1]);
+            }
+          }
           if (record === "PF") {
             row = normalizeAdpPfRow(row, fields);
             var pfRowKey = row.join("\u001f");
@@ -19780,6 +19818,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       supportsExport: base.supportsExport !== false,
       supportsBreakdown: base.supportsBreakdown !== false,
       autoSummaries: base.autoSummaries !== false,
+      autoSummaryReports: base.autoSummaryReports || null,
       folderModeHelpText: base.folderModeHelpText || "",
       customFolderParser: base.customFolderParser || null,
       resolveRecord: base.resolveRecord || null,
@@ -20535,7 +20574,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     if (fileInput) {
       fileInput.disabled = false;
       fileInput.multiple = true;
-      fileInput.accept = ".txt,.pdf,.docx,.xlsx,.xlsm";
+      fileInput.accept = ".txt,.csv,.pdf,.docx,.xlsx,.xlsm";
     }
     if (filePickerButtonText) {
       filePickerButtonText.textContent = "Drop file(s) here";
@@ -21677,6 +21716,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return rowNumbers;
   }
 
+  function getFundRefAmountIssues(row) {
+    var hasRef = !!cleanMappingValue(row[6]);
+    var hasAmount = [row[4], row[5]].some(function (cell) {
+      return cleanMappingValue(cell) && parseMappingNumber(cell) !== 0;
+    });
+    if (hasAmount && !hasRef) return ["Has an amount (E or F) but no TR Ref No (G)"];
+    if (hasRef && !hasAmount) return ["Has a TR Ref No (G) but no amount (E or F)"];
+    return [];
+  }
+
   function validateFundMappingRows(sheetRows, dataStartIndex, accountingRefRows) {
     var result = {
       consideredCount: 0,
@@ -21689,6 +21738,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var groups = {};
     var groupOrder = [];
     var rowErrors = [];
+    var lowercaseCitRows = [];
+    var blankSetupRows = [];
     var i;
     for (i = dataStartIndex; i < sheetRows.length; i += 1) {
       var row = sheetRows[i] || [];
@@ -21699,7 +21750,19 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         result.ignoredCount += 1;
         continue;
       }
-      result.consideredCount += 1;
+      if (isLowercaseCitMappingRow(row)) {
+        lowercaseCitRows.push(rowNumber);
+      }
+      if (isCitMappingRow(row)) {
+        result.consideredCount += 1;
+      } else {
+        result.ignoredCount += 1;
+      }
+      // These should be filled in like the CIT rows, but a blank one is only worth a warning.
+      var blankSetupRow = !isCitMappingRow(row) && row.slice(2, 7).every(function (cell) { return !cleanMappingValue(cell); });
+      if (blankSetupRow) {
+        blankSetupRows.push(rowNumber);
+      }
       var issues = [];
       var splitRaw = cleanMappingValue(row[2]);
       var split = parseMappingNumber(row[2]);
@@ -21709,7 +21772,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var takeover = parseMappingNumber(takeoverRaw);
       var fundAmount = parseMappingNumber(fundAmountRaw);
       if (split === null) {
-        issues.push("C (fund split percent) must be a number, but has \"" + splitRaw + "\"");
+        if (!blankSetupRow) issues.push("C (fund split percent) must be a number, but has \"" + splitRaw + "\"");
       } else if (Math.abs(split - 1) < 0.000001) {
         if (rounding !== "n" && rounding !== "no") issues.push("D (rounding) must be N when C is 1");
       } else if (rounding !== "y" && rounding !== "yes") {
@@ -21724,7 +21787,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (refNo && !isTrRefNumber(refNo)) issues.push("G (TR Ref No) \"" + refNo + "\" must be the 8-digit date it was made plus 6 letters or numbers, like 20260928922GSK");
       if (!isDescriptorBlankValue(row[16]) && !isFourCharacterText(row[16])) issues.push("Q must be a 4-character text string");
       if (!isBlankOrYesNoValue(row[19])) issues.push("T (Re-Reg) must be Y, N, Yes or No");
-      if (priorFundCode) {
+      issues = issues.concat(getFundRefAmountIssues(row));
+      if (priorFundCode && !blankSetupRow) {
         if (!groups[priorFundCode]) {
           groups[priorFundCode] = { rowNumbers: [], splitTotal: 0, splitKnown: true, takeoverTotal: 0, fundAmounts: [], hasAmounts: false, amountsKnown: true };
           groupOrder.push(priorFundCode);
@@ -21795,8 +21859,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         });
       }
     }
+    warnLowercaseCitRows("Fund Mapping", lowercaseCitRows, result.warnings);
+    if (blankSetupRows.length) {
+      result.warnings.push("Fund Mapping " + formatRowNumberList(blankSetupRows).toLowerCase() + ": no CIT and columns C through G are blank. These should be filled in like the CIT rows.");
+    }
     if (!result.consideredCount) {
-      result.warnings.push("No rows with a prior fund code were found in the Fund Mapping data section.");
+      result.warnings.push("No CIT rows were found in the Fund Mapping data section.");
     }
     return result;
   }
@@ -21836,12 +21904,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
     }
     var plain = matches.filter(function (match) { return match.plain; });
-    var pick = matches.length === 1 ? matches[0] : plain.length === 1 ? plain[0] : null;
+    var pick = plain[0] || matches[0];
     if (!matches.length) {
       return { value: "", warning: "SOURCE_I table has no Rollover row, so Source I is left blank in the CONV file." };
-    }
-    if (!pick) {
-      return { value: "", warning: "SOURCE_I table has more than one Rollover row (rows " + matches.map(function (match) { return match.rowNumber; }).join(", ") + "), so Source I is left blank in the CONV file." };
     }
     if (!/^\d+$/.test(pick.srcI)) {
       return { value: "", warning: "SOURCE_I table: the Rollover SRC_I on row " + pick.rowNumber + " is \"" + pick.srcI + "\". Excel has rounded or changed it. Format the cell as Text, retype the full number, and upload again. Source I is left blank in the CONV file until then." };
@@ -22798,7 +22863,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var bySsn = {};
     var order = [];
     var sources = [
-      { code: "IND", keys: { rothctbnslesswithdrawals: "taxFree" } },
+      { code: "IND", keys: { rothctbnslesswithdrawals: "taxFree", rothandpost86aftertaxbasis: "rothPost86" } },
       { code: "MT", keys: { roth1stcontributiondate: "firstDate" } },
       { code: "AVAIL", keys: { hardshipavailableamount: "pretaxHardship" } }
     ];
@@ -22819,6 +22884,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         }
         if (sources[s].keys.hasOwnProperty(key)) {
           targets.push({ index: tab.columns[i].index, field: sources[s].keys[key] });
+        } else if (sources[s].code === "IND" && /^pre(19)?87/.test(key)) {
+          targets.push({ index: tab.columns[i].index, field: "pre87" });
         }
       }
       if (ssnColumn === -1 || !targets.length) {
@@ -22831,7 +22898,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           continue;
         }
         if (!bySsn[ssn]) {
-          bySsn[ssn] = { display: trimValue(source[ssnColumn]), taxFree: null, pretaxHardship: null, firstDate: "" };
+          bySsn[ssn] = { display: trimValue(source[ssnColumn]), taxFree: null, rothPost86: null, pre87: null, pretaxHardship: null, firstDate: "" };
           order.push(ssn);
         }
         var entry = bySsn[ssn];
@@ -22854,15 +22921,19 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var rows = [];
     for (i = 0; i < order.length; i += 1) {
       var item = bySsn[order[i]];
-      if (!item.taxFree && !item.pretaxHardship && !item.firstDate) {
+      if (!item.taxFree && !item.rothPost86 && !item.pre87 && !item.pretaxHardship && !item.firstDate) {
         continue;
       }
+      // Ascensus prints Roth and post-1986 after-tax basis as one combined column, so the Roth part comes out.
+      var post86 = item.rothPost86 === null ? null : item.rothPost86 - (item.taxFree || 0);
       rows.push([
         item.display,
         item.taxFree === null ? "" : item.taxFree.toFixed(2),
         item.taxFree === null ? "" : item.taxFree.toFixed(2),
         item.pretaxHardship === null ? "" : item.pretaxHardship.toFixed(2),
-        item.firstDate.slice(0, 4)
+        item.firstDate.slice(0, 4),
+        post86 === null ? "" : post86.toFixed(2),
+        item.pre87 === null ? "" : item.pre87.toFixed(2)
       ]);
     }
     return {
@@ -22871,7 +22942,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         { header: "Roth Tax-Free Contribution Basis", type: "decimal" },
         { header: "Roth Hardship Basis", type: "decimal" },
         { header: "Pre-Tax Hardship Available Amount", type: "decimal" },
-        { header: "Roth First Contribution Year", type: "text" }
+        { header: "Roth First Contribution Year", type: "text" },
+        { header: "Post-1986 After-Tax Basis", type: "decimal" },
+        { header: "Pre-1987 After-Tax Basis", type: "decimal" }
       ],
       rows: rows
     };
@@ -23793,7 +23866,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   var TIAA_SSN_KEYS = ["participant", "ssn", "participantid"];
   var TIAA_DECIMAL_HEADERS = /^(full|fullshr|schg|xfer|tiaa|tiaashr|shares|units)$/;
-  var TIAA_DECIMAL_HINTS = /(amt|amount|balance|cntrb|ctrb|contrib|rollover|comp|hours)/;
+  var TIAA_DECIMAL_HINTS = /(amt|amount|bal$|balance|cntrb|ctrb|contrib|rollover|comp|hours)/;
 
   function tiaaHeaderRows(code, rows) {
     var merged;
@@ -24002,6 +24075,44 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     };
   }
 
+  // A legend's description sits in a new column right after the code it explains.
+  function prepareAlerusColumns(code, columns) {
+    var legends = ALERUS_LEGENDS[code] || {};
+    var out = [];
+    columns.forEach(function (column) {
+      var key = normalizeWorkbookHeaderLabel(column.header);
+      column.isZip = key === "zip";
+      out.push(column);
+      if (legends[key]) {
+        out.push({ index: column.index, header: column.header + " Description", type: "text", legend: legends[key] });
+      }
+    });
+    return out;
+  }
+
+  // Opening a CSV in Excel drops leading zeros, so SSNs and zips are padded back.
+  function alerusRowFromCells(cells, columns) {
+    var cleaned = cells.slice();
+    columns.forEach(function (column) {
+      if (column.type === "decimal") {
+        cleaned[column.index] = trimValue(cells[column.index]).replace(/[$,]/g, "");
+      }
+    });
+    var built = rowFromColumns(cleaned, columns);
+    for (var i = 0; i < columns.length; i += 1) {
+      if (columns[i].legend) {
+        built[i] = columns[i].legend[built[i].toUpperCase().replace(/^0+(?=.)/, "")] || "";
+      } else if (built[i] === "00/00/00") {
+        built[i] = "";
+      } else if (columns[i].isSsn && built[i]) {
+        built[i] = built[i].padStart(9, "0");
+      } else if (columns[i].isZip && /^\d{1,4}$/.test(built[i])) {
+        built[i] = built[i].padStart(5, "0");
+      }
+    }
+    return built;
+  }
+
   async function parseAlerusFileSet(source, files, runId) {
     var grouped = {};
     var layoutsByReport = {};
@@ -24013,6 +24124,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var discardedLines = 0;
     var unmatched = [];
     var summaryHeld = "";
+    var placeholderRows = 0;
     var fileIndex;
 
     for (fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
@@ -24033,13 +24145,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
 
       try {
-        var rows = await readFirstSheetRows(file);
+        var rows = (await sniffFileKind(file)) === "text" ? splitDelimitedText(await readFileAsText(file)) : await readFirstSheetRows(file);
         var headerIndex = detectPrincipalHeaderRow(rows);
         if (headerIndex === -1) {
           errors.push(fileName + ": could not find the header row.");
           continue;
         }
-        var columns = buildHeaderColumns(rows[headerIndex], ALERUS_SSN_KEYS, ALERUS_DECIMAL_HINTS, null);
+        var columns = prepareAlerusColumns(code, buildHeaderColumns(rows[headerIndex], ALERUS_SSN_KEYS, ALERUS_DECIMAL_HINTS, null));
         if (!columns.length) {
           errors.push(fileName + ": no column headers were found.");
           continue;
@@ -24049,11 +24161,17 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           layoutsByReport[code] = columnsToLayout(columns);
           foundReports.push(code);
         }
+        var ssnIndex = columns.map(function (column) { return column.isSsn; }).indexOf(true);
         var cursor;
         for (cursor = headerIndex + 1; cursor < rows.length; cursor += 1) {
           totalLines += 1;
-          var built = rowFromColumns(rows[cursor], columns);
-          if (!trimValue(built.join(""))) {
+          if (!trimValue(rows[cursor].join(""))) {
+            discardedLines += 1;
+            continue;
+          }
+          var built = alerusRowFromCells(rows[cursor], columns);
+          if (built[ssnIndex] === ALERUS_PLACEHOLDER_SSN) {
+            placeholderRows += 1;
             discardedLines += 1;
             continue;
           }
@@ -24077,6 +24195,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     if (summaryHeld) {
       note += " " + summaryHeld + " is held for reference; its plan totals are not read.";
       discardReasons.push({ type: "message", label: summaryHeld + " is held for reference; its plan totals are not read." });
+    }
+    if (placeholderRows) {
+      discardReasons.push({ type: "message", label: "Left out " + placeholderRows + " row(s) for the OMNI ONLINE placeholder (SSN 1), which is not a person." });
     }
     if (unmatched.length) {
       note += " Ignored: " + unmatched.join(", ") + ".";
@@ -27431,6 +27552,51 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return result;
   }
 
+  // The CONV file won't load unless each ref number's total equals the mapping, so the file side is shared out as the CONV file does it.
+  function compareFundAmountsByRef(fundTotals, mappingIndex) {
+    var rowsByCode = mappingIndex ? mappingIndex.rowsByPriorCode : {};
+    var fileByCode = {};
+    var byRef = {};
+    var result = { hasAmounts: false, issues: [], refCount: 0, fileTotal: 0, mappingTotal: 0 };
+    (fundTotals || []).forEach(function (item) {
+      fileByCode[item.key] = Number(item.value || 0);
+    });
+    var noRefRows = [];
+    Object.keys(rowsByCode).forEach(function (code) {
+      var rows = rowsByCode[code];
+      var shares = shareFundTotal(fileByCode[code] || 0, rows);
+      rows.forEach(function (row, index) {
+        var takeover = parseMappingNumber(row[4]);
+        var amount = takeover !== null ? takeover : parseMappingNumber(row[5]) || 0;
+        var ref = cleanMappingValue(row[6]);
+        result.hasAmounts = result.hasAmounts || amount !== 0;
+        result.fileTotal += shares[index];
+        result.mappingTotal += amount;
+        if (ref) {
+          if (!byRef[ref]) {
+            byRef[ref] = { file: 0, mapping: 0 };
+          }
+          byRef[ref].file += shares[index];
+          byRef[ref].mapping += amount;
+        } else if (shares[index]) {
+          noRefRows.push({ code: code, meta: "In the file, but this mapping row has no ref number or amount", amount: shares[index] });
+        }
+      });
+    });
+    if (!result.hasAmounts) {
+      return result;
+    }
+    Object.keys(byRef).forEach(function (ref) {
+      var difference = byRef[ref].file - byRef[ref].mapping;
+      result.refCount += 1;
+      if (Math.abs(difference) >= 0.005) {
+        result.issues.push({ code: ref, meta: "File " + formatTotalAmount(byRef[ref].file) + " / Mapping " + formatTotalAmount(byRef[ref].mapping), amount: difference });
+      }
+    });
+    result.issues = result.issues.concat(noRefRows);
+    return result;
+  }
+
   function buildComparisonSectionHtml(label, comparison, includeOpenWindowAction) {
     var html = "";
     var missingCount = comparison.missing.length;
@@ -27439,7 +27605,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var mappingOnlyCount = comparison.mappingOnly.length;
     var totalCount = comparison.totalCount || 0;
 
-    var issueCount = missingCount + ambiguousCount;
+    var refTotals = comparison.refTotals;
+    var refIssueCount = refTotals ? refTotals.issues.length : 0;
+    var issueCount = missingCount + ambiguousCount + refIssueCount;
     var summaryLine = String(matchedCount) + " matched / " + String(issueCount) + " flagged";
     var summaryNote = "Checked " + String(totalCount) + " code(s)." + (mappingOnlyCount ? " " + String(mappingOnlyCount) + " mapping-only code(s) allowed." : "");
     var toggleSvg = "<svg viewBox=\"0 0 12 8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 1L6 6l5-5\"/></svg>";
@@ -27454,6 +27622,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     html += "<span class=\"comparison-badge" + (missingCount ? " is-error" : "") + "\">" + (missingCount ? "Missing " + String(missingCount) : "No missing") + "</span>";
     if (ambiguousCount) {
       html += "<span class=\"comparison-badge is-warn\">Ambiguous " + String(ambiguousCount) + "</span>";
+    }
+    if (refIssueCount) {
+      html += "<span class=\"comparison-badge is-error\">Totals off " + String(refIssueCount) + "</span>";
     }
     if (mappingOnlyCount) {
       html += "<span class=\"comparison-badge\">Mapping-only " + String(mappingOnlyCount) + "</span>";
@@ -27499,6 +27670,19 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       html += "</div>";
     }
 
+
+    if (refTotals && !refTotals.hasAmounts) {
+      html += "<div class=\"comparison-note\"><strong>Ref number totals not checked yet</strong> The mapping has no amounts so far.</div>";
+    } else if (refTotals) {
+      html += "<div class=\"comparison-note\"><strong>Ref number totals</strong> File " + escapeHtml(formatTotalAmount(refTotals.fileTotal)) + " / Mapping " + escapeHtml(formatTotalAmount(refTotals.mappingTotal)) + " across " + String(refTotals.refCount) + " ref number(s)." + (refIssueCount ? " The CONV file won't load until these match." : "") + "</div>";
+    }
+    if (refIssueCount) {
+      html += "<div class=\"comparison-list\">";
+      for (var r = 0; r < refTotals.issues.length; r += 1) {
+        html += "<div class=\"comparison-item\"><div class=\"comparison-item-main\"><div class=\"comparison-code\">" + escapeHtml(refTotals.issues[r].code) + "</div><div class=\"comparison-meta\" style=\"white-space:normal\">" + escapeHtml(refTotals.issues[r].meta) + "</div></div><div class=\"comparison-amount\">" + escapeHtml(formatTotalAmount(refTotals.issues[r].amount)) + "</div></div>";
+      }
+      html += "</div>";
+    }
 
     // Mapping-only codes: expanded as individual cards, grey tint at bottom
     if (mappingOnlyCount) {
@@ -27572,18 +27756,22 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     if (fundComparison) {
       fundComparison.matched = fundComparison.matched.concat(fundComparison.ambiguous);
       fundComparison.ambiguous = [];
+      fundComparison.refTotals = compareFundAmountsByRef(summary.fundTotals, buildFundMappingIndex(mappingState));
     }
     var sourceIssues = sourceComparison.missing.length + sourceComparison.ambiguous.length;
-    var fundIssues = fundComparison ? fundComparison.missing.length + fundComparison.ambiguous.length : 0;
+    var fundIssues = fundComparison ? fundComparison.missing.length + fundComparison.ambiguous.length + fundComparison.refTotals.issues.length : 0;
     var hasIssues = !!(sourceIssues || fundIssues);
     var mappingOnlyTotal = sourceComparison.mappingOnly.length + (fundComparison ? fundComparison.mappingOnly.length : 0);
     var statusClass = hasIssues ? "is-error" : "is-valid";
     var statusTitle = hasIssues ? "Reconciliation failed" : "Reconciliation passed";
     var statusNote = hasIssues ?
-      "There are " + String(sourceIssues + fundIssues) + " input code mismatch(es) that need attention." :
+      "There are " + String(sourceIssues + fundIssues) + " mismatch(es) that need attention." :
       (hasFundMappingSheet ? "All parsed source and fund totals matched the mapping workbook." : "Source totals matched the mapping workbook. Fund Mapping was not provided, so fund reconciliation was skipped.");
     if (mappingOnlyTotal) {
       statusNote += " Mapping-only codes are allowed and listed below.";
+    }
+    if (fundComparison && !fundComparison.refTotals.hasAmounts) {
+      statusNote += " Ref number totals were not checked because the mapping has no amounts yet.";
     }
 
     comparisonStatus.className = "comparison-status " + statusClass;
@@ -28664,6 +28852,19 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     });
   }
 
+  // A split fund gets one row per mapping row; its total is shared by the C percents, leftover pennies on the last row.
+  function shareFundTotal(total, mappingRows) {
+    var remaining = total;
+    return mappingRows.map(function (mappingRow, index) {
+      if (mappingRows.length === 1) {
+        return total;
+      }
+      var amount = index === mappingRows.length - 1 ? remaining : Math.round(total * parseMappingNumber(mappingRow[2]) * 100) / 100;
+      remaining = Math.round((remaining - amount) * 100) / 100;
+      return amount;
+    });
+  }
+
   function buildConvFileSheet(result, caseNumber, mappingState, sheetNumber, split) {
     var source = getSelectedSource();
     var summary;
@@ -28700,16 +28901,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var item = funds[i];
       var priorFundCode = trimValue(item.key || "");
       var total = Number(item.value || 0);
-      var remaining = total;
-      // A split fund gets one row per mapping row; its total is shared by the C percents, leftover pennies on the last row.
       var mappingRows = mappingIndex.rowsByPriorCode[item.key] || [null];
+      var amounts = shareFundTotal(total, mappingRows);
       for (var j = 0; j < mappingRows.length; j += 1) {
         var mappingRow = mappingRows[j];
-        var amount = total;
-        if (mappingRows.length > 1) {
-          amount = j === mappingRows.length - 1 ? remaining : Math.round(total * parseMappingNumber(mappingRow[2]) * 100) / 100;
-          remaining = Math.round((remaining - amount) * 100) / 100;
-        }
+        var amount = amounts[j];
         var taCode = mappingRow ? trimValue(mappingRow[16] || "") : "";
         var reRegValue = mappingRow ? trimValue(mappingRow[19] || "") : "";
         var reReg = "";
@@ -28918,7 +29114,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     {
       name: "Roth Basis",
       headerContains: ["Roth", "Tax Basis", "Basis Amount", "Contribution Basis", "Hardship", "First Contribution", "Accumulator"],
-      headerExcludes: ["Prior", "Previous", "PYTD"]
+      headerExcludes: ["Prior", "Previous", "PYTD", "Market Value"]
     },
     {
       name: "YTD",
@@ -28946,7 +29142,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       specs.push({
         name: spec.name,
-        reports: source.reports.slice(0),
+        reports: (source.autoSummaryReports || source.reports).slice(0),
         headerContains: spec.headerContains,
         headerExcludes: spec.headerExcludes,
         omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"]
@@ -28954,24 +29150,20 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
   }
 
-  /* Fidelity's 18R basis covers all of a person's Roth money, rollover included.
-     The Source Mapping names tell which source codes are Roth rollover and which
-     are regular Roth, so each person's 77 balances can be split between them. */
-  function fidelityRothBalancesBySsn(result) {
+  /* Most vendors give one Roth basis covering all of a person's Roth money,
+     rollover included. This reads each person's Roth and Roth rollover balances
+     from the vendor's balance report so the basis can be split between them.
+     The mapping file's source descriptions say which sources are Roth and which
+     of those are rollover money. Keyed by the person's ID with only digits. */
+  function rothBalancesBySsn(result, sourceKey) {
     var mappingState = currentMappingValidation;
-    var balanceLayouts = result.layoutsByReport["77"] || [];
-    var balanceRows = result.grouped["77"] || [];
-    var ssnIndex = getHeaderIndex(balanceLayouts, ["Social Security Number"]);
-    var sourceIndex = getHeaderIndex(balanceLayouts, ["Source"]);
-    var amountIndex = getHeaderIndex(balanceLayouts, ["Cash/Market Value"]);
+    var rule = SUMMARY_RULES[sourceKey];
     var kinds = {};
     var people = {};
     var sourceRows;
     var start;
-    var kind;
-    var ssn;
     var r;
-    if (!mappingState || !mappingState.sourceRows || ssnIndex === -1 || sourceIndex === -1 || amountIndex === -1) {
+    if (!rule || !mappingState || !mappingState.sourceRows) {
       return null;
     }
     sourceRows = mappingState.sourceRows;
@@ -28983,15 +29175,29 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         kinds[cleanMappingValue(row[1])] = /roll\s*-?\s*(over|in)/i.test(label) ? "rollover" : "roth";
       }
     }
-    for (r = 0; r < balanceRows.length; r += 1) {
-      kind = kinds[trimValue(balanceRows[r][sourceIndex])];
-      ssn = trimValue(balanceRows[r][ssnIndex]);
-      if (!kind || !ssn) {
-        continue;
+    [].concat(rule.reportCode).forEach(function (code) {
+      var layouts = result.layoutsByReport[code] || [];
+      var rows = result.grouped[code] || [];
+      var ssnIndex = getHeaderIndex(layouts, rule.participantHeaders);
+      var sourceIndex = getHeaderIndex(layouts, rule.sourceHeaders);
+      var amountIndex = getHeaderIndex(layouts, rule.amountHeaders);
+      if (ssnIndex === -1 || sourceIndex === -1 || amountIndex === -1) {
+        return;
       }
-      people[ssn] = people[ssn] || { roth: 0, rollover: 0 };
-      people[ssn][kind] += parseAmountValue(balanceRows[r][amountIndex]);
-    }
+      for (var i = 0; i < rows.length; i += 1) {
+        var source = trimValue(rows[i][sourceIndex]);
+        if (rule.sourceSlice) {
+          source = source.slice(rule.sourceSlice[0], rule.sourceSlice[1]);
+        }
+        var kind = kinds[source];
+        var ssn = trimValue(rows[i][ssnIndex]).replace(/\D/g, "");
+        if (!kind || !ssn) {
+          continue;
+        }
+        people[ssn] = people[ssn] || { roth: 0, rollover: 0 };
+        people[ssn][kind] += parseAmountValue(rows[i][amountIndex]);
+      }
+    });
     return people;
   }
 
@@ -29058,10 +29264,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var basisRows = result.grouped["18R"] || [];
     var basisSsnIndex = getHeaderIndex(basisLayouts, ["Social Security Number"]);
     var basisIndex = getHeaderIndex(basisLayouts, ["Roth Gross"]);
+    var basisRptIndex = getHeaderIndex(basisLayouts, ["Roth Rpt"]);
     for (r = 0; basisSsnIndex > -1 && basisIndex > -1 && r < basisRows.length; r += 1) {
       entry = people[trimValue(basisRows[r][basisSsnIndex])];
       if (entry && trimValue(basisRows[r][basisIndex])) {
-        entry.basis = (entry.basis || 0) + parseAmountValue(basisRows[r][basisIndex]);
+        var rpt = basisRptIndex > -1 && trimValue(basisRows[r][basisRptIndex]) ? Math.abs(parseAmountValue(basisRows[r][basisRptIndex])) : 0;
+        entry.basis = (entry.basis || 0) + parseAmountValue(basisRows[r][basisIndex]) - rpt;
       }
     }
 
@@ -29258,16 +29466,20 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         },
         {
           name: "Roth Basis",
-          reports: ["16", "07DR", "18R"],
+          reports: ["16", "07DR", "18R", "18"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
-          outputOrder: ["Hardship Available", "Roth Contribution", "Roth Hardship", "First Year Contributions", "Roth Rollover"],
-          rothRolloverSplit: true,
+          outputOrder: ["Hardship Available", "Roth Contribution", "Roth Hardship", "First Year Contributions", "Roth Rollover", "Post-86 After-Tax Basis", "Pre-87 After-Tax Basis"],
+          rothRolloverSplit: ["Roth Contribution", "Roth Hardship"],
           derivedFields: [
-            { output: "Hardship Available", type: "decimal", kind: "difference", from: "Post 12/31/88 Contributions", minus: "Post 12/31/88 Withdrawals" },
-            { output: "Roth Hardship", type: "decimal", kind: "difference", from: "Roth Gross", minus: "Roth Contribution" }
+            { output: "Hardship Available", type: "decimal", kind: "difference", from: "Post 12/31/88 Contributions", plus: "12/31/88 Market Value", minus: "Post 12/31/88 Withdrawals" },
+            { output: "Roth Contribution", type: "decimal", kind: "difference", from: "Roth Gross", minus: "Roth Rpt" },
+            { output: "Roth Hardship", type: "decimal", kind: "difference", from: "Roth Gross", minus: "Roth Rpt" },
+            { output: "Post-86 After-Tax Basis", type: "decimal", kind: "difference", from: "Post 86-Gross", minus: "Post 86-Rpt" },
+            { output: "Pre-87 After-Tax Basis", type: "decimal", kind: "difference", from: "Pre 87-Gross", minus: "Pre 87-Rpt" }
           ],
           fieldsByReport: {
             "16": [
+              { output: "12/31/88 Market Value", candidates: ["12/31/88 Market Value"], internal: true, sum: true },
               { output: "Post 12/31/88 Contributions", candidates: ["Post 12/31/88 Contributions"], internal: true, sum: true },
               { output: "Post 12/31/88 Withdrawals", candidates: ["Post 12/31/88 Withdrawals"], internal: true, sum: true }
             ],
@@ -29276,7 +29488,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
             ],
             "18R": [
               { output: "Roth Gross", candidates: ["Roth Gross"], internal: true, sum: true },
-              { output: "Roth Contribution", candidates: ["Contribution Basis", "Roth Rpt"], sum: true }
+              { output: "Roth Rpt", candidates: ["Roth Rpt"], internal: true, sum: true }
+            ],
+            "18": [
+              { output: "Post 86-Gross", candidates: ["Post 86-Gross"], internal: true, sum: true },
+              { output: "Post 86-Rpt", candidates: ["Post 86-Rpt"], internal: true, sum: true },
+              { output: "Pre 87-Gross", candidates: ["Pre 87-Gross"], internal: true, sum: true },
+              { output: "Pre 87-Rpt", candidates: ["Pre 87-Rpt"], internal: true, sum: true }
             ]
           }
         },
@@ -29340,12 +29558,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           name: "Roth Basis",
           reports: ["PT"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
+          rothRolloverSplit: ["ROTH-BASIS-AT"],
           fieldsByReport: {
             PT: [
+              { output: "AVAIL-HARDSHIP-WITHDRAWAL-AMT", candidates: ["AVAIL-HARDSHIP-WITHDRAWAL-AMT"] },
               { output: "PLN-MT-FIR-CNB-DT", candidates: ["PLN-MT-FIR-CNB-DT"] },
-              { output: "PYTD-ROTH-ELECTIVE-DEFERRAL-AT", candidates: ["PYTD-ROTH-ELECTIVE-DEFERRAL-AT"] },
-              { output: "PYTD-ROTH-EDFR-DT", candidates: ["PYTD-ROTH-EDFR-DT"] },
-              { output: "ROTH-BASIS-AT", candidates: ["ROTH-BASIS-AT"] }
+              { output: "ROTH-BASIS-AT", candidates: ["ROTH-BASIS-AT"] },
+              { output: "ROTH-TRM-LOAN-PPAL-BAS-RCY-AT", candidates: ["ROTH-TRM-LOAN-PPAL-BAS-RCY-AT"] },
+              { output: "AFTER-TAX-BASIS-AT", candidates: ["AFTER-TAX-BASIS-AT"] },
+              { output: "ATX-TRM-LOAN-PPAL-BAS-RCY-AT", candidates: ["ATX-TRM-LOAN-PPAL-BAS-RCY-AT"] },
+              { output: "PRE87-AFTER-TAX-BASIS-AT", candidates: ["PRE87-AFTER-TAX-BASIS-AT"] }
             ]
           }
         },
@@ -29463,12 +29685,16 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           name: "Roth Basis",
           reports: ["PT"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
+          rothRolloverSplit: ["Roth Basis Amount"],
           fieldsByReport: {
             PT: [
+              { output: "Available Hardship Withdrawal Amount", candidates: ["Available Hardship Withdrawal Amount"] },
               { output: "First Contribution Date", candidates: ["First Contribution Date"] },
-              { output: "Plan YTD Roth Elective Deferral Amount", candidates: ["Plan YTD Roth Elective Deferral Amount"] },
-              { output: "Plan YTD Roth Elective Deferral Date", candidates: ["Plan YTD Roth Elective Deferral Date"] },
-              { output: "Roth Basis Amount", candidates: ["Roth Basis Amount"] }
+              { output: "Roth Basis Amount", candidates: ["Roth Basis Amount"] },
+              { output: "Roth Basis Total Loan Exclusion Amount", candidates: ["Roth Basis Total Loan Exclusion Amount"] },
+              { output: "After-tax Basis Amount", candidates: ["After-tax Basis Amount"] },
+              { output: "After-tax Basis Total Loan Exclusion Amount", candidates: ["After-tax Basis Total Loan Exclusion Amount"] },
+              { output: "Pre-1987 After-tax Basis Amount", candidates: ["Pre-1987 After-tax Basis Amount"] }
             ]
           }
         },
@@ -29507,6 +29733,25 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           }
         }
       ],
+      AMERICANFUNDS: [
+        {
+          name: "Roth Basis",
+          reports: ["PT"],
+          omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
+          rothRolloverSplit: ["Roth Basis Amount"],
+          fieldsByReport: {
+            PT: [
+              { output: "Available Hardship Withdrawal Amount", candidates: ["Available Hardship Withdrawal Amount"] },
+              { output: "Plan Money Type First Contribution Date", candidates: ["Plan Money Type First Contribution Date"] },
+              { output: "Roth Basis Amount", candidates: ["Roth Basis Amount"] },
+              { output: "Roth Termination Loan Principal Basis Recovery Amount", candidates: ["Roth Termination Loan Principal Basis Recovery Amount"] },
+              { output: "After Tax Basis Amount", candidates: ["After Tax Basis Amount"] },
+              { output: "After Tax Termination Loan Principal Basis Recovery Amount", candidates: ["After Tax Termination Loan Principal Basis Recovery Amount"] },
+              { output: "Pre-1987 After Tax Basis Amount", candidates: ["Pre-1987 After Tax Basis Amount"] }
+            ]
+          }
+        }
+      ],
       ADP: [
         {
           name: "Deferrals",
@@ -29528,10 +29773,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           name: "Roth Basis",
           reports: ["PH"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
+          rothRolloverSplit: ["ROTH TAX BASIS"],
           fieldsByReport: {
             PH: [
               { output: "Roth First Contribution Date", candidates: ["Roth First Contribution Date"] },
-              { output: "ROTH TAX BASIS", candidates: ["ROTH TAX BASIS"] }
+              { output: "ROTH TAX BASIS", candidates: ["ROTH TAX BASIS"] },
+              { output: "Post-1986 Employee After-Tax Contributions", candidates: ["Post-1986 Employee After-Tax Contributions"] },
+              { output: "Pre-1987 Employee After-Tax Contributions", candidates: ["Pre-1987 Employee After-Tax Contributions"] }
             ]
           }
         },
@@ -29611,12 +29859,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           name: "Roth Basis",
           reports: ["ITD"],
           moneyTypes: ["RTH", "RRO"],
+          dropEmptyRows: true,
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
           fieldsByReport: {
             ITD: [
-              { output: "Roth Contribution Basis", candidates: ["AVAILABLE HARDSHIP AMOUNT"], moneyTypes: ["RTH"] },
-              { output: "Roth Hardship Amount", candidates: ["AVAILABLE HARDSHIP AMOUNT"], moneyTypes: ["RTH"] },
-              { output: "Roth Rollover", candidates: ["TAX-FREE AMOUNT"], moneyTypes: ["RRO"], rolloverAmountCandidates: ["AMOUNT"] },
+              { output: "Roth Contribution Basis", candidates: ["AMOUNT"], moneyTypes: ["RTH"], sum: true, costBasis: true, taxFreeCandidates: ["TAX-FREE AMOUNT"] },
+              { output: "Roth Hardship Amount", candidates: ["AMOUNT"], moneyTypes: ["RTH"], sum: true, costBasis: true, taxFreeCandidates: ["TAX-FREE AMOUNT"] },
+              { output: "Roth Rollover", candidates: ["AMOUNT"], moneyTypes: ["RRO"], sum: true, costBasis: true, taxFreeCandidates: ["TAX-FREE AMOUNT"] },
               { output: "Roth First Contribution Date", candidates: ["ROTH FIRST CONTRIBUTION DATE"], yearOnly: true }
             ]
           }
@@ -29884,13 +30133,15 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           name: "Roth Basis",
           reports: ["ROTH"],
           omitBaseHeaders: ["Report Code", "Report Name", "Plan Number", "Loan ID"],
-          outputOrder: ["Roth Tax-Free Contribution Basis", "Roth Hardship Basis", "Pre-Tax Hardship Available Amount", "Roth First Contribution Year"],
+          outputOrder: ["Roth Tax-Free Contribution Basis", "Roth Hardship Basis", "Pre-Tax Hardship Available Amount", "Roth First Contribution Year", "Post-1986 After-Tax Basis", "Pre-1987 After-Tax Basis"],
           fieldsByReport: {
             ROTH: [
               { output: "Roth Tax-Free Contribution Basis", candidates: ["Roth Tax-Free Contribution Basis"] },
               { output: "Roth Hardship Basis", candidates: ["Roth Hardship Basis"] },
               { output: "Pre-Tax Hardship Available Amount", candidates: ["Pre-Tax Hardship Available Amount"] },
-              { output: "Roth First Contribution Year", candidates: ["Roth First Contribution Year"] }
+              { output: "Roth First Contribution Year", candidates: ["Roth First Contribution Year"] },
+              { output: "Post-1986 After-Tax Basis", candidates: ["Post-1986 After-Tax Basis"] },
+              { output: "Pre-1987 After-Tax Basis", candidates: ["Pre-1987 After-Tax Basis"] }
             ]
           }
         },
@@ -29988,7 +30239,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     var loanIndexByKey = {};
     var loanPrincipalByIndex = {};
     var loanIndexBySsn = {};
-    var participantCandidates = ["Social Security Number", "SSN", "Participant Id", "Participant Tax ID", "PART-TAX-ID", "EE SS#", "PH-PART-ID", "AHLH-PART-ID", "AHLF-PART-ID", "AHLP-PART-ID", "PS-PART-ID", "PF-PART-ID"];
+    var participantCandidates = ["Social Security Number", "SSN", "Participant Id", "Participant Tax ID", "PART-TAX-ID", "EE SS#", "PH-PART-ID", "AHLH-PART-ID", "AHLF-PART-ID", "AHLP-PART-ID", "PS-PART-ID", "PF-PART-ID", "Part-Num"];
     var loanIdCandidates = ["Loan ID", "Loan Number", "LOAN NUMBER", "PART-LOAN-EXTL-ID", "AHLH-LOAN-NUM", "AHLF-LOAN-NUM", "AHLP-LOAN-NUM"];
     var planNumberCandidates = ["Plan Number", "PTAF-PLAN-NUM", "PL-PLAN-NUM", "GROUP ACCOUNT"];
 
@@ -30030,7 +30281,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var baseFieldCount;
       var orderedFields;
       var deemedHeaders = [];
-      var rothBalances = spec.rothRolloverSplit ? fidelityRothBalancesBySsn(result) : null;
+      var rothBalances = spec.rothRolloverSplit ? rothBalancesBySsn(result, source.key) : null;
 
       for (c = 0; c < (spec.omitBaseHeaders || []).length; c += 1) {
         omittedHeaders[spec.omitBaseHeaders[c]] = true;
@@ -30078,7 +30329,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           if (trimValue(values[derived.from] == null ? "" : values[derived.from]) === "") {
             return "";
           }
-          return (Number(values[derived.from]) - Number(values[derived.minus] || 0)).toFixed(2);
+          // Fidelity prints withdrawals as negatives, so "minus" always takes the size off.
+          return (Number(values[derived.from]) + Number(values[derived.plus] || 0) - Math.abs(Number(values[derived.minus] || 0))).toFixed(2);
         }
         if (derived.kind !== "loanSplitAmount") {
           return "";
@@ -30159,8 +30411,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
                 yearOnly: !!fieldSpec.yearOnly,
                 sum: !!fieldSpec.sum,
                 moneyTypes: fieldSpec.moneyTypes,
-                rolloverAmountIndex: fieldSpec.rolloverAmountCandidates
-                  ? (getFieldByCandidates(layouts, fieldSpec.rolloverAmountCandidates) || { index: -1 }).index
+                costBasis: !!fieldSpec.costBasis,
+                taxFreeIndex: fieldSpec.taxFreeCandidates
+                  ? (getFieldByCandidates(layouts, fieldSpec.taxFreeCandidates) || { index: -1 }).index
                   : -1
               });
             }
@@ -30245,12 +30498,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
               continue;
             }
             fieldValue = field.yearOnly ? isoDateYear(currentRow[field.index]) : currentRow[field.index];
-            /* Roth rollover: flip a negative tax-free amount to positive; otherwise
-               use amount minus tax-free amount, even if that comes out negative. */
-            if (field.rolloverAmountIndex >= 0 && trimValue(fieldValue || "") !== "") {
-              fieldValue = Number(fieldValue) < 0
-                ? Math.abs(Number(fieldValue)).toFixed(2)
-                : (Number(currentRow[field.rolloverAmountIndex] || 0) - Number(fieldValue)).toFixed(2);
+            /* Empower cost basis: CNT (blank) + CNT REG - Tax Free Amount. A
+               negative tax-free amount is basis still available, so it adds. */
+            if (field.costBasis) {
+              var activity = trimValue(getHeaderValueByCandidates(currentRow, layouts, ["FINANCIAL ACTIVITY CODE"]) || "").toUpperCase();
+              var depositType = trimValue(getHeaderValueByCandidates(currentRow, layouts, ["DEPOSIT TYPE"]) || "").toUpperCase();
+              var counted = activity === "CNT" && (depositType === "" || depositType === "REG") ? Number(fieldValue || 0) || 0 : 0;
+              fieldValue = (counted - (Number(currentRow[field.taxFreeIndex] || 0) || 0)).toFixed(2);
             }
             /* A participant can have several lines of one money type where only
                one carries the amount; keep the zeros out of the merged cell. */
@@ -30271,6 +30525,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
       for (r = 0; r < rowOrder.length; r += 1) {
         values = rowMap[rowOrder[r]];
+        if (spec.dropEmptyRows && !Object.keys(spec.fieldsByReport).some(function (key) {
+          return spec.fieldsByReport[key].some(function (f) {
+            return trimValue(values[f.output] == null ? "" : String(values[f.output])) !== "";
+          });
+        })) {
+          continue;
+        }
         if (spec.includeIndex) {
           values.Index = r + 1;
           if (values["Social Security Number"] && values["Loan ID"]) {
@@ -30297,11 +30558,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         }
         /* Rollover money takes its balance; the Roth basis keeps only the regular
            Roth share of the person's balance. */
-        var rothSplit = rothBalances && rothBalances[trimValue(values["Social Security Number"] || "")];
+        var rothSplit = rothBalances && rothBalances[trimValue(values["Social Security Number"] || "").replace(/\D/g, "")];
         if (rothSplit && rothSplit.rollover) {
           var regularShare = rothSplit.roth / (rothSplit.roth + rothSplit.rollover);
           values["Roth Rollover"] = rothSplit.rollover.toFixed(2);
-          ["Roth Contribution", "Roth Hardship"].forEach(function (header) {
+          spec.rothRolloverSplit.forEach(function (header) {
             if (trimValue(values[header] == null ? "" : values[header]) !== "") {
               values[header] = regularShare > 0 ? (Number(values[header]) * regularShare).toFixed(2) : "";
             }
@@ -31296,7 +31557,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     { key: "JOHNHANCOCK", patterns: [/DISCONTINUANCE[ _-]*FILE.*\.(?:xlsx|xlsm)$/i, /^(?:[A-Za-z0-9_ -]*[0-9_ -])?(?:AC|AI|BD|DP|ID|IE|IW|LA|LH|LN|MV|RI|RM|VI|YT)\.(?:sdf|csv|txt|xls|xlsx)$/i, /ADMINISTRATIVE[ _-]*REPORT.*\.(?:csv|xls|xlsx)$/i] },
     { key: "TIAA", patterns: [/^DCNV\.(?:ACCUM|ALLOC|CYTD|HOLB|INDIC|KEY|LOAN|LOANFUND|ORIGSTAT|PYTD|SRCE1231)\.csv$/i, /^FUND_TOT_RPT.*\.(?:xlsx|xlsm)$/i] },
     { key: "ALIGHT", patterns: [/(?:^|[ _.-])(?:12LN|BELC|CDF|CDH|CRED|CTEL|CTSR|CVBL|DEDS|EEOR|EEST|ELEC|ESVC|FVBL|HHRT|HINC|IVEL|LOAN|OVER|PDLV|PINC|PPAT|PPCT|PPST|PRAD|PRDP|PRLT|PROP|PRQE|PRSN|PTNS|PYRT|PYSC|RCON|SBHS|WTHL|YTDC|SBAL|LN12)(?:[ _.-][^\/]*)?\.(?:txt|text|dat)$/, /(?:^|[ _-])Records\.(?:txt|text|dat)$/i, /Data[ _-]*Dictionary[^\/]*\.(?:xlsx|xlsm)$/i] },
-    { key: "ALERUS", patterns: [/^(?:SERVICETERM|SERVTRM)(?:BALALLOC|CONTRIB|DISBSC|DISB|LPMT|HILN|LN|PT)\b.*\.(?:xlsx|xlsm)$/i, /^Participant[ _-]*Valuation[ _-]*Summary.*\.pdf$/i] },
+    { key: "ALERUS", patterns: [/^(?:SERVICETERM|SERVTERM|SERVTRM)(?:BALALLOC|CONTRIB|DISBSC|DISB|LOANPMT|LPMT|HILN|LOAN|LN|PT)\b.*\.(?:csv|xlsx|xlsm)$/i, /^Participant[ _-]*Valuation[ _-]*Summary.*\.pdf$/i] },
     { key: "AMERITAS", patterns: [/^(?!\d{6}_Valuation_\d{8}\.txt$).*(?:^|[ _-])Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i, /(?:^|[ _-])Disburse\w*[^\/]*\.txt$/i, /Check[ _-]*Register[^\/]*\.txt$/i, /^Loan[ _-]*Distribution[^\/]*\.txt$/i, /^Loan[ _-]*Report[^\/]*\.(?:xlsx|xlsm|xls|csv)$/i, /^Investments?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /^Sources?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i] },
     { key: "PLANDOCS", patterns: [/Onboarding[ _-]*Package.*\.(?:xlsx|xlsm)$/i, /(?:^|[ _-])PRD(?:[ _-]|\.).*\.docx$/i, /Plan[ _-]*Review[ _-]*Document.*\.docx$/i, /Merger[ _-]*Compar\w*.*\.pdf$/i, /merger[^\/]*\.pdf$/i, /Sub(?:mission)?[ _-]*Pack\w*.*\.docx$/i, /(?:^|[ _-])spac\d*\.docx$/i] },
     { key: "BASEREMIT", patterns: [/base[ _-]*data.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /remit\w*.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /payroll.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /^\d{8}\d*[ _-]?[A-Z]{2}[\d_-]{5,}\.(?:xlsx|xls|csv|txt|text|dat)$/i] },
@@ -32567,7 +32828,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       var bits = [];
       if (srcN) { bits.push(srcN + (srcN === 1 ? " source code" : " source codes")); }
-      if (fundN) { bits.push(fundN + (fundN === 1 ? " fund code" : " fund codes")); }
+      if (fundN) { bits.push(fundN + (fundN === 1 ? " fund item" : " fund items")); }
       holdHeadline.textContent = bits.join(" and ") + (rows.length === 1 ? " is" : " are") + " not resolved against the mapping workbook";
       holdCount.textContent = String(rows.length);
     }
