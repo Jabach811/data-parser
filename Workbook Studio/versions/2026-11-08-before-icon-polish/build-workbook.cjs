@@ -1,0 +1,15 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const dir=__dirname,root=path.dirname(dir),conceptDir=path.join(root,'Microsoft Concepts');
+const sourcePath=path.join(conceptDir,'Data Parser - Workbook Studio.html'),source=fs.readFileSync(sourcePath,'utf8');
+const css=fs.readFileSync(path.join(dir,'ribbon.css'),'utf8'),runtime=fs.readFileSync(path.join(dir,'ribbon.js'),'utf8');
+let app=source.replace('</head>',`<style id="workbook-ribbon-style">${css}</style>\n</head>`);
+function appendScript(html,id,script){const closing=html.lastIndexOf('</body>');return html.slice(0,closing)+`<script id="${id}">\n${script}\n</script>\n`+html.slice(closing);}
+app=appendScript(app,'workbook-ribbon-runtime',runtime);
+fs.writeFileSync(path.join(dir,'Workbook Studio.html'),app);
+const samplePath=path.join(root,'Test Samples','Vendor Files','fidelity','FIDELITY_special_rollover_mock.txt'),sample=fs.readFileSync(samplePath,'utf8');
+const demoRuntime=fs.readFileSync(path.join(conceptDir,'demo-runtime.js'),'utf8');
+const json=JSON.stringify(sample).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+const demo=appendScript(app.replace('<title>Data Parser | Workbook Studio</title>','<title>Workbook Studio | Ribbon update demo</title>'),'loaded-demo-runtime',`const DEMO_SAMPLE_TEXT=${json};\n${demoRuntime}`);
+fs.writeFileSync(path.join(dir,'Workbook Studio - Demo.html'),demo);
+fs.writeFileSync(path.join(dir,'build.json'),JSON.stringify({source:path.relative(root,sourcePath),sourceSha256:crypto.createHash('sha256').update(source).digest('hex'),sample:path.relative(root,samplePath),app:'Workbook Studio.html',demo:'Workbook Studio - Demo.html'},null,2));
+console.log('Built Workbook Studio and its loaded demo. Earlier concepts preserved.');

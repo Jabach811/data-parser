@@ -1,0 +1,81 @@
+/* Workbook Studio: a focused Office ribbon pass. */
+.studio-ribbon .excel-ribbon{background:var(--surface-2);border-bottom:1px solid var(--line-mid);flex:none}
+.ws-ribbon-top{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:42px;padding:3px 14px;background:var(--surface)}
+.ws-ribbon-tabs{display:flex;align-self:stretch;gap:10px}
+.ws-ribbon-tab{position:relative;padding:8px 14px;border:0;border-radius:4px;background:transparent;color:var(--ink-2);font:400 13px/1.3 var(--font-ui);cursor:pointer}
+.ws-ribbon-tab:hover{background:var(--fill)}
+.ws-ribbon-tab[aria-selected=true]{color:var(--brand);font-weight:600}
+.ws-ribbon-tab[aria-selected=true]::after{content:'';position:absolute;left:14px;right:14px;bottom:2px;height:3px;background:var(--brand);border-radius:3px}
+.ws-ribbon-actions{display:flex;align-items:center;gap:8px}
+.ws-toolbar-button{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:6px 10px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--ink-2);font:400 12px/1.4 var(--font-ui);cursor:pointer}
+.ws-toolbar-button svg{width:17px;height:17px}
+.ws-toolbar-button:hover{background:var(--fill);border-color:var(--line)}
+.ws-toolbar-button[aria-expanded=true]:not(.ws-icon-only){background:var(--brand-tint);color:var(--brand)}
+.ws-icon-only{padding:6px;min-width:30px}
+.ws-icon-only span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.studio-ribbon #exportWorkbookBtn.ws-export{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;min-height:32px;padding:6px 14px;font-size:12px;border-radius:4px}
+.studio-ribbon #exportWorkbookBtn.ws-export svg{width:17px;height:17px}
+.ws-ribbon-panels{margin:0 10px 7px;border:1px solid var(--line);border-bottom-color:var(--line-mid);border-radius:6px;background:var(--surface);box-shadow:0 1px 2px #00000005;overflow-x:auto}
+.ws-ribbon-panel{display:flex;align-items:stretch;min-height:81px;padding:4px 5px 3px;gap:0;width:max-content;min-width:100%}
+.ws-group{display:flex;flex-direction:column;justify-content:space-between;align-items:center;border-right:1px solid var(--line);padding:0 12px;gap:3px;flex:none}
+.ws-group:last-child{border-right:0}
+.ws-group-controls{display:flex;align-items:center;gap:6px;flex:1}
+.ws-group-label{font:400 10px/1.3 var(--font-ui);color:var(--ink-3);white-space:nowrap}
+.ws-command{display:flex;align-items:center;justify-content:flex-start;gap:7px;min-height:29px;padding:5px 8px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--ink);font:400 12px/1.3 var(--font-ui);cursor:pointer;text-align:left;white-space:nowrap}
+.ws-command svg{width:18px;height:18px;color:var(--brand);flex:none}
+.ws-command:hover:not(:disabled){background:var(--brand-tint);border-color:var(--line)}
+.ws-command:active:not(:disabled){background:var(--fill);border-color:var(--line-mid)}
+.ws-command:disabled{opacity:.42;cursor:default}
+.ws-large{flex-direction:column;justify-content:center;gap:4px;min-height:58px;min-width:72px;padding:5px 10px;text-align:center}
+.ws-large svg{width:27px;height:27px;stroke-width:1.5}
+.ws-command-stack{display:flex;flex-direction:column;justify-content:center;gap:0}
+.studio-ribbon .ws-casebar{display:flex;align-items:center;gap:18px;min-height:46px;padding:7px 14px;margin:0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:var(--surface-2);flex:none}
+.studio-ribbon .ws-casebar .ms-block-title{display:none}
+.studio-ribbon .ws-casebar .fields{display:grid;grid-template-columns:230px minmax(180px,1fr);gap:20px;flex:1;min-width:0}
+.studio-ribbon .ws-casebar .fields label{display:flex;flex-direction:row;align-items:center;gap:9px;min-width:0}
+.studio-ribbon .ws-casebar .fields .eyebrow{font:400 12px var(--font-ui);color:var(--ink-3);white-space:nowrap;flex:none;margin:0}
+.studio-ribbon .ws-casebar .fields input{height:30px;font-size:12px;padding:5px 9px;flex:1;min-width:0}
+.studio-ribbon .ws-casebar #caseNumberMessage{font-size:11px;line-height:1.45;margin:0;max-width:175px;flex:0 1 175px;color:var(--ink-3)}
+.studio-ribbon .ws-casebar #caseNumberMessage.error{color:var(--danger,#b10e1c);font-weight:600}
+.studio-ribbon .ws-override{width:calc(100% - 28px)!important;margin:14px 14px 0;white-space:normal}
+.studio-ribbon .report-toggle,.studio-ribbon .report-download{border-radius:4px;padding:5px 10px;min-height:30px;font-size:12px}
+.studio-ribbon .excel-taskpane .ms-mini-tabs .ms-nav-button{min-height:36px;padding:8px 10px}
+.studio-ribbon .excel-taskpane .ms-mini-tabs .ms-nav-button:hover{background:var(--fill)}
+.studio-ribbon .excel-taskpane .ms-mini-tabs .ms-nav-button:focus-visible{outline-offset:-3px}
+.studio-ribbon .excel-taskpane .ms-mini-tabs .ms-nav-button[aria-pressed=true]{background:none}
+@media(min-width:1001px){
+  body.studio-ribbon .page{display:flex!important;flex-direction:column;height:100dvh;min-height:0}
+  .studio-ribbon .masthead{flex:none}
+  .studio-ribbon .console{display:flex;flex:1;min-height:0}
+  .studio-ribbon .ms-shell{display:flex;flex-direction:column;min-height:0;flex:1}
+  .studio-ribbon .excel-workarea{flex:1;min-height:0;align-items:stretch}
+  .studio-ribbon .excel-canvas{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .studio-ribbon .ms-preview{display:flex;flex-direction:column;flex:1;min-height:0!important}
+  .studio-ribbon .table-card{flex:1;min-height:0!important}
+  .studio-ribbon #reportOutputs{min-height:0;overflow:hidden}
+  .studio-ribbon .report-card.is-active{height:100%;min-height:0}
+  .studio-ribbon .report-card-head{flex:none}
+  .studio-ribbon .report-table-wrap{flex:1;min-height:0;max-height:none!important}
+  .studio-ribbon #dpcTabs{flex:none}
+  .studio-ribbon .ms-empty-workspace{flex:1;min-height:0}
+  .studio-ribbon .excel-taskpane{height:auto!important;min-height:0;overflow-y:auto}
+}
+@media(max-width:1200px){.studio-ribbon .ws-casebar{flex-wrap:wrap;gap:5px 14px}.studio-ribbon .ws-casebar .fields{grid-template-columns:205px minmax(150px,1fr)}.studio-ribbon .ws-casebar #caseNumberMessage{max-width:none;flex:1 1 100%;padding-left:36px}.ws-group{padding:0 9px}}
+@media(max-width:700px){
+  .ws-ribbon-top{flex-wrap:wrap;gap:2px;padding:4px 10px}
+  .ws-ribbon-tabs{min-height:38px}
+  .ws-ribbon-actions{width:100%;justify-content:flex-end;padding-bottom:6px;gap:5px}
+  .ws-ribbon-actions .ws-toolbar-button:first-child{margin-right:auto}
+  .ws-toolbar-button,.studio-ribbon #exportWorkbookBtn.ws-export{height:36px;min-height:36px}
+  .ws-ribbon-panels{margin:0 7px 7px}
+  .ws-ribbon-panel{min-height:94px}
+  .ws-command{min-height:35px}
+  .ws-large{min-height:66px}
+  .studio-ribbon .ws-casebar{padding:12px 14px;gap:8px}
+  .studio-ribbon .ws-casebar .fields{grid-template-columns:1fr;gap:10px}
+  .studio-ribbon .ws-casebar .fields label>.eyebrow{width:29px}
+  .studio-ribbon .ws-casebar .fields input{height:34px}
+  .studio-ribbon .ws-casebar #caseNumberMessage{padding-left:38px;font-size:11px}
+  .studio-ribbon .excel-taskpane .ms-mini-tabs .ms-nav-button{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){.studio-ribbon *{scroll-behavior:auto!important;transition:none!important}}

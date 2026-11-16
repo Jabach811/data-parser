@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-11-13T14:12:54.663Z",
+  "parserAndExportScriptsUnchanged": true,
+  "settingsScriptsReplaced": 2,
+  "allOriginalIdsPresent": true,
+  "loadedDemo": true,
+  "ribbonTabsAndKeyboard": true,
+  "liveFilePicker": true,
+  "liveMappingPicker": true,
+  "reportRowsToggle": true,
+  "taskPaneToggle": true,
+  "ribbonCollapse": {
+    "expandedHeight": 172.59375,
+    "collapsedHeight": 51
+  },
+  "caseValidation": true,
+  "conversionAndExportPreview": true,
+  "newCaseClears": true,
+  "emptyWorkingCopy": true,
+  "responsive": [
+    1280,
+    768,
+    390
+  ],
+  "errors": []
+}

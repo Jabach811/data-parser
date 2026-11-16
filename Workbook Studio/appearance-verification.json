@@ -1,0 +1,287 @@
+{
+  "checkedAt": "2026-11-08T14:05:32.326Z",
+  "paletteMatrix": [
+    {
+      "palette": "green",
+      "mode": "light",
+      "header": {
+        "background": "rgb(16, 124, 65)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(16, 124, 65)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "selected": {
+        "background": "rgb(232, 244, 236)",
+        "text": "rgb(0, 0, 0)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(16, 124, 65)"
+      }
+    },
+    {
+      "palette": "blue",
+      "mode": "light",
+      "header": {
+        "background": "rgb(15, 108, 189)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(15, 108, 189)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "selected": {
+        "background": "rgb(234, 243, 252)",
+        "text": "rgb(0, 0, 0)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(15, 108, 189)"
+      }
+    },
+    {
+      "palette": "indigo",
+      "mode": "light",
+      "header": {
+        "background": "rgb(88, 80, 177)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(88, 80, 177)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "selected": {
+        "background": "rgb(239, 237, 249)",
+        "text": "rgb(0, 0, 0)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(88, 80, 177)"
+      }
+    },
+    {
+      "palette": "teal",
+      "mode": "light",
+      "header": {
+        "background": "rgb(0, 111, 115)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(0, 111, 115)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "selected": {
+        "background": "rgb(228, 243, 242)",
+        "text": "rgb(0, 0, 0)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(0, 111, 115)"
+      }
+    },
+    {
+      "palette": "plum",
+      "mode": "light",
+      "header": {
+        "background": "rgb(133, 67, 124)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(133, 67, 124)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "selected": {
+        "background": "rgb(246, 236, 243)",
+        "text": "rgb(0, 0, 0)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(133, 67, 124)"
+      }
+    },
+    {
+      "palette": "graphite",
+      "mode": "light",
+      "header": {
+        "background": "rgb(77, 88, 106)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(77, 88, 106)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "selected": {
+        "background": "rgb(237, 240, 245)",
+        "text": "rgb(0, 0, 0)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(77, 88, 106)"
+      }
+    },
+    {
+      "palette": "green",
+      "mode": "dark",
+      "header": {
+        "background": "rgb(11, 76, 43)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(159, 221, 181)",
+        "text": "rgb(22, 34, 42)"
+      },
+      "selected": {
+        "background": "rgb(37, 59, 46)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(159, 221, 181)"
+      }
+    },
+    {
+      "palette": "blue",
+      "mode": "dark",
+      "header": {
+        "background": "rgb(14, 66, 110)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(154, 203, 250)",
+        "text": "rgb(22, 34, 42)"
+      },
+      "selected": {
+        "background": "rgb(36, 56, 74)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(154, 203, 250)"
+      }
+    },
+    {
+      "palette": "indigo",
+      "mode": "dark",
+      "header": {
+        "background": "rgb(52, 46, 112)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(198, 192, 255)",
+        "text": "rgb(22, 34, 42)"
+      },
+      "selected": {
+        "background": "rgb(52, 49, 73)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(198, 192, 255)"
+      }
+    },
+    {
+      "palette": "teal",
+      "mode": "dark",
+      "header": {
+        "background": "rgb(0, 73, 76)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(130, 217, 213)",
+        "text": "rgb(22, 34, 42)"
+      },
+      "selected": {
+        "background": "rgb(33, 59, 60)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(130, 217, 213)"
+      }
+    },
+    {
+      "palette": "plum",
+      "mode": "dark",
+      "header": {
+        "background": "rgb(85, 40, 79)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(229, 179, 219)",
+        "text": "rgb(22, 34, 42)"
+      },
+      "selected": {
+        "background": "rgb(64, 45, 61)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(229, 179, 219)"
+      }
+    },
+    {
+      "palette": "graphite",
+      "mode": "dark",
+      "header": {
+        "background": "rgb(48, 56, 70)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "primary": {
+        "background": "rgb(189, 202, 221)",
+        "text": "rgb(22, 34, 42)"
+      },
+      "selected": {
+        "background": "rgb(51, 59, 71)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "tab": {
+        "background": "rgba(0, 0, 0, 0)",
+        "text": "rgb(189, 202, 221)"
+      }
+    }
+  ],
+  "textSizes": [
+    {
+      "size": "standard",
+      "values": [
+        15,
+        15,
+        15,
+        14,
+        14
+      ]
+    },
+    {
+      "size": "large",
+      "values": [
+        17,
+        17,
+        17,
+        15.8667,
+        15.8667
+      ]
+    },
+    {
+      "size": "extra-large",
+      "values": [
+        19,
+        19,
+        19,
+        17.7333,
+        17.7333
+      ]
+    }
+  ],
+  "preferencesSurviveReload": true,
+  "gearClick": true,
+  "resetPreservesCase": true,
+  "legacyAndInvalidSettings": true,
+  "responsiveExtraLarge": [
+    1280,
+    768,
+    390
+  ],
+  "errors": []
+}

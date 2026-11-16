@@ -1,0 +1,44 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto'),{pathToFileURL}=require('node:url');
+const{chromium}=require('C:/Users/mabac/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright-core');
+const dir=__dirname,root=path.dirname(dir),out=path.join(dir,'previews'),manifest=JSON.parse(fs.readFileSync(path.join(dir,'build.json'),'utf8'));
+fs.mkdirSync(out,{recursive:true});
+const scripts=html=>[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
+(async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});try{
+ const source=fs.readFileSync(path.join(root,manifest.source),'utf8'),app=fs.readFileSync(path.join(dir,manifest.app),'utf8'),demo=fs.readFileSync(path.join(dir,manifest.demo),'utf8');
+ assert.equal(crypto.createHash('sha256').update(source).digest('hex'),manifest.sourceSha256);
+ const originalScripts=scripts(source),workingScripts=scripts(app).slice(0,-1);assert.equal(workingScripts.length,originalScripts.length);
+ let changedSettings=0;
+ for(const [index,script]of originalScripts.entries()){
+  if(script.includes('var pals=')&&script.includes('localStorage.getItem("dpc-settings")')){assert.equal(workingScripts[index].trim(),fs.readFileSync(path.join(dir,'appearance.js'),'utf8').trim());changedSettings++;}
+  else if(script.includes('var b=document.body,btn=document.getElementById("settingsBtn")')){assert.equal(workingScripts[index].trim(),'/* Settings are managed by Workbook Studio appearance preferences. */');changedSettings++;}
+  else assert.equal(workingScripts[index],script,`Preserved original script ${index}`);
+ }
+ assert.equal(changedSettings,2);assert.deepEqual(scripts(demo).slice(0,-1),scripts(app));
+ const ctx=await browser.newContext({viewport:{width:1600,height:1000}}),page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(pathToFileURL(path.join(dir,manifest.demo)).href);await page.waitForSelector('body.studio-ribbon[data-demo-state="ready"]');
+ const originalIds=[...source.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]),actualIds=await page.locator('[id]').evaluateAll(ns=>ns.map(n=>n.id));for(const id of originalIds)assert.equal(actualIds.filter(v=>v===id).length,1,`Preserved ID ${id}`);
+ assert.equal(await page.locator('#dpcReportList button[data-code]').count(),8);await page.screenshot({path:path.join(out,'ribbon-home.png')});
+ const tab=key=>page.locator('#ws-tab-'+key),home=page.locator('#ws-panel-home');
+ await tab('data').click();await page.screenshot({path:path.join(out,'ribbon-data.png')});await tab('data').focus();await page.keyboard.press('ArrowRight');assert.equal(await tab('review').getAttribute('aria-selected'),'true');await page.screenshot({path:path.join(out,'ribbon-review.png')});await page.keyboard.press('Home');assert.equal(await tab('home').getAttribute('aria-selected'),'true');
+ // All pane commands use the existing live task pane.
+ await home.getByRole('button',{name:'Parse summary',exact:true}).click();assert.ok(await page.locator('#dpcTotals').isVisible());
+ await home.getByRole('button',{name:'Mapping checks',exact:true}).click();assert.ok(await page.locator('#mappingImportBtn').isVisible());
+ await home.getByRole('button',{name:'Browse reports',exact:true}).click();assert.ok(await page.locator('#dpcReportList').isVisible());
+ await page.locator('#ws-pane-toggle').click();assert.ok(await page.locator('.excel-taskpane').isHidden());await page.locator('#ws-pane-toggle').click();assert.ok(await page.locator('#dpcReportList').isVisible());
+ await page.locator('.excel-taskpane').getByRole('button',{name:'Hide pane',exact:true}).click();assert.equal(await page.locator(':focus').getAttribute('id'),'ws-pane-toggle');await page.locator('#ws-pane-toggle').click();
+ const expandedHeight=await page.locator('.excel-ribbon').evaluate(n=>n.getBoundingClientRect().height);await page.locator('#ws-collapse-ribbon').click();const collapsedHeight=await page.locator('.excel-ribbon').evaluate(n=>n.getBoundingClientRect().height);assert.ok(collapsedHeight<expandedHeight-60);assert.ok(await page.locator('#exportWorkbookBtn').isVisible());await page.screenshot({path:path.join(out,'ribbon-collapsed.png')});await page.locator('#ws-collapse-ribbon').click();
+ // The new file command opens the real picker and parses the selected fixture.
+ const fileChooser=page.waitForEvent('filechooser');await home.getByRole('button',{name:'Add files',exact:true}).click();await(await fileChooser).setFiles(path.join(root,'Test Samples/Vendor Files/fidelity/FIDELITY_summary_tabs_mock.txt'));await page.waitForFunction(()=>document.querySelector('#loadingBox').dataset.loadingState==='complete');assert.equal(await page.locator('#dpcReportList button[data-code]').count(),19);
+ await home.getByRole('button',{name:'Browse reports',exact:true}).click();await page.locator('#dpcReportList').getByRole('button',{name:/^09 - Deferral Percentages/}).click();await home.getByRole('button',{name:'Show all rows',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.report-card.is-active .muted').textContent.includes('Showing 30 of 30'));await home.getByRole('button',{name:'Show fewer rows',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.report-card.is-active .muted').textContent.includes('Showing 10 of 30'));
+ // The mapping command keeps the original upload and validation behavior.
+ const mappingChooser=page.waitForEvent('filechooser');await home.getByRole('button',{name:'Upload mapping',exact:true}).click();await(await mappingChooser).setFiles(path.join(root,'Test Samples/Mapping Files/v01-matched.xlsx'));await page.waitForFunction(()=>document.querySelector('#mappingValidationPanel').textContent.includes('Fund Mapping'));assert.ok(await page.locator('#mappingValidationPanel').isVisible());
+ await page.locator('#caseNumberInput').fill('bad');assert.ok(await page.locator('#caseNumberMessage.error').isVisible());await page.locator('#caseNumberInput').fill('QK5432167890');await page.locator('#planNameInput').fill('Northstar Demo 401(k) Plan');await page.locator('#caseNumberInput').blur();
+ await page.locator('#exportWorkbookBtn').click();await page.locator('#dpcConvDialog').waitFor({state:'visible'});await page.locator('#dpcConvDialog input[value="cash"]').check();await page.locator('#dpcConvDialog [data-cv="next"]').click();await page.locator('#dpcExportDialog').waitFor({state:'visible'});await page.screenshot({path:path.join(out,'ribbon-export.png')});await page.locator('#dpcExportCancel').click();
+ await home.getByRole('button',{name:'Browse reports',exact:true}).click();await page.locator('#settingsBtn').click();await page.locator('[data-mode="dark"]').click();await page.locator('#settingsBtn').click();await page.screenshot({path:path.join(out,'ribbon-dark.png'),animations:'disabled'});await page.locator('#settingsBtn').click();await page.locator('[data-mode="light"]').click();await page.locator('#settingsBtn').click();
+ for(const width of[1280,768,390]){await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width,`Overflow at ${width}`);await page.screenshot({path:path.join(out,'ribbon-'+width+'.png')});}
+ // The Data tab delegates New case to the original control, including demo reset handling.
+ await tab('data').click();await page.locator('#ws-panel-data').getByRole('button',{name:'New case',exact:true}).click();await page.waitForSelector('body[data-demo-state="cleared"]');assert.equal(await page.locator('#caseNumberInput').inputValue(),'');assert.equal(await page.locator('#dpcReportList button[data-code]').count(),0);
+ // The clean working copy opens without seeded records.
+ await page.goto(pathToFileURL(path.join(dir,manifest.app)).href);await page.waitForSelector('body.studio-ribbon');assert.equal(await page.locator('#dpcReportList button[data-code]').count(),0);assert.ok(await page.locator('#exportWorkbookBtn').isDisabled());await page.setViewportSize({width:1600,height:1000});await page.screenshot({path:path.join(out,'ribbon-empty.png')});
+ assert.deepEqual(errors,[]);fs.writeFileSync(path.join(dir,'verification.json'),JSON.stringify({checkedAt:new Date().toISOString(),parserAndExportScriptsUnchanged:true,settingsScriptsReplaced:changedSettings,allOriginalIdsPresent:true,loadedDemo:true,ribbonTabsAndKeyboard:true,liveFilePicker:true,liveMappingPicker:true,reportRowsToggle:true,taskPaneToggle:true,ribbonCollapse:{expandedHeight,collapsedHeight},caseValidation:true,conversionAndExportPreview:true,newCaseClears:true,emptyWorkingCopy:true,responsive:[1280,768,390],errors},null,2));console.log('Workbook Studio ribbon checks passed.');await ctx.close();
+}finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});

@@ -1,0 +1,51 @@
+/* Workbook Studio Focus: one command row, totals beside the case. */
+.studio-focus .ws-ribbon-top{flex-wrap:wrap;gap:2px 16px;min-height:48px;padding:3px 10px}
+.studio-focus .ws-ribbon-actions{flex-wrap:wrap;gap:2px}
+.studio-focus .ws-toolbar-button{white-space:nowrap}
+.studio-focus .ws-toolbar-button:disabled{opacity:.42;cursor:default}
+.studio-focus .ws-toolbar-button:disabled .ws-icon--color{filter:grayscale(1)}
+.studio-focus .ws-toolbar-button:disabled:hover{background:transparent;border-color:transparent}
+.studio-focus .ws-ribbon-actions #exportWorkbookBtn{margin-left:8px}
+.studio-focus .ws-casebar{flex-wrap:wrap;gap:5px 18px}
+.studio-focus .ws-casebar .fields{flex:1 1 430px}
+.studio-focus .ws-casebar #caseNumberMessage{order:3;flex:1 1 100%;max-width:none}
+.studio-focus .ws-casebar #caseNumberMessage:not(.error){display:none}
+.studio-focus .ws-totals{display:flex;flex-wrap:wrap;align-items:center;gap:4px 20px;flex:0 1 auto}
+.studio-focus .ws-totals[hidden]{display:none}
+.studio-focus .ws-totals .summary-card{display:flex;flex-direction:row;align-items:center;gap:7px;min-height:0;margin:0;padding:0!important;border:0;background:none;box-shadow:none}
+.studio-focus .ws-totals .eyebrow{margin:0;font:400 var(--ws-font-label) var(--font-ui);letter-spacing:0;text-transform:none;color:var(--ink-3);white-space:nowrap}
+.studio-focus .ws-totals .v{margin:0;overflow:visible;font:600 var(--ws-font-ui)/1.3 var(--font-ui);font-variant-numeric:tabular-nums;letter-spacing:0;color:var(--ink);white-space:nowrap}
+.studio-focus .ws-totals .summary-card.is-alert{padding:4px 10px!important;border-radius:4px;background:var(--danger,#b10e1c)}
+.studio-focus .ws-totals .summary-card.is-alert :is(.eyebrow,.v){color:#fff}
+.studio-focus #dpcTabs{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.studio-focus #dpcTabs .tab{flex:none;padding-inline:12px}
+.studio-focus .excel-workarea:not(.pane-closed){grid-template-columns:minmax(0,1fr) clamp(300px,33vw,380px)}
+.studio-focus .excel-taskpane :is(.comparison-section-head,.mp-header){flex-wrap:wrap;align-items:center;gap:8px 12px}
+.studio-focus .excel-taskpane :is(.comparison-section-actions,.mp-header-actions){display:contents}
+.studio-focus .excel-taskpane :is(.comparison-section-title,.mp-header-text){flex:1 1 calc(100% - 40px);min-width:0}
+.studio-focus .excel-taskpane :is(.comparison-toggle,.mp-toggle){order:1}
+.studio-focus .excel-taskpane .comparison-section-badges{order:2;min-width:0}
+.studio-focus .excel-taskpane :is(.comparison-open-window,.mp-open-window){order:2;margin-left:auto}
+.studio-focus .excel-taskpane :is(.comparison-badge,.mp-header-status,.mp-sheet-lbl,.mp-sheet-cit-lbl,.mp-error-row-num){font:600 12px/1.4 var(--font-ui);letter-spacing:0;text-transform:none}
+.studio-focus .excel-taskpane .mp-error-row-preview{white-space:pre-wrap;overflow-wrap:anywhere}
+.studio-focus .excel-taskpane :is(.mp-sheet-lbl,.mp-sheet-cit-lbl){font-weight:400}
+.studio-focus .excel-taskpane .r5-caption{font:400 13px/1.5 var(--font-ui)}
+.studio-focus .excel-taskpane .comparison-section-value{font:600 15px/1.4 var(--font-ui);font-variant-numeric:tabular-nums}
+.studio-focus .excel-taskpane .comparison-item-main{flex-direction:column;align-items:flex-start;gap:3px}
+.studio-focus .excel-taskpane .report-search{gap:0;font-size:0}
+.studio-focus .excel-taskpane .report-search input{flex:1}
+.studio-focus #dpcTotals>.section-title{display:none}
+.studio-focus #dpcTotals .summary-side{padding-left:0;border-left:0}
+.studio-focus #dpcTotals #anomalyCountText{font:600 13px var(--font-ui)}
+.studio-focus .vp-unresolved-head{flex-wrap:wrap;gap:2px 10px}
+.studio-focus .vp-table thead{display:none}
+.studio-focus .vp-table tbody{display:block}
+.studio-focus .vp-table tr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 8px;padding:10px 0;border-top:1px solid var(--line)}
+.studio-focus .vp-table td{padding:0;border:0}
+.studio-focus .vp-table .vp-code{grid-column:1/3}
+.studio-focus .vp-table td:nth-child(2){grid-area:2/1}
+.studio-focus .vp-table td:nth-child(3){grid-area:2/2/auto/4}
+.studio-focus .vp-table td:is(:nth-child(2),:nth-child(3)){font-size:12px;color:var(--ink-3)}
+.studio-focus .ws-blank{display:none}
+.studio-focus .dpc-yard{position:fixed;top:0;left:0}
+@media(max-width:700px){.studio-focus .ws-ribbon-actions .ws-toolbar-button:first-child{margin-right:0}}
