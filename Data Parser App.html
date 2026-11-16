@@ -9242,7 +9242,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   SOURCE_RUNTIME_CONFIG.AMERITAS = {
     cardMeta: SOURCE_CARD_META.AMERITAS,
     fileAccept: ".txt,.text",
-    filePickerHelpText: "Ameritas mode is active. Drop the print files (Participant Valuation, Disbursement Report, Distribution Check Register, Loan Distribution, Roth) plus the Loan Report, Investments and Sources workbooks. They can arrive in batches.",
+    filePickerHelpText: "Ameritas mode is active. Drop the print files (Participant Valuation, Disbursement Report, Distribution Check Register, Loan Distribution, Roth, Participant Allocation Base) plus the Loan Report, Investments and Sources workbooks. They can arrive in batches.",
     normalizers: {}
   };
   SOURCE_RUNTIME_CONFIG.PLANDOCS = {
@@ -9396,7 +9396,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     participantHeaders: ["SSN"],
     sourceHeaders: ["Money Type"],
     fundHeaders: ["Fund Name"],
-    amountHeaders: ["Mkt Val"]
+    amountHeaders: ["Mkt Val"],
+    excludeFunds: ["LOAN FUND"],
+    excludeLabel: "Loan Fund"
   };
 
   /* The three character ID on every Ameritas balance line is fund then source:
@@ -9713,7 +9715,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     participantHeaders: ["SSN"],
     sourceHeaders: ["Money Type"],
     fundHeaders: ["Fund Name"],
-    amountHeaders: ["Mkt Val"]
+    amountHeaders: ["Mkt Val"],
+    excludeFunds: ["LOAN FUND"]
   };
 
   CIT_ELECTION_RULES.ALERUS = {
@@ -9721,7 +9724,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     participantHeaders: ["SSN"],
     sourceHeaders: ["Money Type"],
     fundHeaders: ["Fund Name"],
-    percentHeaders: ["Allocation%"]
+    percentHeaders: ["Allocation%"],
+    excludeFunds: ["LOAN FUND"]
   };
 
   CIT_BALANCE_RULES.AMERITAS = {
@@ -16961,6 +16965,31 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     }
   };
 
+  var ALERUS_DEEMED_STATUSES = ["Defaulted", "Deemed Distributed", "Active Deemed Distributed", "Pending Deemed Distributed", "Offset Deemed Distributed"];
+  var ALERUS_LOAN_HEADER_LAYOUT = [
+    { header: "Social Security Number", type: "text" },
+    { header: "Participant Name", type: "text" },
+    { header: "Loan Number", type: "text" },
+    { header: "Loan Amount", type: "decimal" },
+    { header: "Loan Start Date", type: "date" },
+    { header: "Loan Frequency", type: "text" },
+    { header: "Payment", type: "decimal" },
+    { header: "Outstanding Loan Balance", type: "decimal" },
+    { header: "Status", type: "text" },
+    { header: "Default Date", type: "date" },
+    { header: "Deemed Amount", type: "decimal" },
+    { header: "Interest Rate", type: "decimal" },
+    { header: "Final Payoff Date", type: "date" }
+  ];
+  var ALERUS_LOAN_SOURCE_LAYOUT = [
+    { header: "Social Security Number", type: "text" },
+    { header: "Participant Name", type: "text" },
+    { header: "Loan Number", type: "text" },
+    { header: "Source Code", type: "text" },
+    { header: "Loan Balance", type: "decimal" },
+    { header: "Note", type: "text" }
+  ];
+
   function buildAlerusSourceConfig() {
     var config = {
       label: "ALERUS",
@@ -16974,6 +17003,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       customFolderParser: parseAlerusFileSet
     };
     addFileSetToSourceConfig(config, ALERUS_FILE_SET);
+    config.autoSummaryReports = config.reports.slice();
+    config.reports.push("LOAN_HEADER", "LOAN_SOURCE");
+    config.reportNames.LOAN_HEADER = "Loan Header";
+    config.reportNames.LOAN_SOURCE = "Loan Source";
+    config.layouts.LOAN_HEADER = ALERUS_LOAN_HEADER_LAYOUT.slice();
+    config.layouts.LOAN_SOURCE = ALERUS_LOAN_SOURCE_LAYOUT.slice();
     return config;
   }
 
@@ -17007,8 +17042,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       { header: "End Bal", type: "text" }
     ],
     CENSUS: [
-      { header: "SSN", type: "text" }, { header: "Name", type: "text" },
-      { header: "Address", type: "text" }, { header: "City State Zip", type: "text" },
+      { header: "SSN", type: "text" }, { header: "Last Name", type: "text" },
+      { header: "First Name", type: "text" },
+      { header: "Address", type: "text" }, { header: "City", type: "text" },
+      { header: "State", type: "text" }, { header: "Zip", type: "text" },
       { header: "Status", type: "text" }, { header: "Location", type: "text" },
       { header: "Birth", type: "text" }, { header: "Hire", type: "text" },
       { header: "Entry", type: "text" }, { header: "Vest", type: "text" },
@@ -17047,6 +17084,20 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     ],
     LOANRPT: [
       { header: "Part Id", type: "text" }, { header: "Loan Number", type: "text" }
+    ],
+    LOAN_HEADER: ALERUS_LOAN_HEADER_LAYOUT,
+    LOANSRC: [
+      { header: "SSN", type: "text" }, { header: "Name", type: "text" },
+      { header: "Loan Number", type: "text" }, { header: "Fund Code", type: "text" },
+      { header: "Source Code", type: "text" }, { header: "Source Name", type: "text" },
+      { header: "Loan Balance", type: "text" }, { header: "Note", type: "text" }
+    ],
+    ALLOCBASE: [
+      { header: "SSN", type: "text" }, { header: "Name", type: "text" },
+      { header: "Fund ID", type: "text" }, { header: "Fund Code", type: "text" },
+      { header: "Fund Name", type: "text" }, { header: "Trans Code", type: "text" },
+      { header: "Base Amount", type: "text" }, { header: "Allocation Amount", type: "text" },
+      { header: "Total Base Amount", type: "text" }, { header: "Total Allocation Amount", type: "text" }
     ]
   };
 
@@ -17060,7 +17111,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     DISB: "Ameritas Disbursement Worksheet",
     CHKREG: "Ameritas Distribution Check Register",
     LOANDIST: "Ameritas Loan Distribution Register",
-    LOANRPT: "Ameritas Loan Report"
+    LOANRPT: "Ameritas Loan Report",
+    LOAN_HEADER: "Loan Header",
+    LOANSRC: "Ameritas Loan Source Balances",
+    ALLOCBASE: "Ameritas Participant Allocation Base"
   };
 
   function buildAmeritasSourceConfig() {
@@ -17070,13 +17124,13 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       supportsExport: true,
       supportsBreakdown: true,
       summaryIncluded: true,
-      folderModeHelpText: "Ameritas mode is active. Drop the print files (Participant Valuation, Disbursement Report, Distribution Check Register, Loan Distribution, Roth) plus the Loan Report, Investments and Sources workbooks. They can arrive in batches.",
+      folderModeHelpText: "Ameritas mode is active. Drop the print files (Participant Valuation, Disbursement Report, Distribution Check Register, Loan Distribution, Roth, Participant Allocation Base) plus the Loan Report, Investments and Sources workbooks. They can arrive in batches.",
       reports: [],
       reportNames: {},
       layouts: {},
       customFolderParser: parseAmeritasReports
     };
-    var order = ["CENSUS", "BAL", "FUNDBAL", "SRCBAL", "VEST", "ROTH", "DISB", "CHKREG", "LOANDIST", "LOANRPT"];
+    var order = ["CENSUS", "BAL", "FUNDBAL", "SRCBAL", "VEST", "ROTH", "DISB", "CHKREG", "LOANDIST", "LOANRPT", "LOAN_HEADER", "LOANSRC", "ALLOCBASE"];
     for (var i = 0; i < order.length; i += 1) {
       config.reports.push(order[i]);
       config.reportNames[order[i]] = AMERITAS_REPORT_NAMES[order[i]];
@@ -20574,7 +20628,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     if (fileInput) {
       fileInput.disabled = false;
       fileInput.multiple = true;
-      fileInput.accept = ".txt,.csv,.pdf,.docx,.xlsx,.xlsm";
+      fileInput.accept = ".txt,.csv,.pdf,.docx,.xlsx,.xlsm,.xls";
     }
     if (filePickerButtonText) {
       filePickerButtonText.textContent = "Drop file(s) here";
@@ -24113,6 +24167,90 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return built;
   }
 
+  // Alerus prints two digit years, and a loan or payoff date is never before 1970.
+  function alerusIsoDate(value) {
+    var match = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(value);
+    if (!match) {
+      return value;
+    }
+    var year = match[3].length === 4 ? match[3] : (Number(match[3]) > 69 ? "19" : "20") + match[3];
+    return year + "-" + match[1].padStart(2, "0") + "-" + match[2].padStart(2, "0");
+  }
+
+  /* The balance file has no loan number, so Loan Fund money can only be tied to
+     a loan when the person has exactly one with money still owed. */
+  function buildAlerusLoanReports(grouped, layoutsByReport) {
+    function loan(row, header) {
+      return getHeaderValueByCandidates(row, layoutsByReport.LN || [], [header]);
+    }
+    function balance(row, header) {
+      return getHeaderValueByCandidates(row, layoutsByReport.BALALLOC || [], [header]);
+    }
+
+    var openLoans = {};
+    var headerRows = (grouped.LN || []).map(function (row) {
+      var ssn = loan(row, "SSN");
+      var status = loan(row, "STATUS Description");
+      var outstanding = loan(row, "OUTSTANDING PRINCIPAL");
+      var deemed = ALERUS_DEEMED_STATUSES.indexOf(status) > -1;
+      if (alightCents(outstanding) > 0) {
+        (openLoans[ssn] = openLoans[ssn] || []).push({ number: loan(row, "LOAN #"), cents: alightCents(outstanding) });
+      }
+      return [
+        ssn, loan(row, "PPT NAME"), loan(row, "LOAN #"), loan(row, "ORIGINAL AMT"),
+        alerusIsoDate(loan(row, "ISSUE DATE")),
+        loan(row, "PMT FREQ Description") || loan(row, "PMT FREQ"),
+        loan(row, "PMT AMT"), outstanding,
+        deemed ? status : "",
+        deemed ? alerusIsoDate(loan(row, "LAST PMT DATE")) : "",
+        deemed ? outstanding : "0.00",
+        loan(row, "INTEREST RATE"),
+        alerusIsoDate(loan(row, "PAYOFF DATE"))
+      ];
+    });
+
+    var sources = {};
+    var order = [];
+    var fundCentsBySsn = {};
+    (grouped.BALALLOC || []).forEach(function (row) {
+      if (balance(row, "Fund Name").toUpperCase() !== "LOAN FUND") {
+        return;
+      }
+      var ssn = balance(row, "SSN");
+      var code = balance(row, "Money Type");
+      var key = ssn + "|" + code;
+      if (!sources[key]) {
+        sources[key] = { ssn: ssn, name: balance(row, "Part Name"), code: code, cents: 0 };
+        order.push(key);
+      }
+      sources[key].cents += alightCents(balance(row, "Mkt Val"));
+      fundCentsBySsn[ssn] = (fundCentsBySsn[ssn] || 0) + alightCents(balance(row, "Mkt Val"));
+    });
+
+    var mismatched = {};
+    var sourceRows = order.map(function (key) {
+      var item = sources[key];
+      var open = openLoans[item.ssn] || [];
+      var owed = open.reduce(function (sum, entry) { return sum + entry.cents; }, 0);
+      var notes = [];
+      if (open.length > 1) {
+        notes.push("Has " + open.length + " open loans, and the balance file does not say which one this money belongs to.");
+      }
+      if (grouped.LN && owed !== fundCentsBySsn[item.ssn]) {
+        mismatched[item.ssn] = true;
+        notes.push("Loan Fund is " + alightCentsText(fundCentsBySsn[item.ssn]) + " but open loans total " + alightCentsText(owed) + ".");
+      }
+      return [item.ssn, item.name, open.length === 1 ? open[0].number : "", item.code, alightCentsText(item.cents), notes.join(" ")];
+    });
+
+    return {
+      header: headerRows,
+      source: sourceRows,
+      noFund: Object.keys(openLoans).filter(function (ssn) { return !fundCentsBySsn[ssn]; }).length,
+      mismatched: Object.keys(mismatched).length
+    };
+  }
+
   async function parseAlerusFileSet(source, files, runId) {
     var grouped = {};
     var layoutsByReport = {};
@@ -24204,6 +24342,24 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       discardReasons.push({ type: "message", label: "Ignored: " + unmatched.join(", ") + "." });
     }
 
+    var loanReports = buildAlerusLoanReports(grouped, layoutsByReport);
+    if (loanReports.header.length) {
+      grouped.LOAN_HEADER = loanReports.header;
+      layoutsByReport.LOAN_HEADER = ALERUS_LOAN_HEADER_LAYOUT.slice();
+      foundReports.push("LOAN_HEADER");
+    }
+    if (loanReports.source.length) {
+      grouped.LOAN_SOURCE = loanReports.source;
+      layoutsByReport.LOAN_SOURCE = ALERUS_LOAN_SOURCE_LAYOUT.slice();
+      foundReports.push("LOAN_SOURCE");
+    }
+    if (grouped.BALALLOC && loanReports.noFund) {
+      discardReasons.push({ type: "message", label: loanReports.noFund + " " + (loanReports.noFund === 1 ? "person has" : "people have") + " a loan balance but no Loan Fund money on BALALLOC, so Loan Source has no row for them." });
+    }
+    if (loanReports.mismatched) {
+      discardReasons.push({ type: "message", label: loanReports.mismatched + " " + (loanReports.mismatched === 1 ? "person's" : "people's") + " Loan Fund total does not match their open loan balance. See the Note column on the Loan Source report." });
+    }
+
     return {
       totalLines: totalLines,
       acceptedLines: acceptedLines,
@@ -24237,7 +24393,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   var AMERITAS_DISB_PATTERN = /disburse\w*[^\\/]*\.txt$/i;
   var AMERITAS_CHKREG_PATTERN = /(?:check[ _-]*register|distribution[ _-]*check)[^\\/]*\.txt$/i;
   var AMERITAS_LOANDIST_PATTERN = /loan[ _-]*distribution[^\\/]*\.txt$/i;
-  var AMERITAS_LOANRPT_PATTERN = /loan[ _-]*report[^\\/]*\.(?:xlsx|xlsm|xls|csv)$/i;
+  var AMERITAS_ALLOCBASE_PATTERN = /allocation[ _-]*base[^\\/]*\.txt$/i;
+  var AMERITAS_ALLOCBASE_ROW = /^\s*(?:(\S.*?)\s{2,})?(\d{3}-\d{2}-\d{4})\s+(\S+)\s+(\S+)\s+(-?[\d,]*\.\d\d-?)\s+(-?[\d,]*\.\d\d-?)\s+(-?[\d,]*\.\d\d-?)\s+(-?[\d,]*\.\d\d-?)\s*$/;
+  var AMERITAS_LOANRPT_PATTERN =/loan[ _-]*report[^\\/]*\.(?:xlsx|xlsm|xls|csv)$/i;
   var AMERITAS_INVESTMENTS_PATTERN = /investments?[^\\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i;
   var AMERITAS_SOURCES_PATTERN = /sources?[^\\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i;
   var AMERITAS_PARTICIPANT_START = /^\s*(\d{3}-\d{2}-\d{4})(?:\s|$)/;
@@ -24317,7 +24475,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   function ameritasCensusFromBlock(ssn, block) {
     function label(name) {
       var found = new RegExp(name + ":\\s*([0-9]{4}\\/[0-9]{2}\\/[0-9]{2}|[0-9][0-9,.]*|[A-Z0-9]+)").exec(block);
-      return found ? trimValue(found[1]) : "";
+      return found ? trimValue(found[1]).replace(/^(\d{4})\/(\d{2})\/(\d{2})$/, "$2/$3/$1") : "";
     }
     var lines = block.split("\n");
     var name = "";
@@ -24341,8 +24499,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     // A blank LOCATION picks up whatever prints next, like "YRS-SVC:" or the "=>" name line.
     if (location && (/^YRS-SVC:/i.test(location[1]) || /^=>/.test(location[1]))) { location = null; }
     var comp = /401K EE:\s*(-?[\d,]*\.?\d*-?)/.exec(block);
+    // State and zip are read from the end, so a city with spaces stays whole. A line that doesn't fit lands in City.
+    var place = /^(.*?)\s+([A-Z]{2})\s+(\d{5}(?:-?\d{4})?)$/.exec(cityLine) || [cityLine, cityLine, "", ""];
     return [
-      ssn.replace(/[^0-9]/g, ""), name, address, cityLine,
+      ssn.replace(/[^0-9]/g, "").replace(/^(\d{3})(\d{2})(\d{4})$/, "$1-$2-$3"),
+      trimValue(name.split(",")[0]), trimValue(name.split(",").slice(1).join(",")), address, trimValue(place[1]), place[2], place[3],
       status ? status[1] : "", location ? location[1] : "",
       label("BIRTH"), label("HIRE"), label("ENTRY"), label("VEST"),
       label("CNTB"), label("TERM"), label("TRNF"),
@@ -24376,6 +24537,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
       if (!bare || /^F-FORF/.test(bare) || /^Y-PLAN XFER/.test(bare) || /RPT-9\d\d/.test(bare)) {
         if (censusBuffer && bare) { censusBuffer.text.push(line); }
+        continue;
+      }
+      // The underline printed between participants.
+      if (/^_+$/.test(bare)) {
+        pending = null;
         continue;
       }
       if (/^PLAN\s+\d/.test(bare) || /^\*+\s*CONTINUATION OF PLAN TOTALS/i.test(bare)) {
@@ -24460,6 +24626,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       var cells = ameritasSliceRow(columns, line);
       if (!cells.desc && !cells.id) {
         if (pending) {
+          // Loan repayments print principal ("P") on the row and interest ("I") on the line under it.
+          if (cells.loans) {
+            pending.loans = (Number(ameritasAmount(pending.loans) || 0) + Number(ameritasAmount(cells.loans))).toFixed(2);
+          }
           if (cells.other) { pending.other.push(cells.other); }
           if (cells.end) { pending.end = cells.end; }
           continue;
@@ -24499,6 +24669,15 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         state.sourceNames[row.id.slice(-1)] = row.desc;
       }
     }
+    for (i = 0; i < state.rows.DISB.length; i += 1) {
+      row = state.rows.DISB[i];
+      row[4] = state.fundLookup[row[3]] || state.fundNames[row[3]] || "";
+      row[6] = state.sourceLookup[row[5]] || state.sourceNames[row[5]] || "";
+    }
+    for (i = 0; i < state.rows.ALLOCBASE.length; i += 1) {
+      row = state.rows.ALLOCBASE[i];
+      row[4] = state.fundLookup[row[3]] || state.fundNames[row[3]] || "";
+    }
     for (i = 0; i < state.pendingRows.length; i += 1) {
       row = state.pendingRows[i];
       var activity = [
@@ -24524,13 +24703,102 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (!row.id && /^(?:\*+\s*TOTAL\b.*|_+)$/i.test(row.desc)) { continue; }
       if (row.planTotal) {
         var amount = parseAmountValue(activity[6]);
-        if (fundCode) { state.planFunds[fundCode] = (state.planFunds[fundCode] || 0) + amount; }
-        if (sourceCode) { state.planSources[sourceCode] = (state.planSources[sourceCode] || 0) + amount; }
+        if (fundCode) { state.planFunds[fundCode] = Math.round(((state.planFunds[fundCode] || 0) + amount) * 100) / 100; }
+        if (sourceCode) { state.planSources[sourceCode] = Math.round(((state.planSources[sourceCode] || 0) + amount) * 100) / 100; }
         continue;
       }
       state.rows.BAL.push([row.ssn, row.desc, row.id, fundCode, fundName, sourceCode, sourceName,
         ameritasPercent(row.pcnt)].concat(activity));
     }
+    buildAmeritasLoanSources(state);
+    buildAmeritasLoanHeader(state);
+  }
+
+  // The Loan Report's columns are matched by name, since the workbook's layout is its own.
+  function ameritasLoanColumn(state, pattern) {
+    var layout = state.loanReportLayout || [];
+    for (var at = 0; at < layout.length; at += 1) { if (pattern.test(layout[at].header)) { return at; } }
+    return -1;
+  }
+
+  function ameritasLoanSsn(state, row) {
+    return String(row[ameritasLoanColumn(state, /ssn|social|part(icipant)?\s*id/i)] || "").replace(/[^0-9]/g, "").padStart(9, "0");
+  }
+
+  function ameritasIsoDate(value) {
+    var text = trimValue(value);
+    if (/^\d{5}(\.\d+)?$/.test(text)) {
+      return new Date(Date.UTC(1899, 11, 30) + Math.floor(Number(text)) * 86400000).toISOString().slice(0, 10);
+    }
+    var match = /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/.exec(text);
+    return match ? match[1] + "-" + match[2].padStart(2, "0") + "-" + match[3].padStart(2, "0") : alerusIsoDate(text);
+  }
+
+  function buildAmeritasLoanHeader(state) {
+    function at(pattern) { return ameritasLoanColumn(state, pattern); }
+    function cell(row, index) { return index > -1 ? trimValue(row[index] || "") : ""; }
+    // Codes like "7 Weekly" or "2 Discharged" keep only the words, as Alerus does.
+    function words(row, index) { return cell(row, index).replace(/^\d+\s+/, ""); }
+    var columns = {
+      number: at(/^loan\s*number/i),
+      reason: at(/^inact/i),
+      start: at(/^issue\s*date/i),
+      lastPaid: at(/^prev\w*\s*payment\s*date/i),
+      amount: at(/^original\s*amt/i),
+      owed: at(/^current\s*bal/i),
+      rate: at(/^interest\s*rate/i),
+      payment: at(/^payment\s*amt/i),
+      frequency: at(/^payment\s*freq/i),
+      payoff: at(/^payoff\s*date/i)
+    };
+    var names = {};
+    state.rows.CENSUS.forEach(function (row) { names[row[0].replace(/-/g, "")] = row[2] ? row[1] + ", " + row[2] : row[1]; });
+    state.rows.LOANRPT.forEach(function (row) {
+      var ssn = ameritasLoanSsn(state, row);
+      var owed = ameritasAmount(cell(row, columns.owed));
+      var status = words(row, columns.reason);
+      var deemed = /deem|default/i.test(status);
+      state.rows.LOAN_HEADER.push([
+        ssn, names[ssn] || "", cell(row, columns.number),
+        ameritasAmount(cell(row, columns.amount)), ameritasIsoDate(cell(row, columns.start)),
+        words(row, columns.frequency), ameritasAmount(cell(row, columns.payment)), owed,
+        deemed ? status : "",
+        deemed ? ameritasIsoDate(cell(row, columns.lastPaid)) : "",
+        deemed ? owed : "0.00",
+        cell(row, columns.rate), ameritasIsoDate(cell(row, columns.payoff))
+      ]);
+    });
+  }
+
+  /* The valuation prints loan money by source but never names the loan, and the
+     Loan Report names loans but not sources, so a source balance only gets a loan
+     number when the person has exactly one open loan on the Loan Report. */
+  function buildAmeritasLoanSources(state) {
+    function column(pattern) { return ameritasLoanColumn(state, pattern); }
+    var numberAt = column(/^loan\s*number/i);
+    var owedAt = column(/^current\s*bal/i);
+    var loans = {};
+    state.rows.LOANRPT.forEach(function (row) {
+      var ssn = ameritasLoanSsn(state, row);
+      if (owedAt > -1 && !Number(ameritasAmount(row[owedAt]))) { return; }
+      (loans[ssn] = loans[ssn] || []).push(numberAt > -1 ? row[numberAt] : "");
+    });
+    var names = {};
+    state.rows.CENSUS.forEach(function (row) { names[row[0].replace(/-/g, "")] = row[2] ? row[1] + ", " + row[2] : row[1]; });
+    state.rows.BAL.forEach(function (row) {
+      if (!/\bLOAN\b/i.test(row[4]) && !/^LOAN\b/i.test(row[1])) { return; }
+      if (!Number(row[14])) { return; }
+      var open = loans[row[0]] || [];
+      var note = "";
+      if (!state.rows.LOANRPT.length) {
+        note = "No Loan Report was dropped in.";
+      } else if (!open.length) {
+        note = "No open loan for this person on the Loan Report.";
+      } else if (open.length > 1) {
+        note = "Has " + open.length + " open loans on the Loan Report, and the valuation does not say which one this money belongs to.";
+      }
+      state.rows.LOANSRC.push([row[0], names[row[0]] || "", open.length === 1 ? open[0] : "", row[3], row[5], row[6], row[14], note]);
+    });
   }
 
   function parseAmeritasRothText(text, state) {
@@ -24620,34 +24888,29 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
   }
 
   /* The disbursement grid prints one label per money column on the second
-     header line, so those tokens locate every column. FUND only appears on the
-     first line. Money is right aligned, so cut halfway between neighbours. */
+     header line, so those labels locate every column. Numbers are right
+     aligned under their label, so each number belongs to the label whose
+     right edge is closest to the number's right edge. */
   var AMERITAS_DISB_COLUMNS = ["VALUE", "FORFEITED", "PARTICIPANT", "AMOUNT", "DEFERRED", "SHARES DISTR", "DISTRIB", "SOLD/FORF", "BASIS"];
+  var AMERITAS_DISB_SHARE_COLUMNS = { 6: true, 7: true };
 
-  function ameritasDisbColumns(fundLine, labelLine) {
-    var fundAt = fundLine.indexOf("FUND");
-    if (fundAt === -1) { return null; }
-    var spans = [];
+  function ameritasDisbColumns(labelLine) {
+    var ends = [];
     var searchFrom = 0;
     var i;
     for (i = 0; i < AMERITAS_DISB_COLUMNS.length; i += 1) {
       var label = AMERITAS_DISB_COLUMNS[i];
       var at = labelLine.indexOf(label, searchFrom);
       if (at === -1) { return null; }
-      spans.push({ start: at, end: at + label.length });
+      ends.push(at + label.length);
       searchFrom = at + label.length;
     }
-    var cuts = [fundAt, fundAt + 4];
-    for (i = 1; i < spans.length; i += 1) {
-      cuts.push(Math.floor((spans[i - 1].end + spans[i].start) / 2));
-    }
-    cuts.push(labelLine.length + 200);
-    return cuts;
+    return ends;
   }
 
   function parseAmeritasDisbursementText(text, state) {
     var lines = String(text || "").split(/\r\n|\n|\r/);
-    var cuts = null;
+    var ends = null;
     var ssn = "";
     var name = "";
     var i;
@@ -24659,9 +24922,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       if (/^PLAN\s+\d/.test(bare) || /DISBURSEMENT WORKSHEET|SHARES INFORMATION|C=CASH|401K TAX INFORMATION|ROTH TAX INFORMATION|SUMMARY OF DISTRIBUTIONS|PAYMENT INFORMATION/i.test(bare)) {
         continue;
       }
-      if (AMERITAS_PARTICIPANT_START.test(line)) {
-        ssn = AMERITAS_PARTICIPANT_START.exec(line)[1].replace(/[^0-9]/g, "");
-        name = "";
+      var start = AMERITAS_PARTICIPANT_START.exec(line);
+      if (start) {
+        ssn = start[1].replace(/[^0-9]/g, "");
+        // The name follows the SSN on the same line, before PLAN ENTRY DATE.
+        name = trimValue(line.slice(start[0].length)).split(/\s{2,}/)[0] || "";
+        if (/PLAN ENTRY|DATE/.test(name)) { name = ""; }
         continue;
       }
       if (!name) {
@@ -24669,44 +24935,73 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         if (candidate) { name = candidate; }
       }
       if (/\bFUND\b/.test(line) && /\bACCOUNT\b/.test(line)) {
-        var next = ameritasDisbColumns(line, lines[i + 1] || "");
-        if (next) { cuts = next; i += 1; state.totalLines += 1; }
+        var next = ameritasDisbColumns(lines[i + 1] || "");
+        if (next) { ends = next; i += 1; state.totalLines += 1; }
         continue;
       }
-      if (!cuts) { continue; }
-      var id = trimValue(line.substring(cuts[0], cuts[1]));
-      if (!/^[0-9A-Z]{3}$/.test(id)) { continue; }
-      var cells = [];
-      var c;
-      for (c = 1; c < cuts.length - 1; c += 1) {
-        cells.push(trimValue(line.substring(cuts[c], cuts[c + 1])));
-      }
-      var payment = cells[3] || "";
+      if (!ends) { continue; }
+      // A fund row is a 3-character fund+source code followed only by numbers
+      // and the one-letter payment type. Tax and footnote lines have words.
+      var head = /^\s*([0-9A-Z]{3})(?=\s|$)/.exec(line);
+      if (!head) { continue; }
+      var cells = ["", "", "", "", "", "", "", "", ""];
       var payType = "";
-      var typeMatch = /\s([A-Z])$/.exec(payment);
-      if (typeMatch) {
-        payType = typeMatch[1];
-        payment = trimValue(payment.slice(0, typeMatch.index));
+      var isRow = true;
+      var sawNumber = false;
+      var token;
+      var tokenPattern = /\S+/g;
+      tokenPattern.lastIndex = head[0].length;
+      while ((token = tokenPattern.exec(line))) {
+        if (/^[A-Z]$/.test(token[0])) { payType = token[0]; continue; }
+        if (!/^-?[\d,]*\.\d+-?$/.test(token[0])) { isRow = false; break; }
+        var tokenEnd = token.index + token[0].length;
+        var best = 0;
+        var c;
+        for (c = 1; c < ends.length; c += 1) {
+          if (Math.abs(ends[c] - tokenEnd) < Math.abs(ends[best] - tokenEnd)) { best = c; }
+        }
+        cells[best] = AMERITAS_DISB_SHARE_COLUMNS[best] ? token[0].replace(/,/g, "") : ameritasAmount(token[0]);
+        sawNumber = true;
       }
+      if (!isRow || !sawNumber) { continue; }
+      var id = head[1];
       var fundCode = id.slice(0, 2);
       var sourceCode = id.slice(2);
+      // Fund and source names are filled in by finalizeAmeritasRows, once the valuation has been read.
       state.rows.DISB.push([
-        ssn, name, id, fundCode, state.fundLookup[fundCode] || state.fundNames[fundCode] || "",
-        sourceCode, state.sourceLookup[sourceCode] || state.sourceNames[sourceCode] || "",
-        ameritasAmount(cells[0]), ameritasAmount(cells[1]), ameritasAmount(cells[2]),
-        ameritasAmount(payment), payType, ameritasAmount(cells[4]), ameritasAmount(cells[5]),
-        ameritasAmount(cells[6]), ameritasAmount(cells[7]), ameritasAmount(cells[8])
+        ssn, name, id, fundCode, "", sourceCode, "",
+        cells[0], cells[1], cells[2], cells[3], payType, cells[4], cells[5], cells[6], cells[7], cells[8]
       ]);
       state.acceptedLines += 1;
     }
   }
 
-  /* Investments.xls and Sources.xls are plain two or three column lookups.
-     They only supply display names, so a missing or unreadable one never
-     blocks the balances - the codes still group correctly on their own. */
-  async function readAmeritasLookupRows(file) {
+  /* OP-65 prints one line per participant and fund: name, SSN, fund ID
+     ("10*" = fund 10, every source), transaction code, then four amounts. */
+  function parseAmeritasAllocationBaseText(text, state) {
+    var lines = String(text || "").split(/\r\n|\n|\r/);
+    var i;
+    for (i = 0; i < lines.length; i += 1) {
+      state.totalLines += 1;
+      var found = AMERITAS_ALLOCBASE_ROW.exec(lines[i]);
+      if (!found) { continue; }
+      // Fund names are filled in by finalizeAmeritasRows, once the valuation has been read.
+      state.rows.ALLOCBASE.push([
+        found[2].replace(/[^0-9]/g, ""), trimValue(found[1] || ""), found[3], found[3].slice(0, -1), "", found[4],
+        ameritasAmount(found[5]), ameritasAmount(found[6]), ameritasAmount(found[7]), ameritasAmount(found[8])
+      ]);
+      state.acceptedLines += 1;
+    }
+  }
+
+  // Ameritas sends its workbooks as old-style .xls, so all three file types are read here.
+  async function readAmeritasWorkbookRows(file) {
     var kind = await sniffFileKind(file);
-    if (kind === "xls") { return null; }
+    if (kind === "xls") {
+      return Array.from(readLegacyXlsWorkbook(await file.arrayBuffer())[0].rows, function (row) {
+        return Array.from(row || [], function (value) { return value == null ? "" : value; });
+      });
+    }
     if (kind === "xlsx") { return await readFirstSheetRows(file); }
     return splitDelimitedText(await readFileAsText(file));
   }
@@ -24723,7 +25018,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
   async function parseAmeritasReports(source, files, runId) {
     var state = {
-      rows: { BAL: [], FUNDBAL: [], SRCBAL: [], CENSUS: [], VEST: [], ROTH: [], DISB: [], CHKREG: [], LOANDIST: [], LOANRPT: [] },
+      rows: { BAL: [], FUNDBAL: [], SRCBAL: [], CENSUS: [], VEST: [], ROTH: [], DISB: [], CHKREG: [], LOANDIST: [], LOANRPT: [], LOAN_HEADER: [], LOANSRC: [], ALLOCBASE: [] },
       pendingRows: [],
       censusSeen: {},
       fundNames: {},
@@ -24760,21 +25055,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       try {
         if (AMERITAS_INVESTMENTS_PATTERN.test(fileName) || AMERITAS_SOURCES_PATTERN.test(fileName)) {
           var isFundList = AMERITAS_INVESTMENTS_PATTERN.test(fileName);
-          var lookupRows = await readAmeritasLookupRows(file);
-          if (!lookupRows) {
-            discardReasons.push({ type: "message", label: fileName + " is a legacy Excel (.xls) file inside. Balances still group correctly by code; save it as .xlsx and drop it again to get the printed names." });
-          } else {
-            fillAmeritasLookup(lookupRows, isFundList ? state.fundLookup : state.sourceLookup, isFundList ? 2 : 1);
-          }
+          fillAmeritasLookup(await readAmeritasWorkbookRows(file), isFundList ? state.fundLookup : state.sourceLookup, isFundList ? 2 : 1);
           continue;
         }
         if (AMERITAS_LOANRPT_PATTERN.test(fileName)) {
-          var loanKind = await sniffFileKind(file);
-          if (loanKind === "xls") {
-            discardReasons.push({ type: "message", label: fileName + " is a legacy Excel (.xls) file inside. Save it as .xlsx and drop it again to read it." });
-            continue;
-          }
-          var loanRows = loanKind === "xlsx" ? await readFirstSheetRows(file) : splitDelimitedText(await readFileAsText(file));
+          var loanRows = await readAmeritasWorkbookRows(file);
           var loanIndex;
           for (loanIndex = 0; loanIndex < loanRows.length; loanIndex += 1) {
             state.totalLines += 1;
@@ -24791,7 +25076,9 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
           continue;
         }
         var text = await readFileAsText(file);
-        if (AMERITAS_ROTH_PATTERN.test(fileName) || /RPT-933/.test(text)) {
+        if (AMERITAS_ALLOCBASE_PATTERN.test(fileName) || /OP-65\b/.test(text)) {
+          parseAmeritasAllocationBaseText(text, state);
+        } else if (AMERITAS_ROTH_PATTERN.test(fileName) || /RPT-933/.test(text)) {
           parseAmeritasRothText(text, state);
           sawRoth = true;
         } else if (AMERITAS_CHKREG_PATTERN.test(fileName) || /OP-07C/.test(text)) {
@@ -28987,7 +29274,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         var sourceValue = getHeaderValueByCandidates(currentRow, layouts, spec.sourceHeaders);
         var fundValue = getHeaderValueByCandidates(currentRow, layouts, spec.fundHeaders);
         var percentValue = getHeaderValueByCandidates(currentRow, layouts, spec.percentHeaders);
-        var rowNumber = i + 2;
+        var rowNumber = exportRows.length + 1;
+        if (spec.excludeFunds && spec.excludeFunds.indexOf(fundValue.toUpperCase()) > -1) {
+          continue;
+        }
         exportRows.push("<row r=\"" + rowNumber + "\">" +
           textCell("A" + rowNumber, caseNumber, 1) +
           textCell("B" + rowNumber, ssnValue, 1) +
@@ -29051,7 +29341,10 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         var sourceValue = getHeaderValueByCandidates(currentRow, layouts, spec.sourceHeaders);
         var fundValue = getHeaderValueByCandidates(currentRow, layouts, spec.fundHeaders);
         var amountValue = getHeaderValueByCandidates(currentRow, layouts, spec.amountHeaders);
-        var rowNumber = i + 2;
+        var rowNumber = exportRows.length + 1;
+        if (spec.excludeFunds && spec.excludeFunds.indexOf(fundValue.toUpperCase()) > -1) {
+          continue;
+        }
         exportRows.push("<row r=\"" + rowNumber + "\">" +
           textCell("A" + rowNumber, caseNumber, 1) +
           textCell("B" + rowNumber, ssnValue, 1) +
@@ -29408,7 +29701,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         var rowNumber = i + 2;
         total += Number(item.value) || 0;
         put(i + 1, textCell(cols[0] + rowNumber, caseValue, 1) + textCell(cols[1] + rowNumber, label, 1) +
-          textCell(cols[2] + rowNumber, item.key, 1) + numberCell(cols[3] + rowNumber, String(item.value), 3));
+          textCell(cols[2] + rowNumber, item.key, 1) + numberCell(cols[3] + rowNumber, String(Math.round((Number(item.value) || 0) * 100) / 100), 3));
       });
       var totalRow = list.length + 2;
       put(list.length + 1, textCell(cols[0] + totalRow, caseValue, 6) + textCell(cols[1] + totalRow, label, 6) +
@@ -30084,6 +30377,73 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
               { output: "Loan Balance In Source", candidates: ["Loan Balance In Source"] },
               { output: "ITD Loan Principal Repaid", candidates: ["ITD Loan Principal Repaid"] },
               { output: "As Of Date", candidates: ["As Of Date"] }
+            ]
+          }
+        }
+      ],
+      ALERUS: [
+        {
+          name: "Loan Header",
+          reports: ["LOAN_HEADER"],
+          keyMode: "ssnLoan",
+          includeIndex: true,
+          indexAfterHeader: "Social Security Number",
+          indexHeader: "Loan Index",
+          omitBaseHeaders: ["Case Number", "Report Code", "Report Name", "Plan Number", "Loan ID"],
+          outputOrder: ["Loan Amount", "Loan Start Date", "Loan Frequency", "Payment", "Outstanding Loan Balance", "Status", "Default Date", "Deemed Amount", "Interest Rate", "Final Payoff Date"],
+          fieldsByReport: {
+            LOAN_HEADER: [
+              { output: "Loan Amount", candidates: ["Loan Amount"] },
+              { output: "Loan Start Date", candidates: ["Loan Start Date"] },
+              { output: "Loan Frequency", candidates: ["Loan Frequency"] },
+              { output: "Payment", candidates: ["Payment"] },
+              { output: "Outstanding Loan Balance", candidates: ["Outstanding Loan Balance"] },
+              { output: "Status", candidates: ["Status"] },
+              { output: "Default Date", candidates: ["Default Date"] },
+              { output: "Deemed Amount", candidates: ["Deemed Amount"] },
+              { output: "Interest Rate", candidates: ["Interest Rate"] },
+              { output: "Final Payoff Date", candidates: ["Final Payoff Date"] }
+            ]
+          }
+        },
+        {
+          name: "Loan Source",
+          reports: ["LOAN_SOURCE"],
+          keyMode: "record",
+          includeMappedIndex: true,
+          indexAfterHeader: "Social Security Number",
+          indexHeader: "Loan Index",
+          omitBaseHeaders: ["Case Number", "Report Code", "Report Name", "Plan Number", "Loan ID"],
+          fieldsByReport: {
+            LOAN_SOURCE: [
+              { output: "Source Code", candidates: ["Source Code"] },
+              { output: "Loan Balance", candidates: ["Loan Balance"] }
+            ]
+          }
+        }
+      ],
+      AMERITAS: [
+        {
+          name: "Loan Header",
+          reports: ["LOAN_HEADER"],
+          keyMode: "ssnLoan",
+          includeIndex: true,
+          indexAfterHeader: "Social Security Number",
+          indexHeader: "Loan Index",
+          omitBaseHeaders: ["Case Number", "Report Code", "Report Name", "Plan Number", "Loan ID"],
+          outputOrder: ["Loan Amount", "Loan Start Date", "Loan Frequency", "Payment", "Outstanding Loan Balance", "Status", "Default Date", "Deemed Amount", "Interest Rate", "Final Payoff Date"],
+          fieldsByReport: {
+            LOAN_HEADER: [
+              { output: "Loan Amount", candidates: ["Loan Amount"] },
+              { output: "Loan Start Date", candidates: ["Loan Start Date"] },
+              { output: "Loan Frequency", candidates: ["Loan Frequency"] },
+              { output: "Payment", candidates: ["Payment"] },
+              { output: "Outstanding Loan Balance", candidates: ["Outstanding Loan Balance"] },
+              { output: "Status", candidates: ["Status"] },
+              { output: "Default Date", candidates: ["Default Date"] },
+              { output: "Deemed Amount", candidates: ["Deemed Amount"] },
+              { output: "Interest Rate", candidates: ["Interest Rate"] },
+              { output: "Final Payoff Date", candidates: ["Final Payoff Date"] }
             ]
           }
         }
@@ -30863,21 +31223,8 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
 
     sheetFiles[0].content = buildReferenceContentsSheet(result, caseNumber, source, sheetDefs, sheetFiles, mappingState);
 
-    var workbookSheets = [];
-    for (i = 0; i < sheetDefs.length; i += 1) {
-      workbookSheets.push("<sheet name=\"" + escapeXml(sheetDefs[i].name) + "\" sheetId=\"" + (i + 1) + "\" r:id=\"rId" + (i + 1) + "\"/>");
-    }
-
-    var workbookFiles = [
-      { path: "[Content_Types].xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/><Default Extension=\"xml\" ContentType=\"application/xml\"/><Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/><Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/><Override PartName=\"/docProps/core.xml\" ContentType=\"application/vnd.openxmlformats-package.core-properties+xml\"/><Override PartName=\"/docProps/app.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.extended-properties+xml\"/>" + contentOverrides.join("") + "</Types>" },
-      { path: "_rels/.rels", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/><Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties\" Target=\"docProps/core.xml\"/><Relationship Id=\"rId3\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties\" Target=\"docProps/app.xml\"/></Relationships>" },
-      { path: "docProps/core.xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><cp:coreProperties xmlns:cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:dcmitype=\"http://purl.org/dc/dcmitype/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dc:creator>Data Parser</dc:creator><cp:lastModifiedBy>Data Parser</cp:lastModifiedBy><dcterms:created xsi:type=\"dcterms:W3CDTF\">" + new Date().toISOString() + "</dcterms:created><dcterms:modified xsi:type=\"dcterms:W3CDTF\">" + new Date().toISOString() + "</dcterms:modified></cp:coreProperties>" },
-      { path: "docProps/app.xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Properties xmlns=\"http://schemas.openxmlformats.org/officeDocument/2006/extended-properties\" xmlns:vt=\"http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes\"><Application>Microsoft Excel</Application></Properties>" },
-      { path: "xl/workbook.xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><sheets>" + workbookSheets.join("") + "</sheets></workbook>" },
-      { path: "xl/_rels/workbook.xml.rels", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" + workbookRels.join("") + "<Relationship Id=\"rId" + (sheetDefs.length + 1) + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/></Relationships>" },
-      { path: "xl/styles.xml", content: exportStylesXml() }
-    ].concat(sheetFiles);
-    workbookFiles.exportManifest = sheetDefs.map(function (sheet) {
+    var workbookFiles = workbookPackageFiles(sheetDefs, workbookRels, contentOverrides).concat(sheetFiles);
+    workbookFiles.exportManifest = sheetDefs.map(function (sheet, defIndex) {
       var file = null;
       for (var manifestIndex = 0; manifestIndex < sheetFiles.length; manifestIndex += 1) {
         if (sheetFiles[manifestIndex].path === sheet.path) {
@@ -30887,10 +31234,44 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       }
       return {
         name: sheet.name,
+        path: sheet.path,
+        supporting: defIndex > 0 && source.reports.indexOf(sheet.name) === -1,
         rowCount: sheet.name === "Title Page" ? 0 : worksheetDataRowCount(file && file.content)
       };
     });
     return workbookFiles;
+  }
+
+  function workbookPackageFiles(sheetDefs, workbookRels, contentOverrides) {
+    var workbookSheets = [];
+    for (var i = 0; i < sheetDefs.length; i += 1) {
+      workbookSheets.push("<sheet name=\"" + escapeXml(sheetDefs[i].name) + "\" sheetId=\"" + (i + 1) + "\" r:id=\"rId" + (i + 1) + "\"/>");
+    }
+    return [
+      { path: "[Content_Types].xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/><Default Extension=\"xml\" ContentType=\"application/xml\"/><Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/><Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/><Override PartName=\"/docProps/core.xml\" ContentType=\"application/vnd.openxmlformats-package.core-properties+xml\"/><Override PartName=\"/docProps/app.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.extended-properties+xml\"/>" + contentOverrides.join("") + "</Types>" },
+      { path: "_rels/.rels", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/><Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties\" Target=\"docProps/core.xml\"/><Relationship Id=\"rId3\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties\" Target=\"docProps/app.xml\"/></Relationships>" },
+      { path: "docProps/core.xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><cp:coreProperties xmlns:cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:dcmitype=\"http://purl.org/dc/dcmitype/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dc:creator>Data Parser</dc:creator><cp:lastModifiedBy>Data Parser</cp:lastModifiedBy><dcterms:created xsi:type=\"dcterms:W3CDTF\">" + new Date().toISOString() + "</dcterms:created><dcterms:modified xsi:type=\"dcterms:W3CDTF\">" + new Date().toISOString() + "</dcterms:modified></cp:coreProperties>" },
+      { path: "docProps/app.xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Properties xmlns=\"http://schemas.openxmlformats.org/officeDocument/2006/extended-properties\" xmlns:vt=\"http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes\"><Application>Microsoft Excel</Application></Properties>" },
+      { path: "xl/workbook.xml", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><sheets>" + workbookSheets.join("") + "</sheets></workbook>" },
+      { path: "xl/_rels/workbook.xml.rels", content: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" + workbookRels.join("") + "<Relationship Id=\"rId" + (sheetDefs.length + 1) + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/></Relationships>" },
+      { path: "xl/styles.xml", content: exportStylesXml() }
+    ];
+  }
+
+  // One sheet lifted out of the full workbook into a workbook of its own.
+  function singleSheetWorkbookFiles(files, sheet) {
+    var content = "";
+    for (var i = 0; i < files.length; i += 1) {
+      if (files[i].path === sheet.path) {
+        content = files[i].content;
+        break;
+      }
+    }
+    return workbookPackageFiles(
+      [{ name: sheet.name }],
+      ["<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet1.xml\"/>"],
+      ["<Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>"]
+    ).concat([{ path: "xl/worksheets/sheet1.xml", content: content }]);
   }
 
   function crc32(bytes) {
@@ -31019,14 +31400,109 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     return new Blob(blobs, { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   }
 
-  async function triggerWorkbookDownload(files, fileName) {
-    var blob = await createZip(files);
-    var anchor = document.createElement("a");
-    var url = URL.createObjectURL(blob);
-    anchor.href = url;
-    anchor.download = fileName;
-    anchor.click();
-    URL.revokeObjectURL(url);
+  // The chosen save folder is remembered in the browser between visits.
+  function exportFolderStore(mode, action) {
+    return new Promise(function (resolve) {
+      var open;
+      try {
+        open = indexedDB.open("dpc-export", 1);
+      } catch (error) {
+        resolve(null);
+        return;
+      }
+      open.onupgradeneeded = function () { open.result.createObjectStore("folder"); };
+      open.onerror = function () { resolve(null); };
+      open.onsuccess = function () {
+        var request = action(open.result.transaction("folder", mode).objectStore("folder"));
+        request.onsuccess = function () { resolve(request.result || null); };
+        request.onerror = function () { resolve(null); };
+      };
+    });
+  }
+
+  var exportFolderHandle = null;
+  var exportSaveSeparate = true;
+  try {
+    exportSaveSeparate = localStorage.getItem("dpc-export-separate") !== "0";
+  } catch (error) {}
+  if (window.showDirectoryPicker) {
+    exportFolderStore("readonly", function (store) { return store.get("handle"); }).then(function (handle) {
+      exportFolderHandle = handle;
+      syncExportFolderLabel();
+    });
+  }
+
+  async function chooseExportFolder() {
+    try {
+      exportFolderHandle = await window.showDirectoryPicker({ id: "dpc-export", mode: "readwrite" });
+    } catch (error) {
+      return;
+    }
+    exportFolderStore("readwrite", function (store) { return store.put(exportFolderHandle, "handle"); });
+    syncExportFolderLabel();
+  }
+
+  function clearExportFolder() {
+    exportFolderHandle = null;
+    exportFolderStore("readwrite", function (store) { return store.delete("handle"); });
+    syncExportFolderLabel();
+  }
+
+  // Asks for write access if the browser has forgotten it. Must run straight from a click.
+  async function readyExportFolder() {
+    if (!exportFolderHandle) {
+      return null;
+    }
+    var options = { mode: "readwrite" };
+    if (await exportFolderHandle.queryPermission(options) === "granted" || await exportFolderHandle.requestPermission(options) === "granted") {
+      return exportFolderHandle;
+    }
+    return null;
+  }
+
+  async function saveBlobs(items, folder) {
+    for (var i = 0; i < items.length; i += 1) {
+      if (folder) {
+        var handle = await folder.getFileHandle(items[i].name, { create: true });
+        var writable = await handle.createWritable();
+        await writable.write(items[i].blob);
+        await writable.close();
+      } else {
+        var anchor = document.createElement("a");
+        var url = URL.createObjectURL(items[i].blob);
+        anchor.href = url;
+        anchor.download = items[i].name;
+        anchor.click();
+        setTimeout(URL.revokeObjectURL.bind(URL, url), 1000);
+      }
+    }
+  }
+
+  function exportFileBase(request) {
+    return request.caseNumber + " - " + safeFilePart(request.planName, "Plan Name");
+  }
+
+  function supportingSheets(request) {
+    return request.manifest.filter(function (sheet) { return sheet.supporting && sheet.rowCount > 0; });
+  }
+
+  async function saveExportFiles(request) {
+    var folder = await readyExportFolder();
+    var outputs = [{ name: request.fileName, files: request.files }];
+    if (exportSaveSeparate) {
+      supportingSheets(request).forEach(function (sheet) {
+        outputs.push({
+          name: exportFileBase(request) + " - " + safeFilePart(sheet.name, "Sheet") + ".xlsx",
+          files: singleSheetWorkbookFiles(request.files, sheet)
+        });
+      });
+    }
+    var items = [];
+    for (var i = 0; i < outputs.length; i += 1) {
+      items.push({ name: outputs[i].name, blob: await createZip(outputs[i].files) });
+    }
+    await saveBlobs(items, folder);
+    return { count: items.length, folder: folder };
   }
 
   function getCurrentExportPlanName() {
@@ -31096,7 +31572,12 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       "<div id=\"dpcExportMappingStatus\" style=\"margin-top:14px;padding:10px 12px;border-radius:8px;background:#f3f5f8;font-weight:700\"></div>" +
       "<div id=\"dpcExportMappingDetail\" style=\"margin-top:5px;color:#626b78;font-size:12px\"></div></div>" +
       "<div style=\"padding:0 22px 16px\"><div style=\"font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6e7784;margin-bottom:7px\">Workbook sheets</div>" +
-      "<div id=\"dpcExportSheetList\" style=\"max-height:260px;overflow:auto;border:1px solid #dde2e9;border-radius:8px\"></div></div>" +
+      "<div id=\"dpcExportSheetList\" style=\"max-height:260px;overflow:auto;border:1px solid #dde2e9;border-radius:8px\"></div>" +
+      "<label id=\"dpcExportSeparateRow\" style=\"display:flex;gap:8px;align-items:center;margin-top:12px;cursor:pointer\"><input id=\"dpcExportSeparate\" type=\"checkbox\"><span id=\"dpcExportSeparateText\"></span></label>" +
+      "<div id=\"dpcExportFolderRow\" style=\"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px\"><span style=\"color:#5b6472\">Save to</span>" +
+      "<strong id=\"dpcExportFolderName\" style=\"overflow-wrap:anywhere\"></strong>" +
+      "<button id=\"dpcExportFolderPick\" type=\"button\" style=\"padding:5px 10px;border:1px solid #cbd2dc;border-radius:7px;background:#fff;color:#29313d;cursor:pointer\">Choose folder</button>" +
+      "<button id=\"dpcExportFolderClear\" type=\"button\" style=\"padding:5px 4px;border:0;background:none;color:#245f95;text-decoration:underline;cursor:pointer\">Use Downloads</button></div></div>" +
       "<div style=\"display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;padding:14px 22px 20px;border-top:1px solid #e2e6ec\">" +
       "<button id=\"dpcExportRunSummary\" type=\"button\" style=\"margin-right:auto;padding:9px 12px;border:1px solid #cbd2dc;border-radius:7px;background:#fff;color:#29313d;cursor:pointer\">Download run summary</button>" +
       "<button id=\"dpcExportCancel\" type=\"button\" style=\"padding:9px 12px;border:1px solid #cbd2dc;border-radius:7px;background:#fff;color:#29313d;cursor:pointer\">Cancel</button>" +
@@ -31124,7 +31605,26 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
         downloadExportRunSummary(activeExportRequest);
       }
     };
+    dialog.querySelector("#dpcExportSeparate").onchange = function () {
+      exportSaveSeparate = this.checked;
+      try {
+        localStorage.setItem("dpc-export-separate", exportSaveSeparate ? "1" : "0");
+      } catch (error) {}
+    };
+    dialog.querySelector("#dpcExportFolderPick").onclick = chooseExportFolder;
+    dialog.querySelector("#dpcExportFolderClear").onclick = clearExportFolder;
     return dialog;
+  }
+
+  function syncExportFolderLabel() {
+    var dialog = document.getElementById("dpcExportDialog");
+    if (!dialog) {
+      return;
+    }
+    dialog.querySelector("#dpcExportFolderRow").style.display = window.showDirectoryPicker ? "flex" : "none";
+    dialog.querySelector("#dpcExportFolderName").textContent = exportFolderHandle ? exportFolderHandle.name : "Downloads";
+    dialog.querySelector("#dpcExportFolderPick").textContent = exportFolderHandle ? "Change folder" : "Choose folder";
+    dialog.querySelector("#dpcExportFolderClear").hidden = !exportFolderHandle;
   }
 
   function renderExportDialog(request) {
@@ -31151,6 +31651,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       item.appendChild(rowCount);
       list.appendChild(item);
     }
+    var separateCount = supportingSheets(request).length;
+    dialog.querySelector("#dpcExportSeparateRow").style.display = separateCount ? "flex" : "none";
+    dialog.querySelector("#dpcExportSeparate").checked = exportSaveSeparate;
+    dialog.querySelector("#dpcExportSeparateText").textContent = "Also save each supporting sheet as its own file (" + separateCount + (separateCount === 1 ? " file)" : " files)");
+    syncExportFolderLabel();
     var blocked = request.mapping.key === "pending" || request.mapping.key === "invalid" || request.mapping.key === "unresolved";
     override.hidden = !blocked || request.mapping.key === "pending";
     override.disabled = false;
@@ -31165,15 +31670,6 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       dialog.close();
     }
     dialog.showModal();
-  }
-
-  function downloadTextFile(text, fileName, type) {
-    var anchor = document.createElement("a");
-    var url = URL.createObjectURL(new Blob([text], { type: type || "text/plain;charset=utf-8" }));
-    anchor.href = url;
-    anchor.download = fileName;
-    anchor.click();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 0);
   }
 
   function downloadExportRunSummary(request) {
@@ -31201,11 +31697,11 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       exportMode: request.mapping.key === "valid" ? "mapped" : (request.mapping.key === "unresolved" ? "override with gaps" : "raw without mapping checks"),
       participantDataIncluded: false
     };
-    downloadTextFile(
-      JSON.stringify(summary, null, 2) + "\n",
-      safeFilePart(request.caseNumber, "Case Number") + " - " + safeFilePart(request.planName, "Plan Name") + " - Run Summary.json",
-      "application/json;charset=utf-8"
-    );
+    var name = safeFilePart(request.caseNumber, "Case Number") + " - " + safeFilePart(request.planName, "Plan Name") + " - Run Summary.json";
+    var blob = new Blob([JSON.stringify(summary, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
+    readyExportFolder().then(function (folder) {
+      return saveBlobs([{ name: name, blob: blob }], folder);
+    });
   }
 
   function completeExportDownload(request, overrideUsed) {
@@ -31227,13 +31723,20 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
       return;
     }
     request.overrideUsed = !!overrideUsed;
-    triggerWorkbookDownload(request.files, request.fileName);
     var dialog = document.getElementById("dpcExportDialog");
-    if (dialog) {
-      dialog.querySelector("#dpcExportConfirm").disabled = true;
-      dialog.querySelector("#dpcExportOverride").disabled = true;
-      dialog.querySelector("#dpcExportMappingDetail").textContent = "Workbook download started. Download the run summary now to record this export and its override status.";
-    }
+    var detail = dialog.querySelector("#dpcExportMappingDetail");
+    dialog.querySelector("#dpcExportConfirm").disabled = true;
+    dialog.querySelector("#dpcExportOverride").disabled = true;
+    detail.textContent = "Saving...";
+    saveExportFiles(request).then(function (saved) {
+      var files = saved.count === 1 ? "Workbook" : saved.count + " files";
+      detail.textContent = (saved.folder ? files + " saved to " + saved.folder.name + "." : files + " sent to Downloads.") +
+        " Download the run summary now to record this export and its override status.";
+    }, function (error) {
+      detail.textContent = "Save failed: " + (error && error.message ? error.message : error) + " If a file is open in Excel, close it and try again.";
+      dialog.querySelector("#dpcExportConfirm").disabled = false;
+      dialog.querySelector("#dpcExportOverride").disabled = false;
+    });
   }
 
   function downloadWorkbookForReports(reportCodes, suffix) {
@@ -31558,7 +32061,7 @@ body.density-compact .report-table-wrap td{padding:7px 14px}
     { key: "TIAA", patterns: [/^DCNV\.(?:ACCUM|ALLOC|CYTD|HOLB|INDIC|KEY|LOAN|LOANFUND|ORIGSTAT|PYTD|SRCE1231)\.csv$/i, /^FUND_TOT_RPT.*\.(?:xlsx|xlsm)$/i] },
     { key: "ALIGHT", patterns: [/(?:^|[ _.-])(?:12LN|BELC|CDF|CDH|CRED|CTEL|CTSR|CVBL|DEDS|EEOR|EEST|ELEC|ESVC|FVBL|HHRT|HINC|IVEL|LOAN|OVER|PDLV|PINC|PPAT|PPCT|PPST|PRAD|PRDP|PRLT|PROP|PRQE|PRSN|PTNS|PYRT|PYSC|RCON|SBHS|WTHL|YTDC|SBAL|LN12)(?:[ _.-][^\/]*)?\.(?:txt|text|dat)$/, /(?:^|[ _-])Records\.(?:txt|text|dat)$/i, /Data[ _-]*Dictionary[^\/]*\.(?:xlsx|xlsm)$/i] },
     { key: "ALERUS", patterns: [/^(?:SERVICETERM|SERVTERM|SERVTRM)(?:BALALLOC|CONTRIB|DISBSC|DISB|LOANPMT|LPMT|HILN|LOAN|LN|PT)\b.*\.(?:csv|xlsx|xlsm)$/i, /^Participant[ _-]*Valuation[ _-]*Summary.*\.pdf$/i] },
-    { key: "AMERITAS", patterns: [/^(?!\d{6}_Valuation_\d{8}\.txt$).*(?:^|[ _-])Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i, /(?:^|[ _-])Disburse\w*[^\/]*\.txt$/i, /Check[ _-]*Register[^\/]*\.txt$/i, /^Loan[ _-]*Distribution[^\/]*\.txt$/i, /^Loan[ _-]*Report[^\/]*\.(?:xlsx|xlsm|xls|csv)$/i, /^Investments?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /^Sources?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i] },
+    { key: "AMERITAS", patterns: [/^(?!\d{6}_Valuation_\d{8}\.txt$).*(?:^|[ _-])Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i, /(?:^|[ _-])Disburse\w*[^\/]*\.txt$/i, /Check[ _-]*Register[^\/]*\.txt$/i, /^Loan[ _-]*Distribution[^\/]*\.txt$/i, /^Loan[ _-]*Report[^\/]*\.(?:xlsx|xlsm|xls|csv)$/i, /^Investments?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /^Sources?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /Allocation[ _-]*Base[^\/]*\.txt$/i] },
     { key: "PLANDOCS", patterns: [/Onboarding[ _-]*Package.*\.(?:xlsx|xlsm)$/i, /(?:^|[ _-])PRD(?:[ _-]|\.).*\.docx$/i, /Plan[ _-]*Review[ _-]*Document.*\.docx$/i, /Merger[ _-]*Compar\w*.*\.pdf$/i, /merger[^\/]*\.pdf$/i, /Sub(?:mission)?[ _-]*Pack\w*.*\.docx$/i, /(?:^|[ _-])spac\d*\.docx$/i] },
     { key: "BASEREMIT", patterns: [/base[ _-]*data.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /remit\w*.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /payroll.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /^\d{8}\d*[ _-]?[A-Z]{2}[\d_-]{5,}\.(?:xlsx|xls|csv|txt|text|dat)$/i] },
     { key: "MILLIMAN", patterns: [/^EXPORT\.\d{8}\.\d+(?:\.(?:txt|text|dat))?$/i, /milliman[^\/]*\.(?:txt|text|dat)$/i] },
