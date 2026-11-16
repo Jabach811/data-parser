@@ -1,0 +1,124 @@
+PAGE    1      OP-06               DISBURSEMENT WORKSHEET                AS OF 2026/11/03
+
+PLAN 3-99999     SAMPLE ASSOCIATES INC 401(K) PLAN
+
+900-11-0001   SAMPLE, ALPHA                     PLAN ENTRY DATE 2020/01/01     REASON: USER DEFINED
+              1 TEST DRIVE                      EMPLOYMENT DATE 2018/12/24     EFFECTIVE DATE: 2026/11/03
+              CENTER FAKETOWN, NY  11111        BIRTH DATE 1972/05/05          OPTIONS: LUMP SUM PAYMENT
+                                                TERM DATE 2021/09/30           STATUS: 31 TERMINATED
+
+* C=CASH A=ANNUITY CASH L=LOAN DISTRIBUTED D=DEFAULTED LOAN I=INTEREST PAID P=INSURANCE POLICY F=FEES
+                                                                            * * SHARES INFORMATION * *
+ FUND     ACCOUNT        AMOUNT       AMOUNT DUE   PAYMENT        AMOUNT       VALUE OF     SHARES      SHARES       COST
+           VALUE       FORFEITED     PARTICIPANT    AMOUNT       DEFERRED   SHARES DISTR    DISTRIB    SOLD/FORF     BASIS
+
+ BEA        0.00            0.00            0.00      0.00  C        0.00
+ BUB      107.69            0.00          107.69    107.69  C        0.00                                 8.6829     86.80
+ BUV      107.69            0.00          107.69    107.69  C        0.00                                 8.6830     86.80
+
+ TOTAL    215.38            0.00          215.38    215.38           0.00                                17.3659    173.60
+
+SOURCE VESTED PCT   SOURCE VESTED PCT   SOURCE VESTED PCT   SOURCE VESTED PCT   SOURCE VESTED PCT
+A 100.00            B 100.00            V 100.00
+
+PARTICIPANT CONTINUED ON NEXT PAGE.
+PAGE    2      OP-06               DISBURSEMENT WORKSHEET                AS OF 2026/11/03
+
+PLAN 3-99999     SAMPLE ASSOCIATES INC 401(K) PLAN
+
+900-11-0001   SAMPLE, ALPHA                     PLAN ENTRY DATE 2020/01/01     REASON: USER DEFINED
+              1 TEST DRIVE                      EMPLOYMENT DATE 2018/12/24     EFFECTIVE DATE: 2026/11/03
+              CENTER FAKETOWN, NY  11111        BIRTH DATE 1972/05/05          OPTIONS: LUMP SUM PAYMENT
+                                                TERM DATE 2021/09/30           STATUS: 31 TERMINATED
+
+* * * * * 401K TAX INFORMATION                * * * TOTAL DISTRIBUTION * * *
+
+                              FEDERAL         STATE:NE
+DISTRIBUTION CODE - 1 PREMATURE         NA
+TAXABLE AMOUNT               $107.69         107.69            PAYMENT IN CASH              $215.38
+CAPITAL GAIN %                     0.00%
+ORDINARY INCOME                  100.00%
+NON-TAXABLE EMPLOYEE CONTRIB/EARN   $0.00
+GROSS DISTRIBUTION           $215.38
+FEDERAL INCOME TAX                 $0.00
+WHLD DED                           $0.00
+ADVANCED WHOLDING                  $0.00
+FEDERAL WITHHOLDING                $0.00
+STATE INCOME TAX WITHHELD          $0.00
+NET DISTRIBUTION AMOUNT                                                NET DISTRIBUTION AMOUNT      $215.38
+MARITAL STATUS SINGLE    NUMBER OF DEPENDENTS 0    FED/ST TAX OVERRIDE: NO TAX
+
+* * * * * ROTH TAX INFORMATION                * * * TOTAL DISTRIBUTION * * *
+
+                              FEDERAL         STATE:NE
+DISTRIBUTION CODE - 1 PREMATURE / B ROTH         NA
+TAXABLE AMOUNT               $31.18         31.18            PAYMENT IN CASH              $107.69
+CAPITAL GAIN %                     0.00%
+ORDINARY INCOME                  100.00%
+NON-TAXABLE EMPLOYEE CONTRIB/EARN   $0.00
+GROSS DISTRIBUTION           $107.69
+FEDERAL INCOME TAX                 $0.00
+WHLD DED                           $0.00
+ADVANCED WHOLDING                  $0.00
+FEDERAL WITHHOLDING                $0.00
+STATE INCOME TAX WITHHELD          $0.00
+NET DISTRIBUTION AMOUNT                                                NET DISTRIBUTION AMOUNT      $107.69
+MARITAL STATUS SINGLE    NUMBER OF DEPENDENTS 0    FED/ST TAX OVERRIDE: NO TAX
+
+ROTH NON-TAXABLE                  $76.51
+
+THE AMOUNT DISTRIBUTED FROM ELECTIVE 401K OR VOL-SAL-RED 403B FUNDS IN THIS DISTRIBUTION ..........= $107.69
+THE AMOUNT PH785 WAS REDUCED BY IN THIS DISTRIBUTION ..............................................= $76.51
+ROTH TAXABLE EARNINGS FROM A NON-QUALIFIED DISTRIBUTION ...........................................= $31.18
+ROTH CONTRIBUTIONS PRIOR TO THIS DISTRIBUTION (PH800) .............................................= $76.51
+ROTH CONTRIBUTIONS IN THIS DISTRIBUTION ...........................................................= $76.51
+MAXIMUM ELIGIBLE ROLLOVER DISTRIBUTION ............................................................= $0.00
+AMOUNT OF MINIMUM DISTRIBUTION ....................................................................= $0.00
+
+PAGE    3      OP-06               DISBURSEMENT WORKSHEET                AS OF 2026/11/03
+
+PLAN 3-99999     SAMPLE ASSOCIATES INC 401(K) PLAN
+
+900-11-0002   SAMPLE, BRAVO J                   PLAN ENTRY DATE 2020/01/01     REASON: USER DEFINED
+              2 TEST ROAD                       EMPLOYMENT DATE 2018/12/24     EFFECTIVE DATE: 2026/11/03
+              MOCKVILLE, NY  22222              BIRTH DATE 1972/05/05          OPTIONS: LUMP SUM PAYMENT
+                                                TERM DATE 2021/09/30           STATUS: 31 TERMINATED
+
+* C=CASH A=ANNUITY CASH L=LOAN DISTRIBUTED D=DEFAULTED LOAN I=INTEREST PAID P=INSURANCE POLICY F=FEES
+                                                                            * * SHARES INFORMATION * *
+ FUND     ACCOUNT        AMOUNT       AMOUNT DUE   PAYMENT        AMOUNT       VALUE OF     SHARES      SHARES       COST
+           VALUE       FORFEITED     PARTICIPANT    AMOUNT       DEFERRED   SHARES DISTR    DISTRIB    SOLD/FORF     BASIS
+
+ B1A   18,523.95            0.00       18,523.95 18,523.95  C        0.00                             1,454.3671 15,426.99
+ B1V   18,380.43            0.00       18,380.43 18,380.43  C        0.00                             1,443.0990 15,309.07
+
+ TOTAL 36,904.38            0.00       36,904.38 36,904.38           0.00                             2,897.4661 30,736.06
+
+SOURCE VESTED PCT   SOURCE VESTED PCT   SOURCE VESTED PCT   SOURCE VESTED PCT   SOURCE VESTED PCT
+A 100.00            V 100.00
+
+* * * * * 401K TAX INFORMATION                * * * TOTAL DISTRIBUTION * * *
+
+                              FEDERAL         STATE:NE
+DISTRIBUTION CODE - 1 PREMATURE         NA
+TAXABLE AMOUNT               $36,904.38         36,904.38            PAYMENT IN CASH              $36,904.38
+CAPITAL GAIN %                     0.00%
+ORDINARY INCOME                  100.00%
+NON-TAXABLE EMPLOYEE CONTRIB/EARN   $0.00
+GROSS DISTRIBUTION           $36,904.38
+FEDERAL INCOME TAX                 $0.00
+WHLD DED                           $0.00
+ADVANCED WHOLDING                  $0.00
+FEDERAL WITHHOLDING                $0.00
+STATE INCOME TAX WITHHELD          $0.00
+NET DISTRIBUTION AMOUNT                                                NET DISTRIBUTION AMOUNT      $36,904.38
+MARITAL STATUS SINGLE    NUMBER OF DEPENDENTS 0    FED/ST TAX OVERRIDE: NO TAX
+
+THE AMOUNT DISTRIBUTED FROM ELECTIVE 401K OR VOL-SAL-RED 403B FUNDS IN THIS DISTRIBUTION ..........= $18,523.95
+THE AMOUNT PH785 WAS REDUCED BY IN THIS DISTRIBUTION ..............................................= $0.00
+ROTH TAXABLE EARNINGS FROM A NON-QUALIFIED DISTRIBUTION ...........................................= $31.18
+ROTH CONTRIBUTIONS PRIOR TO THIS DISTRIBUTION (PH800) .............................................= $0.00
+ROTH CONTRIBUTIONS IN THIS DISTRIBUTION ...........................................................= $0.00
+MAXIMUM ELIGIBLE ROLLOVER DISTRIBUTION ............................................................= $0.00
+AMOUNT OF MINIMUM DISTRIBUTION ....................................................................= $0.00
+

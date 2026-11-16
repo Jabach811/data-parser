@@ -1,0 +1,569 @@
+{
+ "detected": "PAYCHEX",
+ "message": "",
+ "exportAllowed": true,
+ "sheetOrder": [
+  "Title Page",
+  "Fund and Source Breakdown",
+  "Balance Export",
+  "CONV FILE",
+  "Deferrals",
+  "Loan Header",
+  "Loan Source",
+  "CIT Elections",
+  "BALANCES",
+  "ELECTIONS",
+  "LOAN_HEADER",
+  "LOAN_SOURCE"
+ ],
+ "sheets": {
+  "Title Page": [
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "DATA CONVERSION SUMMARY",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "PLAN INFORMATION",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Plan Name",
+    "Test Plan",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Case Number",
+    "AB12345   67890",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Data Source",
+    "PAYCHEX",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "REPORT INDEX",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Report Code",
+    "Report Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "BALANCES",
+    "Balances",
+    1,
+    ""
+   ],
+   [
+    "",
+    "ELECTIONS",
+    "Elections",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LOAN_HEADER",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LOAN_SOURCE",
+    "Loan Source",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "SUPPORTING SHEETS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Sheet Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Fund and Source Breakdown",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Balance Export",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CONV FILE",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Deferrals",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Source",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CIT Elections",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "EXPORT DETAILS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Input File Name",
+    "2 files selected",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Mapping File",
+    "No validated mapping workbook",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Export Status",
+    "No mapping uploaded - raw export only",
+    "",
+    ""
+   ]
+  ],
+  "Fund and Source Breakdown": [
+   [
+    "Case Number",
+    "Type",
+    "Code",
+    "Total",
+    "",
+    "Case Number",
+    "Type",
+    "Code",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "E",
+    1125,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "AA",
+    1125
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "Source Total (1)",
+    1125,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Fund Total (1)",
+    1125
+   ]
+  ],
+  "Balance Export": [
+   [
+    "Case Number",
+    "Region",
+    "SSN",
+    "Source",
+    "Fund",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "111-22-3333",
+    "E",
+    "AA",
+    1125
+   ]
+  ],
+  "CONV FILE": [
+   [
+    "Case Number",
+    "Prior Fund Code",
+    "TA Fund Code",
+    "Total",
+    "Ref Number",
+    "Source I",
+    "Re Reg"
+   ],
+   [
+    "AB12345   67890",
+    "AA",
+    "",
+    1125,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Deferrals": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Source Code",
+    "Fund Code",
+    "Percent",
+    "As Of Date",
+    "Pre-Tax Deferral Percent",
+    "Pre-Tax Deferral Dollar",
+    "Roth Deferral Percent",
+    "Roth Deferral Dollar",
+    "Auto Enroll Status",
+    "Auto Enroll Date",
+    "Opt Out Date",
+    "Auto Increase Date"
+   ],
+   [
+    "AB12345   67890",
+    "111-22-3333",
+    "E",
+    "AA",
+    50,
+    45322,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Loan Header": [
+   [
+    "Social Security Number",
+    "Index",
+    "Loan Amount",
+    "Issuance Date",
+    "Payment Frequency",
+    "Next Payment Amount",
+    "Loan Balance",
+    "Default Date",
+    "Deemed Amount",
+    "Interest Rate",
+    "Final Payment Due Date"
+   ],
+   [
+    "111-22-3333",
+    1,
+    1000,
+    45292,
+    "26-BI WEEKLY",
+    50,
+    750,
+    "",
+    0,
+    6.25,
+    ""
+   ]
+  ],
+  "Loan Source": [
+   [
+    "Social Security Number",
+    "Index",
+    "Source Code",
+    "Current Balance",
+    "Loans Activity",
+    "As Of Date"
+   ],
+   [
+    "111-22-3333",
+    1,
+    "E",
+    750,
+    -50,
+    45322
+   ]
+  ],
+  "CIT Elections": [
+   [
+    "Case Number",
+    "SSN",
+    "Source ID",
+    "Fund ID",
+    "Percent",
+    "Default"
+   ],
+   [
+    "AB12345   67890",
+    "111-22-3333",
+    "E",
+    "AA",
+    50,
+    "N"
+   ]
+  ],
+  "BALANCES": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Status",
+    "Status Code",
+    "Description",
+    "Row ID",
+    "Fund Code",
+    "Source Code",
+    "Allocation Percent",
+    "Begin Balance",
+    "Contribution",
+    "Earnings",
+    "Payments",
+    "Loans Activity",
+    "Other Amount",
+    "Other Activity Code",
+    "End Balance",
+    "Current Balance",
+    "As Of Date"
+   ],
+   [
+    "111-22-3333",
+    "DOE JOHN",
+    "ACTIVE",
+    "01",
+    "Target Fund",
+    "AAE",
+    "AA",
+    "E",
+    50,
+    1000,
+    100,
+    25,
+    "",
+    "",
+    "",
+    "",
+    1125,
+    1125,
+    45322
+   ]
+  ],
+  "ELECTIONS": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Fund Code",
+    "Source Code",
+    "Percent",
+    "As Of Date"
+   ],
+   [
+    "111-22-3333",
+    "DOE JOHN",
+    "AA",
+    "E",
+    50,
+    45322
+   ]
+  ],
+  "LOAN_HEADER": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Loan Number",
+    "Loan Payroll Number Code",
+    "Loan Amount",
+    "Loan Balance",
+    "Issuance Date",
+    "Interest Rate",
+    "Payment Frequency",
+    "Loan Status",
+    "Next Payment Amount",
+    "Next Payment Date",
+    "Last Payment Date",
+    "Deemed Amount",
+    "Final Payment Due Date"
+   ],
+   [
+    "111-22-3333",
+    "DOE JOHN",
+    "1",
+    "001",
+    1000,
+    750,
+    45292,
+    6.25,
+    "26-BI WEEKLY",
+    "1-ACTIVE",
+    50,
+    45323,
+    45306,
+    0,
+    ""
+   ]
+  ],
+  "LOAN_SOURCE": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Loan Number",
+    "Status",
+    "Status Code",
+    "Description",
+    "Row ID",
+    "Fund Code",
+    "Source Code",
+    "Allocation Percent",
+    "Begin Balance",
+    "Contribution",
+    "Earnings",
+    "Payments",
+    "Loans Activity",
+    "Other Amount",
+    "Other Activity Code",
+    "End Balance",
+    "Current Balance",
+    "As Of Date"
+   ],
+   [
+    "111-22-3333",
+    "DOE JOHN",
+    "",
+    "ACTIVE",
+    "01",
+    "Loan Source",
+    "L0E",
+    "L0",
+    "E",
+    "",
+    750,
+    "",
+    "",
+    "",
+    -50,
+    "",
+    "",
+    750,
+    750,
+    45322
+   ]
+  ]
+ }
+}

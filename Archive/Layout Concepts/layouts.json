@@ -1,0 +1,36 @@
+{
+  "source": "Data Parser App.html",
+  "sha256": "f715b08714156a30ef826015fbe7d5ca4456fe1b572d127d695473981dc3b36a",
+  "layouts": [
+    {
+      "key": "explorer",
+      "name": "Explorer",
+      "description": "A file-manager structure: case and files on the left, a report directory in the middle, and a large preview on the right. Totals and mapping have their own review view.",
+      "structure": "Intake rail / report directory / preview canvas"
+    },
+    {
+      "key": "guided",
+      "name": "Guided Workflow",
+      "description": "A step-by-step workspace with separate screens for case setup, data review, mapping and export. Move through the flow using Back and Continue, or jump between steps.",
+      "structure": "Step navigation / single task screen / next action"
+    },
+    {
+      "key": "board",
+      "name": "Conversion Board",
+      "description": "Three workflow columns keep Intake, Inspect and Deliver in view together. Select a report to open its full-width canvas beneath the board.",
+      "structure": "Three workflow columns / expandable report canvas"
+    },
+    {
+      "key": "focus",
+      "name": "Focus Workspace",
+      "description": "The report table owns the screen. File setup, report selection, totals and mapping open in a side panel from the toolbar, leaving the data front and center.",
+      "structure": "Command toolbar / full-screen table / tool drawer"
+    },
+    {
+      "key": "casebook",
+      "name": "Case File",
+      "description": "A conversion record arranged like a working document. A contents margin jumps to each section, while a delivery desk keeps mapping and export alongside the file.",
+      "structure": "Contents margin / conversion document / delivery desk"
+    }
+  ]
+}

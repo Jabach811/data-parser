@@ -1,0 +1,769 @@
+{
+ "detected": "ONEAMERICA",
+ "message": "",
+ "exportAllowed": true,
+ "sheetOrder": [
+  "Title Page",
+  "Fund and Source Breakdown",
+  "Balance Export",
+  "CONV FILE",
+  "Deferrals",
+  "Loan Header",
+  "Loan Source",
+  "CIT Elections",
+  "BALANCES",
+  "ELECTIONS",
+  "LOAN_HEADER",
+  "LOAN_SOURCE"
+ ],
+ "sheets": {
+  "Title Page": [
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "DATA CONVERSION SUMMARY",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "PLAN INFORMATION",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Plan Name",
+    "Test Plan",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Case Number",
+    "AB12345   67890",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Data Source",
+    "ONEAMERICA",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "REPORT INDEX",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Report Code",
+    "Report Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "BALANCES",
+    "Balances",
+    6,
+    ""
+   ],
+   [
+    "",
+    "ELECTIONS",
+    "Elections",
+    3,
+    ""
+   ],
+   [
+    "",
+    "LOAN_HEADER",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LOAN_SOURCE",
+    "Loan Source",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "SUPPORTING SHEETS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Sheet Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Fund and Source Breakdown",
+    4,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Balance Export",
+    6,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CONV FILE",
+    3,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Deferrals",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Source",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CIT Elections",
+    3,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "EXPORT DETAILS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Input File Name",
+    "G12345.FINAL.xlsx",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Mapping File",
+    "No validated mapping workbook",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Export Status",
+    "No mapping uploaded - raw export only",
+    "",
+    ""
+   ]
+  ],
+  "Fund and Source Breakdown": [
+   [
+    "Case Number",
+    "Type",
+    "Code",
+    "Total",
+    "",
+    "Case Number",
+    "Type",
+    "Code",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "A",
+    14050.75,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "AB",
+    10851.25
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "D",
+    1000.75,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "LN",
+    2300
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "Source Total (2)",
+    15051.5,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "AA",
+    1900.25
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Fund Total (3)",
+    15051.5
+   ]
+  ],
+  "Balance Export": [
+   [
+    "Case Number",
+    "Region",
+    "SSN",
+    "Source",
+    "Fund",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "012345678",
+    "A",
+    "AA",
+    1500.25
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "012345678",
+    "A",
+    "AB",
+    2250.5
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "012345678",
+    "D",
+    "AA",
+    400
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "012345678",
+    "D",
+    "AB",
+    600.75
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "012345678",
+    "A",
+    "LN",
+    2300
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "987650001",
+    "A",
+    "AB",
+    8000
+   ]
+  ],
+  "CONV FILE": [
+   [
+    "Case Number",
+    "Prior Fund Code",
+    "TA Fund Code",
+    "Total",
+    "Ref Number",
+    "Source I",
+    "Re Reg"
+   ],
+   [
+    "AB12345   67890",
+    "AB",
+    "",
+    10851.25,
+    "",
+    "",
+    ""
+   ],
+   [
+    "AB12345   67890",
+    "LN",
+    "",
+    2300,
+    "",
+    "",
+    ""
+   ],
+   [
+    "AB12345   67890",
+    "AA",
+    "",
+    1900.25,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Deferrals": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Source Code",
+    "Fund Code",
+    "Percent",
+    "As Of Date"
+   ],
+   [
+    "AB12345   67890",
+    "012345678",
+    "A",
+    "AA; AB",
+    "60.00; 40.00",
+    46022
+   ],
+   [
+    "AB12345   67890",
+    "987650001",
+    "A",
+    "AB",
+    100,
+    46022
+   ]
+  ],
+  "Loan Header": [
+   [
+    "Social Security Number",
+    "Index",
+    "Loan Amount",
+    "Issuance Date",
+    "Payment Frequency",
+    "Repayment Amount",
+    "Loan Balance",
+    "Default Date",
+    "Deemed Amount",
+    "Interest Rate",
+    "Final Payment Due Date"
+   ],
+   [
+    "012345678",
+    1,
+    5000,
+    45000,
+    "B",
+    98.5,
+    3800,
+    "",
+    0,
+    5.25,
+    ""
+   ]
+  ],
+  "Loan Source": [
+   [
+    "Social Security Number",
+    "Index",
+    "Source",
+    "Loan Balance",
+    "Loan Amount",
+    "Loan Status",
+    "As Of Date"
+   ],
+   [
+    "012345678",
+    1,
+    "401(k) Deferral",
+    2300,
+    3000,
+    "N",
+    46022
+   ],
+   [
+    "012345678",
+    1,
+    "Employer Match",
+    1500,
+    2000,
+    "N",
+    46022
+   ]
+  ],
+  "CIT Elections": [
+   [
+    "Case Number",
+    "SSN",
+    "Source ID",
+    "Fund ID",
+    "Percent",
+    "Default"
+   ],
+   [
+    "AB12345   67890",
+    "012345678",
+    "A",
+    "AA",
+    60,
+    "N"
+   ],
+   [
+    "AB12345   67890",
+    "012345678",
+    "A",
+    "AB",
+    40,
+    "N"
+   ],
+   [
+    "AB12345   67890",
+    "987650001",
+    "A",
+    "AB",
+    100,
+    "N"
+   ]
+  ],
+  "BALANCES": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Status",
+    "Status Code",
+    "Description",
+    "Row ID",
+    "Fund Code",
+    "Source Code",
+    "Allocation Percent",
+    "Begin Balance",
+    "Contribution",
+    "Earnings",
+    "Payments",
+    "Loans Activity",
+    "Other Amount",
+    "Other Activity Code",
+    "End Balance",
+    "Current Balance",
+    "As Of Date"
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "",
+    "",
+    "Sample Stable Value Fund",
+    "AAA",
+    "AA",
+    "A",
+    60,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    1500.25,
+    1500.25,
+    46022
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "",
+    "",
+    "Sample Index Fund",
+    "ABA",
+    "AB",
+    "A",
+    40,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    2250.5,
+    2250.5,
+    46022
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "",
+    "",
+    "Sample Stable Value Fund",
+    "AAD",
+    "AA",
+    "D",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    400,
+    400,
+    46022
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "",
+    "",
+    "Sample Index Fund",
+    "ABD",
+    "AB",
+    "D",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    600.75,
+    600.75,
+    46022
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "",
+    "",
+    "Loan Fund",
+    "LNA",
+    "LN",
+    "A",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    2300,
+    2300,
+    46022
+   ],
+   [
+    "987650001",
+    "TEST PERSON BRAVO",
+    "",
+    "",
+    "Sample Index Fund",
+    "ABA",
+    "AB",
+    "A",
+    100,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    8000,
+    8000,
+    46022
+   ]
+  ],
+  "ELECTIONS": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Fund Code",
+    "Source Code",
+    "Percent",
+    "As Of Date"
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "AA",
+    "A",
+    60,
+    46022
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "AB",
+    "A",
+    40,
+    46022
+   ],
+   [
+    "987650001",
+    "TEST PERSON BRAVO",
+    "AB",
+    "A",
+    100,
+    46022
+   ]
+  ],
+  "LOAN_HEADER": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Loan Number",
+    "Issuance Date",
+    "Repayment Amount",
+    "Payment Frequency",
+    "Interest Rate",
+    "First Payment Date",
+    "Loan Status",
+    "Loan Amount",
+    "Loan Balance",
+    "As Of Date"
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "001",
+    45000,
+    98.5,
+    "B",
+    5.25,
+    "",
+    "N",
+    5000,
+    3800,
+    46022
+   ]
+  ],
+  "LOAN_SOURCE": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Loan Number",
+    "Source",
+    "Loan Amount",
+    "Loan Balance",
+    "Loan Status",
+    "As Of Date"
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "001",
+    "401(k) Deferral",
+    3000,
+    2300,
+    "N",
+    46022
+   ],
+   [
+    "012345678",
+    "TEST PERSON ALPHA",
+    "001",
+    "Employer Match",
+    2000,
+    1500,
+    "N",
+    46022
+   ]
+  ]
+ }
+}

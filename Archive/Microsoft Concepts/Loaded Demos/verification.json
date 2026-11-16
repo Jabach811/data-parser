@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-11-08T06:56:58.981Z",
+  "results": [
+    {
+      "name": "Workbook Studio",
+      "opensPreloaded": true,
+      "originalScriptsPreserved": true,
+      "participants": 4,
+      "reports": 8,
+      "grandTotal": "27,560.85",
+      "reportNavigation": true,
+      "exportPreview": true,
+      "newCaseClears": true,
+      "reopenReloadsDemo": true,
+      "narrowLayout": true,
+      "errors": []
+    },
+    {
+      "name": "Review Inbox",
+      "opensPreloaded": true,
+      "originalScriptsPreserved": true,
+      "participants": 4,
+      "reports": 8,
+      "grandTotal": "27,560.85",
+      "reportNavigation": true,
+      "exportPreview": true,
+      "newCaseClears": true,
+      "reopenReloadsDemo": true,
+      "narrowLayout": true,
+      "errors": []
+    },
+    {
+      "name": "Team Workspace",
+      "opensPreloaded": true,
+      "originalScriptsPreserved": true,
+      "participants": 4,
+      "reports": 8,
+      "grandTotal": "27,560.85",
+      "reportNavigation": true,
+      "exportPreview": true,
+      "newCaseClears": true,
+      "reopenReloadsDemo": true,
+      "narrowLayout": true,
+      "errors": []
+    },
+    {
+      "name": "Fluent Desktop",
+      "opensPreloaded": true,
+      "originalScriptsPreserved": true,
+      "participants": 4,
+      "reports": 8,
+      "grandTotal": "27,560.85",
+      "reportNavigation": true,
+      "exportPreview": true,
+      "newCaseClears": true,
+      "reopenReloadsDemo": true,
+      "narrowLayout": true,
+      "errors": []
+    },
+    {
+      "name": "Insights Desk",
+      "opensPreloaded": true,
+      "originalScriptsPreserved": true,
+      "participants": 4,
+      "reports": 8,
+      "grandTotal": "27,560.85",
+      "reportNavigation": true,
+      "exportPreview": true,
+      "newCaseClears": true,
+      "reopenReloadsDemo": true,
+      "narrowLayout": true,
+      "errors": []
+    }
+  ]
+}

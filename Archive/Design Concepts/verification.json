@@ -1,0 +1,87 @@
+[
+  {
+    "name": "Harbor",
+    "reports": 14,
+    "scriptsIdentical": true,
+    "idsPreserved": true,
+    "conversionDialog": true,
+    "exportPreview": true,
+    "downloadBehaviorMatchesOriginal": true,
+    "browserDownloadFailure": "canceled",
+    "workbookDownload": "QK12345   67890 - Sample Company 401(k) Plan - Full Parse.xlsx",
+    "darkAndLight": true,
+    "mobileWidths": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Meridian",
+    "reports": 14,
+    "scriptsIdentical": true,
+    "idsPreserved": true,
+    "conversionDialog": true,
+    "exportPreview": true,
+    "downloadBehaviorMatchesOriginal": true,
+    "browserDownloadFailure": "canceled",
+    "workbookDownload": "QK12345   67890 - Sample Company 401(k) Plan - Full Parse.xlsx",
+    "darkAndLight": true,
+    "mobileWidths": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Carbon",
+    "reports": 14,
+    "scriptsIdentical": true,
+    "idsPreserved": true,
+    "conversionDialog": true,
+    "exportPreview": true,
+    "downloadBehaviorMatchesOriginal": true,
+    "browserDownloadFailure": "canceled",
+    "workbookDownload": "QK12345   67890 - Sample Company 401(k) Plan - Full Parse.xlsx",
+    "darkAndLight": true,
+    "mobileWidths": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Studio",
+    "reports": 14,
+    "scriptsIdentical": true,
+    "idsPreserved": true,
+    "conversionDialog": true,
+    "exportPreview": true,
+    "downloadBehaviorMatchesOriginal": true,
+    "browserDownloadFailure": "canceled",
+    "workbookDownload": "QK12345   67890 - Sample Company 401(k) Plan - Full Parse.xlsx",
+    "darkAndLight": true,
+    "mobileWidths": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Signal",
+    "reports": 14,
+    "scriptsIdentical": true,
+    "idsPreserved": true,
+    "conversionDialog": true,
+    "exportPreview": true,
+    "downloadBehaviorMatchesOriginal": true,
+    "browserDownloadFailure": "canceled",
+    "workbookDownload": "QK12345   67890 - Sample Company 401(k) Plan - Full Parse.xlsx",
+    "darkAndLight": true,
+    "mobileWidths": [
+      390,
+      768
+    ],
+    "errors": []
+  }
+]

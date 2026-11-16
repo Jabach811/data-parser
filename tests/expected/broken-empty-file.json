@@ -1,0 +1,5 @@
+{
+ "detected": "Select a Data Source",
+ "message": "Could not tell which vendor these file(s) came from: empty.txt. Drop a complete, unmodified vendor extract, or pick the source manually.What the file looks like:empty.txt - no readable lines.",
+ "exportAllowed": false
+}

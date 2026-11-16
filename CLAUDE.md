@@ -1,8 +1,12 @@
 # Data Parser
 
-## Keep Workbook Studio in sync — every change, every time
-Any change to `Data Parser App.html` must also land in Workbook Studio. After editing the app, run:
+## The one official app
+`Workbook Studio.html` is the team app. Make every change there, directly. Nothing else gets updated.
 
-    node "Workbook Studio/sync-from-app.cjs"
+- `Workbook Studio - Demo.html` is the training copy with a fictional Fidelity case preloaded. Never edit it by hand. After any change to the app, rebuild it with `node tools/build-demo.cjs`.
+- `Archive/` holds the retired main app (`Data Parser App.html`), the old Workbook Studio build pieces and the old design concepts. Don't edit or rebuild anything in there.
 
-That rebuilds all four Workbook Studio files (Workbook Studio, Demo, Focus, Focus Demo) from the app. Then check the change in Workbook Studio - Focus.html too, not just the main app. Never edit the Workbook Studio HTML files by hand; they get overwritten. Workbook Studio's own look lives in its .css/.js files next to the builders.
+## Check every change
+After changing the app, run the vendor checks from the `tests` folder: `npm test`. Each vendor sample in `Test Samples/Vendor Files` is run through the app, and every exported sheet is compared with its saved known-good copy in `tests/expected`. Any difference fails the check.
+
+When a difference is intended (for example, a fix that changes a column), look at what changed, confirm it with Joel, then record the new known-good copies with `npm run test:update`.

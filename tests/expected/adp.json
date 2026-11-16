@@ -1,0 +1,868 @@
+{
+ "detected": "ADP",
+ "message": "5 parse anomalies — values were not changed, but this file may not be clean.5 × Record shorter than its layout (fields truncated)PH line length 568 < 588 row 1 = \"PH111223333DOE JOHN                                         \"PF line length 28 < 72 row 2 = \"PF111223333AAR7500 125000.00\"LH line length 104 < 173 row 3 = \"LH1112233331010101202302012023011520231000.00    800.00     \"Short records by report: PH (1), PF (1), LH (1), LF (2)",
+ "exportAllowed": true,
+ "sheetOrder": [
+  "Title Page",
+  "Fund and Source Breakdown",
+  "Balance Export",
+  "CONV FILE",
+  "Deferrals",
+  "Roth Basis",
+  "Loan Header",
+  "Loan Source",
+  "YOS",
+  "YTD Hours",
+  "YTD",
+  "Prior Year",
+  "CIT Elections",
+  "PH",
+  "PF",
+  "LH",
+  "LF"
+ ],
+ "sheets": {
+  "Title Page": [
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "DATA CONVERSION SUMMARY",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "PLAN INFORMATION",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Plan Name",
+    "Test Plan",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Case Number",
+    "AB12345   67890",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Data Source",
+    "ADP",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "REPORT INDEX",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Report Code",
+    "Report Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "PH",
+    "PH",
+    1,
+    ""
+   ],
+   [
+    "",
+    "PF",
+    "PF",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LH",
+    "LH",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LF",
+    "LF",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "SUPPORTING SHEETS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Sheet Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Fund and Source Breakdown",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Balance Export",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CONV FILE",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Deferrals",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Roth Basis",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Source",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "YOS",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "YTD Hours",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "YTD",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Prior Year",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CIT Elections",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "EXPORT DETAILS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Input File Name",
+    "2 files selected",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Mapping File",
+    "No validated mapping workbook",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Export Status",
+    "No mapping uploaded - raw export only",
+    "",
+    ""
+   ]
+  ],
+  "Fund and Source Breakdown": [
+   [
+    "Case Number",
+    "Type",
+    "Code",
+    "Total",
+    "",
+    "Case Number",
+    "Type",
+    "Code",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "R",
+    0,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "AA",
+    0
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "Source Total (1)",
+    0,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Fund Total (1)",
+    0
+   ]
+  ],
+  "Balance Export": [
+   [
+    "Case Number",
+    "Region",
+    "SSN",
+    "Source",
+    "Fund",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "111223333",
+    "R",
+    "AA",
+    0
+   ]
+  ],
+  "CONV FILE": [
+   [
+    "Case Number",
+    "Prior Fund Code",
+    "TA Fund Code",
+    "Total",
+    "Ref Number",
+    "Source I",
+    "Re Reg"
+   ],
+   [
+    "AB12345   67890",
+    "AA",
+    "",
+    0,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Deferrals": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Before-Tax Deferral Percent",
+    "Roth Deferral Percent",
+    "Source ID",
+    "Contribution Allocation Percent",
+    "Gross Contributions Year-to-date"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    4,
+    2,
+    "R",
+    75,
+    1250
+   ]
+  ],
+  "Roth Basis": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Roth First Contribution Date",
+    "ROTH TAX BASIS",
+    "Post-1986 Employee After-Tax Contributions",
+    "Pre-1987 Employee After-Tax Contributions",
+    "Roth Rollover"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    44621,
+    275,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Loan Header": [
+   [
+    "Social Security Number",
+    "Index",
+    "Loan Original Amount",
+    "Date of Loan Issue Date",
+    "Loan Payment Frequency",
+    "Loan Payment Amount",
+    "Loan Balance Current",
+    "Default Date",
+    "Deemed Amount",
+    "Loan Interest Rate",
+    "Loan Payoff Date"
+   ],
+   [
+    "111223333",
+    1,
+    1000,
+    44927,
+    "",
+    75,
+    800,
+    "",
+    0,
+    6.5,
+    45658
+   ]
+  ],
+  "Loan Source": [
+   [
+    "Social Security Number",
+    "Index",
+    "Source ID",
+    "Original Loan Amount",
+    "Principal Amount Repaid",
+    "Interest Amount Repaid"
+   ],
+   [
+    "111223333",
+    1,
+    "R",
+    700,
+    200,
+    25
+   ],
+   [
+    "111223333",
+    1,
+    "E",
+    300,
+    75,
+    10
+   ]
+  ],
+  "YOS": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Years of Service"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    3
+   ]
+  ],
+  "YTD Hours": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Current Year-to-date Hours of Service"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    1540
+   ]
+  ],
+  "YTD": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Current Year-to-date Hours of Service",
+    "415 Compensation - Current Period - Sign",
+    "415 Compensation - Current Period",
+    "Catch-up Year-to-date Sign",
+    "Catch-up Year-to-date Amount",
+    "Gross Contributions Year-to-date - Sign",
+    "Gross Contributions Year-to-date"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    1540,
+    "",
+    "",
+    "",
+    "",
+    "",
+    1250
+   ]
+  ],
+  "Prior Year": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "415 Contributions - Prior Period - Sign",
+    "415 Contributions - Prior Period",
+    "415 Compensation - Prior Period - Sign",
+    "415 Compensation - Prior Period",
+    "401(k) Before-Tax Contributions - Prior Year - Sign",
+    "401(k) Before-Tax Contributions - Prior Year",
+    "Catch-up Prior Year-to-date Sign",
+    "Catch-up Prior Year-to-date Amount"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "CIT Elections": [
+   [
+    "Case Number",
+    "SSN",
+    "Source ID",
+    "Fund ID",
+    "Percent",
+    "Default"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "R",
+    "AA",
+    75,
+    "N"
+   ]
+  ],
+  "PH": [
+   [
+    "Record ID",
+    "Social Security Number",
+    "Name",
+    "Employee File Number",
+    "Status",
+    "Date of Birth",
+    "Date of Hire",
+    "Date of Plan Entry/Eligibility",
+    "Date of Termination",
+    "Date of Suspension",
+    "Date of Alternate Vesting",
+    "Years of Service",
+    "Current Year-to-date Hours of Service",
+    "401(k) EE Contributions - Taxed by State - Sign",
+    "401(k) EE Contributions - Taxed by State",
+    "Eligible Rollover Distributions This Year - Sign",
+    "Eligible Rollover Distributions This Year",
+    "Vesting Override Percent",
+    "Vesting Override Flag",
+    "Location ID Number (ADP Company Code)",
+    "Pre-1987 Employee After-Tax Contributions - Sign",
+    "Pre-1987 Employee After-Tax Contributions",
+    "Buy-Back Employer After-Tax Contributions - Sign",
+    "Buy-Back Employer After-Tax Contributions",
+    "Participant Address - Line 1",
+    "Participant Address - Line 2",
+    "Participant Address - City",
+    "Participant Address - State",
+    "Participant Address - Zip Code",
+    "Alternate State for Tax Purposes",
+    "415 Contributions - Current Period - Sign",
+    "415 Contributions - Current Period",
+    "415 Contributions - Prior Period - Sign",
+    "415 Contributions - Prior Period",
+    "415 Compensation - Current Period - Sign",
+    "415 Compensation - Current Period",
+    "415 Compensation - Prior Period - Sign",
+    "415 Compensation - Prior Period",
+    "Before-Tax Deferral Percent",
+    "Leave of Absence Date",
+    "Protected Benefit Amount - Sign",
+    "Protected Benefit Amount",
+    "NEC Contributions - Sign",
+    "NEC Contributions",
+    "401(k) Elective Deferrals - Hardship Amount - Sign",
+    "401(k) Elective Deferrals - Hardship Amount",
+    "401(k) Before-Tax Contributions - Current Year - Sign",
+    "401(k) Before-Tax Contributions - Current Year",
+    "401(k) Before-Tax Contributions - Prior Year - Sign",
+    "401(k) Before-Tax Contributions - Prior Year",
+    "Post-1986 Employee After-Tax Contributions - Sign",
+    "Post-1986 Employee After-Tax Contributions",
+    "Insider Flag",
+    "Pay Frequency",
+    "Union Indicator",
+    "HCE Indicator",
+    "Excluded Class Indicator",
+    "After-Tax Deferral Percent",
+    "Termination Rehire Flag",
+    "Rehire Date",
+    "Employer Match Eligibility Date",
+    "Key Employee Indicator",
+    "QDRO Pending",
+    "Beneficiary Code",
+    "Rollover Acct Type",
+    "Term Reason Code",
+    "Disability Date",
+    "Minimum Distribution Eligibility Date",
+    "Eligible Date",
+    "Auto Rebalance Flag",
+    "Before-Tax Deferral Percent Change Date",
+    "Save Smart Annual Increment Percent",
+    "Save Smart Maximum Deferral Percent",
+    "Save Smart Month",
+    "Catch-up Percent",
+    "Catch-up Deferral Change Date",
+    "Catch-up Year-to-date Sign",
+    "Catch-up Year-to-date Amount",
+    "Catch-up Prior Year-to-date Sign",
+    "Catch-up Prior Year-to-date Amount",
+    "Catch-up Contribution Per Pay Period Sign",
+    "Catch-up Contribution Per Pay Period",
+    "Roth Deferral Percent",
+    "Roth First Contribution Date",
+    "Roth Last Deferral Change Date",
+    "Roth Catch-up Deferral Percentage",
+    "ROTH TAX BASIS",
+    "Before Tax Contribution Amount",
+    "Roth Contribution Amount",
+    "Roth Catch-up Amount"
+   ],
+   [
+    "PH",
+    "111223333",
+    "DOE JOHN",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    3,
+    1540,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    4,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    2,
+    44621,
+    "",
+    "",
+    275,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "PF": [
+   [
+    "Record ID",
+    "Social Security Number",
+    "Fund ID",
+    "Source ID",
+    "Contribution Allocation Percent",
+    "Gross Contributions Year-to-date - Sign",
+    "Gross Contributions Year-to-date",
+    "Conversion Balance-Market Value - Sign",
+    "Conversion Balance-Market Value",
+    "Cost Balance - Sign",
+    "Cost Balance",
+    "Share Balance - Sign",
+    "Share Balance",
+    "Vested Percent"
+   ],
+   [
+    "PF",
+    "111223333",
+    "AA",
+    "R",
+    75,
+    "",
+    1250,
+    "",
+    0,
+    "",
+    0,
+    "",
+    0,
+    0
+   ]
+  ],
+  "LH": [
+   [
+    "Record ID",
+    "Social Security Number",
+    "Loan Number",
+    "Date of Loan Issue Date",
+    "Date of Next Loan Payment",
+    "Date of Previous Loan Payment",
+    "Loan Original Amount",
+    "Loan Balance Current",
+    "Loan Interest Rate",
+    "Loan Payment Amount",
+    "Loan Payment Frequency",
+    "Loan Payoff Date",
+    "Loan Use Indicator",
+    "Principal in Arrears",
+    "Interest in Arrears",
+    "Loan Total Expected Interest",
+    "Loan Original Number of Payments",
+    "Loan Total Interest Paid to Date",
+    "Deemed Distributed Loan Indicator",
+    "Payroll Loan Number",
+    "Loan Inactive Date",
+    "Loan Inactive Flag",
+    "Refinance Date",
+    "Next Periodic Interest Date"
+   ],
+   [
+    "LH",
+    "111223333",
+    "101",
+    44927,
+    44958,
+    44941,
+    1000,
+    800,
+    6.5,
+    75,
+    "",
+    45658,
+    "",
+    0,
+    0,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "LF": [
+   [
+    "Record ID",
+    "Social Security Number",
+    "Fund ID",
+    "Source ID",
+    "Loan Number",
+    "Original Loan Amount Sign",
+    "Original Loan Amount",
+    "Principal Amount Repaid Sign",
+    "Principal Amount Repaid",
+    "Interest Amount Repaid Sign",
+    "Interest Amount Repaid"
+   ],
+   [
+    "LF",
+    "111223333",
+    "AA",
+    "R",
+    "101",
+    "",
+    700,
+    "",
+    200,
+    "",
+    25
+   ],
+   [
+    "LF",
+    "111223333",
+    "BB",
+    "E",
+    "101",
+    "",
+    300,
+    "",
+    75,
+    "",
+    10
+   ]
+  ]
+ }
+}

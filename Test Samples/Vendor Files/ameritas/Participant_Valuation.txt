@@ -1,0 +1,89 @@
+PAGE    1      RPT-957                PARTICIPANT VALUATION SUMMARY                      AS OF 2026/11/03        307  19:50
+
+PLAN 3-99999     SAMPLE ASSOCIATES INC          401(K) PLAN
+
+
+    ______________________________________________________________________________________________________________________________________
+  900-11-0001                              STATUS: TERM      30     LOCATION:          YRS-SVC:     3
+  =>SAMPLE, ALPHA               1 TEST DRIVE
+                                                                                          FAKETOWN                  NY 11111
+                                                       401K EE:        76.51                          NET ROTH:        76.51
+  BIRTH: 1972/05/05          HIRE: 2018/12/24          ENTRY: 2020/01/01        VEST: 2019/01/01        CNTB: 2021/02/05
+  TRNF: 2025/05/02          TERM: 2021/09/30
+
+     * * * * * * * * * * * * *   V E S T I N G   I N F O R M A T I O N   * * * * * * * * * * * * *
+  SOURCE          VESTED %    VESTED AMT   SOURCE          VESTED %   VESTED AMT   SOURCE          VESTED %   VESTED AMT
+  EMPLOYEE SAL    **A 100.00        0.00 /  ROTH DEFERRA    **B 100.00      107.69 /  EMPLOYER SAF   **V 100.00     107.69
+  TOTAL VESTED BALANCE          215.38
+
+                           ALLOC       BEG BAL      * * * * * * * * *   A C T I V I T Y   * * * * * * * * *                            END BAL
+    DESCRIPTION        ID   PCNT    2026/01/01       CONTRIB          EARNINGS         PAYMENTS           LOANS           OTHER     2026/11/03
+    HAND EE ROTH       BUB 100.0%        99.83           .00              7.88              .00               .00           .02-A       107.69
+    HAND ER SAFE HARB  BUV 100.0%        99.84           .00              7.88              .00               .00           .03-A       107.69
+    ** TOTAL                            199.67           .00             15.76              .00               .00           .05-A       215.38
+    ***** INVESTMENTS
+    HAND BEN TR        BU* 100.0%       199.67           .00             15.76              .00               .00           .05-A       215.38
+    ***** SOURCES
+    ROTH DEFERRAL      **B               99.83           .00              7.88              .00               .00           .02-A       107.69
+    EMPLOYER SAFE HAR  **V               99.84           .00              7.88              .00               .00           .03-A       107.69
+
+
+    ______________________________________________________________________________________________________________________________________
+  900-11-0002                              STATUS: ACTIVE    00     LOCATION:          YRS-SVC:     3
+  =>SAMPLE, BRAVO J             2 TEST ROAD
+                                                                                          MOCKVILLE                 NY 22222
+                                                       401K EE:        19,267.55                          NET ROTH:        19,267.55
+  BIRTH: 1972/05/05          HIRE: 2018/12/24          ENTRY: 2020/01/01        VEST: 2019/01/01        CNTB: 2021/02/05
+  TRNF: 2025/05/02          TERM: 2021/09/30
+
+     * * * * * * * * * * * * *   V E S T I N G   I N F O R M A T I O N   * * * * * * * * * * * * *
+  SOURCE          VESTED %    VESTED AMT   SOURCE          VESTED %   VESTED AMT   SOURCE          VESTED %   VESTED AMT
+  QUALIFIED RO    **9 100.00     1412.37 /  EMPLOYEE SAL    **A 100.00        0.00 /  ROTH DEFERRA   **B 100.00   27974.67
+  EMPLOYER SAF    **V 100.00    27981.00 /
+  TOTAL VESTED BALANCE        57368.04
+
+    F-FORF D-DIVIDEND U-UNREALIZED W-WDRL T-TERM PMT L-LOAN ISSUE P-PRINC PMT I-INT PMT X-XFER M-MISC C-CONV A-FEE ASSESSED N-INSURANCE
+    Y-PLAN XFER
+PAGE    2      RPT-957                PARTICIPANT VALUATION SUMMARY                      AS OF 2026/11/03        307  19:50
+
+PLAN 3-99999     SAMPLE ASSOCIATES INC          401(K) PLAN
+
+
+     **** CONTINUATION OF PARTICIPANT 900-11-0002            SAMPLE, BRAVO J
+
+                           ALLOC       BEG BAL      * * * * * * * * *   A C T I V I T Y   * * * * * * * * *                            END BAL
+    DESCRIPTION        ID   PCNT    2026/01/01       CONTRIB          EARNINGS         PAYMENTS           LOANS           OTHER     2026/11/03
+    LOAN QUAL ROLL     909   0.0%       152.21           .00              4.78              .00               .00         95.62-X        61.37
+    LOAN EE ROTH       90B   0.0%     1,582.36           .00             49.58              .00               .00        993.92-X       638.02
+    HAND QUAL ROLL     BU9 100.0%     1,162.59           .00             93.61              .00           90.84 P           .82-A     1,351.00
+                                                                                                           4.78 I
+    HAND EE ROTH       BUB 100.0%    24,412.84           .00          1,946.76              .00          944.34 P         16.87-A    27,336.65
+                                                                                                          49.58 I
+    ** TOTAL                         25,727.64           .00          2,045.15              .00        1,035.18 P         95.62-X    28,749.02
+                                                                                                          54.36 I         17.69-A
+
+    ***** INVESTMENTS
+    LOAN FUND          90*   0.0%       152.21           .00              4.78              .00               .00         95.62-X        61.37
+    HAND BEN TR        BU* 100.0%    25,575.43           .00          2,040.37              .00        1,035.18 P         17.69-A    28,687.65
+                                                                                                          54.36 I
+
+    ***** SOURCES
+    QUALIFIED ROLLOVE  **9            1,314.80           .00             98.39              .00           90.84 P         95.62-X     1,412.37
+                                                                                                           4.78 I           .82-A
+    ROTH DEFERRAL      **B           24,412.84           .00          1,946.76              .00          944.34 P         16.87-A    27,336.65
+                                                                                                          49.58 I
+
+
+    ______________________________________________________________________________________________________________________________________
+  =>PLAN TOTALS
+
+                           ALLOC       BEG BAL      * * * * * * * * *   A C T I V I T Y   * * * * * * * * *                            END BAL
+    DESCRIPTION        ID   PCNT    2026/01/01       CONTRIB          EARNINGS         PAYMENTS           LOANS           OTHER     2026/11/03
+    HAND EE ROTH       BUB                0.10           .00               .00              .00               .00                         0.10
+    HAND ER SAFE HARB  BUB                0.20           .00               .00              .00               .00                         0.20
+    HAND QUAL ROLL     BU9          335,775.19           .00               .00              .00               .00                   335,775.19
+    HAND QUAL ROLL     AX9                0.20           .00               .00              .00               .00                         0.20
+
+    ______________________________________________________________________________________________________________________________________
+    F-FORF D-DIVIDEND U-UNREALIZED W-WDRL T-TERM PMT L-LOAN ISSUE P-PRINC PMT I-INT PMT X-XFER M-MISC C-CONV A-FEE ASSESSED N-INSURANCE
+    Y-PLAN XFER

@@ -1,0 +1,41 @@
+{
+  "source": "Data Parser App.html",
+  "sha256": "f715b08714156a30ef826015fbe7d5ca4456fe1b572d127d695473981dc3b36a",
+  "concepts": [
+    {
+      "key": "harbor",
+      "name": "Harbor",
+      "tag": "Clear, confident, blue.",
+      "description": "A full-width navy masthead, sharp blue controls and an open, spacious workspace.",
+      "accent": "#164bc4"
+    },
+    {
+      "key": "meridian",
+      "name": "Meridian",
+      "tag": "Calm, considered, green.",
+      "description": "A large serif wordmark, soft green surfaces and generous spacing for a calmer review.",
+      "accent": "#32634b"
+    },
+    {
+      "key": "carbon",
+      "name": "Carbon",
+      "tag": "Focused, technical, dark.",
+      "description": "A compact graphite console with cyan selection markers, square controls and precise data typography.",
+      "accent": "#06748d"
+    },
+    {
+      "key": "studio",
+      "name": "Studio",
+      "tag": "Soft, spacious, modern.",
+      "description": "A lavender canvas, rounded white work surfaces and large, friendly typography.",
+      "accent": "#714ac0"
+    },
+    {
+      "key": "signal",
+      "name": "Signal",
+      "tag": "Direct, architectural, red.",
+      "description": "A fixed identity rail, white workbench and restrained red accents that make actions easy to spot.",
+      "accent": "#b92f3b"
+    }
+  ]
+}

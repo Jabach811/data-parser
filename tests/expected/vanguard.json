@@ -1,0 +1,522 @@
+{
+ "detected": "VANGUARD",
+ "message": "",
+ "exportAllowed": true,
+ "sheetOrder": [
+  "Title Page",
+  "Fund and Source Breakdown",
+  "Balance Export",
+  "CONV FILE",
+  "Deferrals",
+  "Loan Header",
+  "Loan Source",
+  "BALANCES",
+  "ELECTIONS",
+  "LOAN_HEADER",
+  "LOAN_SOURCE"
+ ],
+ "sheets": {
+  "Title Page": [
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "DATA CONVERSION SUMMARY",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "PLAN INFORMATION",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Plan Name",
+    "Test Plan",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Case Number",
+    "AB12345   67890",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Data Source",
+    "VANGUARD",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "REPORT INDEX",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Report Code",
+    "Report Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "BALANCES",
+    "Balances",
+    1,
+    ""
+   ],
+   [
+    "",
+    "ELECTIONS",
+    "Elections",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LOAN_HEADER",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LOAN_SOURCE",
+    "Loan Source",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "SUPPORTING SHEETS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Sheet Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Fund and Source Breakdown",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Balance Export",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CONV FILE",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Deferrals",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Source",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "EXPORT DETAILS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Input File Name",
+    "2 files selected",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Mapping File",
+    "No validated mapping workbook",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Export Status",
+    "No mapping uploaded - raw export only",
+    "",
+    ""
+   ]
+  ],
+  "Fund and Source Breakdown": [
+   [
+    "Case Number",
+    "Type",
+    "Code",
+    "Total",
+    "",
+    "Case Number",
+    "Type",
+    "Code",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "EE",
+    1125,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "FUND01",
+    1125
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "Source Total (1)",
+    1125,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Fund Total (1)",
+    1125
+   ]
+  ],
+  "Balance Export": [
+   [
+    "Case Number",
+    "Region",
+    "SSN",
+    "Source",
+    "Fund",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "111223333",
+    "EE",
+    "FUND01",
+    1125
+   ]
+  ],
+  "CONV FILE": [
+   [
+    "Case Number",
+    "Prior Fund Code",
+    "TA Fund Code",
+    "Total",
+    "Ref Number",
+    "Source I",
+    "Re Reg"
+   ],
+   [
+    "AB12345   67890",
+    "FUND01",
+    "",
+    1125,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Deferrals": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Election Type",
+    "Source Code",
+    "Value Type",
+    "Percent",
+    "Amount",
+    "Effective Date",
+    "As Of Date"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "CURRENT",
+    "EE",
+    "PCT",
+    6,
+    "",
+    45292,
+    ""
+   ]
+  ],
+  "Loan Header": [
+   [
+    "Social Security Number",
+    "Index",
+    "Original Loan Amount",
+    "Original Loan Issue Date",
+    "Loan Repayment Frequency",
+    "Loan Payment Amount",
+    "Outstanding Loan Balance",
+    "Default Date",
+    "Deemed Amount",
+    "Loan Interest Rate",
+    "Loan Payoff Date"
+   ],
+   [
+    "111223333",
+    1,
+    1000,
+    44927,
+    "6-BI-WEEKLY",
+    50,
+    750,
+    "",
+    0,
+    6.25,
+    45658
+   ]
+  ],
+  "Loan Source": [
+   [
+    "Social Security Number",
+    "Index",
+    "Source Code",
+    "Loan Balance In Source",
+    "ITD Loan Principal Repaid",
+    "As Of Date"
+   ],
+   [
+    "111223333",
+    1,
+    "EE",
+    500,
+    150,
+    ""
+   ],
+   [
+    "111223333",
+    1,
+    "ER",
+    250,
+    75,
+    ""
+   ]
+  ],
+  "BALANCES": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Status",
+    "Status Code",
+    "Fund Code",
+    "Source Code",
+    "Shares Units",
+    "Net Contributions",
+    "Earnings",
+    "Current Balance",
+    "Cost Basis",
+    "Allocation Percent",
+    "As Of Date"
+   ],
+   [
+    "111223333",
+    "DOE JOHN",
+    "ACTIVE",
+    "00",
+    "FUND01",
+    "EE",
+    10,
+    1000,
+    25,
+    1125,
+    1000,
+    6,
+    ""
+   ]
+  ],
+  "ELECTIONS": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Election Type",
+    "Source Code",
+    "Value Type",
+    "Percent",
+    "Amount",
+    "Effective Date",
+    "Change Reason Code",
+    "As Of Date"
+   ],
+   [
+    "111223333",
+    "DOE JOHN",
+    "CURRENT",
+    "EE",
+    "PCT",
+    6,
+    "",
+    45292,
+    "INIT",
+    ""
+   ]
+  ],
+  "LOAN_HEADER": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Loan Number",
+    "Original Loan Amount",
+    "Outstanding Loan Balance",
+    "Loan Interest Rate",
+    "Original Loan Issue Date",
+    "Vanguard Loan Issue Date",
+    "Next Scheduled Payment Date",
+    "Loan Payoff Date",
+    "Loan Payment Amount",
+    "Loan Repayment Option",
+    "Loan Repayment Frequency",
+    "Loan Use Flag",
+    "Loan Type Flag",
+    "As Of Date"
+   ],
+   [
+    "111223333",
+    "DOE JOHN",
+    "001",
+    1000,
+    750,
+    6.25,
+    44927,
+    44928,
+    45323,
+    45658,
+    50,
+    "1-REPAY TO CONTRIBUTION ALLOCATIONS",
+    "6-BI-WEEKLY",
+    "0-GENERAL PURPOSE",
+    "0-CONVENTIONAL",
+    ""
+   ]
+  ],
+  "LOAN_SOURCE": [
+   [
+    "Participant Id",
+    "Participant Name",
+    "Loan Number",
+    "Source Code",
+    "Loan Balance In Source",
+    "ITD Loan Principal Repaid",
+    "As Of Date"
+   ],
+   [
+    "111223333",
+    "DOE JOHN",
+    "001",
+    "EE",
+    500,
+    150,
+    ""
+   ],
+   [
+    "111223333",
+    "DOE JOHN",
+    "001",
+    "ER",
+    250,
+    75,
+    ""
+   ]
+  ]
+ }
+}

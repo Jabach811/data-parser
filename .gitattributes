@@ -1,0 +1,11 @@
+# Disable ALL end-of-line conversion for this repo.
+#
+# Why: this repo stores fixed-width vendor extracts (Voya, Newport, ADP,
+# Paychex, OneAmerica, Vanguard, BASEREMIT 773/553-char lines, ...) where
+# field positions are byte offsets. Any automatic CRLF<->LF rewrite by git
+# would shift column alignment in the fixtures and silently change what the
+# parser reads. Bytes must round-trip exactly.
+#
+# This also stops git from reporting whole-file "modifications" that are
+# nothing but line-ending flips, which makes real diffs reviewable.
+* -text

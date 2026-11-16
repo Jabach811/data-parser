@@ -1,0 +1,671 @@
+{
+ "detected": "NATIONWIDE",
+ "message": "5 parse anomalies — values were not changed, but this file may not be clean.5 × Record shorter than its layout (fields truncated)PR line length 121 < 184 row 1 = \"PR111223333          5.50            0.00            100.00 \"PT line length 595 < 702 row 2 = \"PT111223333                                                 \"LN line length 140 < 378 row 3 = \"LN111223333L0001950.00           2023-02-011000.00          \"Short records by report: PR (1), PT (1), LN (1), LD (2)",
+ "exportAllowed": true,
+ "sheetOrder": [
+  "Title Page",
+  "Deferrals",
+  "Roth Basis",
+  "Loan Header",
+  "Loan Source",
+  "YTD",
+  "Prior Year",
+  "PT",
+  "LN",
+  "LD",
+  "PR"
+ ],
+ "sheets": {
+  "Title Page": [
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "DATA CONVERSION SUMMARY",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "PLAN INFORMATION",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Plan Name",
+    "Test Plan",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Case Number",
+    "AB12345   67890",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Data Source",
+    "NATIONWIDE",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "REPORT INDEX",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Report Code",
+    "Report Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "PT",
+    "PT",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LN",
+    "LN",
+    1,
+    ""
+   ],
+   [
+    "",
+    "LD",
+    "LD",
+    2,
+    ""
+   ],
+   [
+    "",
+    "PR",
+    "PR",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "SUPPORTING SHEETS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Sheet Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Deferrals",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Roth Basis",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Header",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Source",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "YTD",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Prior Year",
+    1,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "EXPORT DETAILS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Input File Name",
+    "NWI_vendor_summary_test.txt",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Mapping File",
+    "No validated mapping workbook",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Export Status",
+    "No mapping uploaded - raw export only",
+    "",
+    ""
+   ]
+  ],
+  "Deferrals": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Pre-tax Rate",
+    "Post-tax Rate",
+    "Pre-tax Amount",
+    "Post-tax Amount",
+    "Roth Elective Deferral Contribution Enrollment Rate",
+    "Roth Elective Deferral Contribution Enrollment Amount"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    5.5,
+    0,
+    100,
+    0,
+    6,
+    125
+   ]
+  ],
+  "Roth Basis": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Available Hardship Withdrawal Amount",
+    "First Contribution Date",
+    "Roth Basis Amount",
+    "Roth Basis Total Loan Exclusion Amount",
+    "After-tax Basis Amount",
+    "After-tax Basis Total Loan Exclusion Amount",
+    "Pre-1987 After-tax Basis Amount",
+    "Roth Rollover"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "",
+    44927,
+    180,
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Loan Header": [
+   [
+    "Social Security Number",
+    "Index",
+    "Original Loan Amount",
+    "Loan Start Date",
+    "Loan Payment Frequency Code",
+    "Scheduled Payment Amount",
+    "Outstanding Principal Amount",
+    "Default Date",
+    "Deemed Amount",
+    "Annual Interest Rate",
+    "Loan Maturity Date"
+   ],
+   [
+    "111223333",
+    1,
+    1000,
+    44958,
+    "",
+    50,
+    950,
+    "",
+    0,
+    5.25,
+    ""
+   ]
+  ],
+  "Loan Source": [
+   [
+    "Social Security Number",
+    "Index",
+    "Money Type Code",
+    "Outstanding Amount by Money Type"
+   ],
+   [
+    "111223333",
+    1,
+    "ER",
+    600
+   ],
+   [
+    "111223333",
+    1,
+    "EE",
+    350
+   ]
+  ],
+  "YTD": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Plan YTD Salary Amount",
+    "Plan YTD Salary Change Date",
+    "Plan YTD Salary Deduction Amount",
+    "Plan YTD Salary Deduction Change Date",
+    "Plan YTD Employer Match Amount",
+    "Plan YTD Employer Match Date",
+    "Plan YTD Voluntary Money Amount",
+    "Plan YTD Roth Elective Deferral Amount",
+    "Plan YTD Roth Elective Deferral Date",
+    "Calendar YTD Salary Deduction Amount",
+    "Year to Date Hours",
+    "Year-to-Date Principal Paid Amount",
+    "Year-to-Date Interest Paid Amount",
+    "Year-to-Date Contribution Amount",
+    "Year-to-Date Distribution Amount",
+    "Year-to-Date Earnings Amount"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    200,
+    45291,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Prior Year": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Prior Year-to-Date Voluntary Money Date Value",
+    "Previous Year-End Balance Amount"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "",
+    ""
+   ]
+  ],
+  "PT": [
+   [
+    "Record Code",
+    "Participant Tax ID",
+    "Location ID",
+    "Location Name",
+    "Affiliate Tax ID",
+    "Participant Name",
+    "Participant Address 1",
+    "Participant Address 2",
+    "Participant Address 3",
+    "Participant City",
+    "State Code",
+    "Participant Zip Code",
+    "External Employee ID",
+    "Participant Birth Date",
+    "Plan Enroll Date",
+    "Employee Hire Date",
+    "Employee Termination Date",
+    "Participant Death Date",
+    "Participant Suspense Start Date",
+    "Participant Disable Date",
+    "Participant Inactive Date",
+    "Employee Retire Date",
+    "Employee Rehire Date",
+    "Participant Vest Date",
+    "Participant Status Code",
+    "Highly Compensated Employee Code",
+    "Employee Family Member Code",
+    "Key Employee Code",
+    "Former Key Employee Code",
+    "Compliance Group Code",
+    "Associated Highly Compensated Tax ID",
+    "Employee's Relative Tax ID",
+    "Participant Spouse Code",
+    "Top Ten % Owner Code",
+    "Employee Ownership Level Code",
+    "Employee Lineal Ascendant Code",
+    "Employee Lineal Descendent Code",
+    "Former Highly Compensated Employee Code",
+    "Marital Status",
+    "Plan YTD Salary Amount",
+    "Plan YTD Salary Change Date",
+    "Plan YTD Salary Deduction Amount",
+    "Plan YTD Salary Deduction Change Date",
+    "Plan YTD Employer Match Amount",
+    "Plan YTD Employer Match Date",
+    "Plan YTD Voluntary Money Amount",
+    "Prior Year-to-Date Voluntary Money Date Value",
+    "Available Hardship Withdrawal Amount",
+    "Hardship Suspension End Date Value",
+    "First Contribution Date",
+    "Plan YTD Roth Elective Deferral Amount",
+    "Plan YTD Roth Elective Deferral Date",
+    "Roth Basis Amount",
+    "Roth Basis Total Loan Exclusion Amount",
+    "After-tax Basis Amount",
+    "After-tax Basis Total Loan Exclusion Amount",
+    "Pre-1987 After-tax Basis Amount",
+    "Original Participant Tax ID",
+    "Participant Customer Gender",
+    "Calendar YTD Salary Deduction Amount",
+    "Participant Investment Elections Defaulted"
+   ],
+   [
+    "PT",
+    "111223333",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    44927,
+    200,
+    45291,
+    180,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "LN": [
+   [
+    "Record Code",
+    "Participant Tax ID",
+    "Loan ID",
+    "Outstanding Principal Amount",
+    "Loan Start Date",
+    "Original Loan Amount",
+    "Scheduled Payment Amount",
+    "Annual Interest Rate",
+    "Total Scheduled Loan Payments",
+    "Loan First Payment Due Date",
+    "Loan Payment Frequency Code",
+    "Mortgage Loan Code",
+    "Loan Deem Status Code",
+    "Loan Maturity Date",
+    "Total Loan Payments Made",
+    "Date of Last Loan Payment",
+    "Month 1 High Balance",
+    "Month 2 High Balance",
+    "Month 3 High Balance",
+    "Month 4 High Balance",
+    "Month 5 High Balance",
+    "Month 6 High Balance",
+    "Month 7 High Balance",
+    "Month 8 High Balance",
+    "Month 9 High Balance",
+    "Month 10 High Balance",
+    "Month 11 High Balance",
+    "Month 12 High Balance",
+    "Roth Basis Loan Amount",
+    "After-tax Basis Loan Amount"
+   ],
+   [
+    "LN",
+    "111223333",
+    "L0001",
+    950,
+    44958,
+    1000,
+    50,
+    5.25,
+    "",
+    44986,
+    "",
+    "",
+    "",
+    "",
+    "",
+    45292,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "LD": [
+   [
+    "Record Code",
+    "Participant Tax ID",
+    "Loan ID",
+    "Money Type Code",
+    "Outstanding Amount by Money Type",
+    "Loan-to-Date Principal Paid Amount",
+    "Loan-to-Date Interest Paid Amount",
+    "Year-to-Date Principal Paid Amount",
+    "Year-to-Date Interest Paid Amount"
+   ],
+   [
+    "LD",
+    "111223333",
+    "L0001",
+    "ER",
+    600,
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "LD",
+    "111223333",
+    "L0001",
+    "EE",
+    350,
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "PR": [
+   [
+    "Record Code",
+    "Participant Tax ID",
+    "Plan Enrollment Date",
+    "Pre-tax Rate",
+    "Post-tax Rate",
+    "Pre-tax Amount",
+    "Post-tax Amount",
+    "Status Reported Date",
+    "Passive Default Percentage Rate Used Code",
+    "Automatic Pre-tax Contribution Increase Election Code",
+    "Roth Elective Deferral Contribution Enrollment Rate",
+    "Roth Elective Deferral Contribution Enrollment Amount",
+    "Qualified Automatic Contribution Arrangement Code",
+    "Eligible Automatic Contribution Arrangement Code",
+    "Qualified Automatic Contribution Arrangement First Contribution Date",
+    "Qualified Automatic Contribution Arrangement Opt Out Date",
+    "Qualified Automatic Contribution Arrangement Next Deferral Increase Date",
+    "Eligible Automatic Contribution Arrangement Opt Out Date",
+    "Eligible Automatic Contribution Arrangement Start Date"
+   ],
+   [
+    "PR",
+    "111223333",
+    "",
+    5.5,
+    0,
+    100,
+    0,
+    "",
+    "",
+    "",
+    6,
+    125,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ]
+ }
+}

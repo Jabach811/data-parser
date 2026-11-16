@@ -1,0 +1,13 @@
+{
+  "name": "data-parser-tests",
+  "private": true,
+  "description": "Headless regression tests for Data Parser App.html",
+  "scripts": {
+    "test": "node run.js",
+    "test:update": "node run.js --update"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1",
+    "xlsx": "^0.18.5"
+  }
+}

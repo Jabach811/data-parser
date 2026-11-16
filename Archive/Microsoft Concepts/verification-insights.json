@@ -1,0 +1,24 @@
+{
+  "sourceSha256": "f715b08714156a30ef826015fbe7d5ca4456fe1b572d127d695473981dc3b36a",
+  "checkedAt": "2026-11-08T06:52:21.621Z",
+  "results": [
+    {
+      "name": "Insights Desk",
+      "originalScriptsUnchanged": true,
+      "allOriginalIdsPresent": true,
+      "parsedSample": true,
+      "reports": 8,
+      "reportSearch": true,
+      "reportSwitching": true,
+      "mappingFeedback": true,
+      "conversionAndExportPreview": true,
+      "darkMode": true,
+      "compactMode": true,
+      "responsive": [
+        390,
+        768
+      ],
+      "errors": []
+    }
+  ]
+}

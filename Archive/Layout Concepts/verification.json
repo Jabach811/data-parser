@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Explorer",
+    "originalScriptsUnchanged": true,
+    "allOriginalIdsPresent": true,
+    "reports": 14,
+    "navigation": true,
+    "mappingValidation": true,
+    "conversionPreview": true,
+    "exportPreview": true,
+    "mobile": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Guided Workflow",
+    "originalScriptsUnchanged": true,
+    "allOriginalIdsPresent": true,
+    "reports": 14,
+    "navigation": true,
+    "mappingValidation": true,
+    "conversionPreview": true,
+    "exportPreview": true,
+    "mobile": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Conversion Board",
+    "originalScriptsUnchanged": true,
+    "allOriginalIdsPresent": true,
+    "reports": 14,
+    "navigation": true,
+    "mappingValidation": true,
+    "conversionPreview": true,
+    "exportPreview": true,
+    "mobile": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Focus Workspace",
+    "originalScriptsUnchanged": true,
+    "allOriginalIdsPresent": true,
+    "reports": 14,
+    "navigation": true,
+    "mappingValidation": true,
+    "conversionPreview": true,
+    "exportPreview": true,
+    "mobile": [
+      390,
+      768
+    ],
+    "errors": []
+  },
+  {
+    "name": "Case File",
+    "originalScriptsUnchanged": true,
+    "allOriginalIdsPresent": true,
+    "reports": 14,
+    "navigation": true,
+    "mappingValidation": true,
+    "conversionPreview": true,
+    "exportPreview": true,
+    "mobile": [
+      390,
+      768
+    ],
+    "errors": []
+  }
+]

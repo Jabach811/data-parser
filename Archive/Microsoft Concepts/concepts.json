@@ -1,0 +1,46 @@
+{
+  "source": "Data Parser App.html",
+  "sha256": "f715b08714156a30ef826015fbe7d5ca4456fe1b572d127d695473981dc3b36a",
+  "concepts": [
+    {
+      "key": "workbook",
+      "name": "Workbook Studio",
+      "reference": "Excel",
+      "accent": "#107c41",
+      "description": "A familiar ribbon, a spacious worksheet and report tabs along the bottom. Files and checks live in a task pane.",
+      "structure": "Ribbon + worksheet + task pane"
+    },
+    {
+      "key": "inbox",
+      "name": "Review Inbox",
+      "reference": "Outlook",
+      "accent": "#0f6cbd",
+      "description": "Move through reports like an inbox. Folder navigation, a searchable report list and a large reading pane sit side by side.",
+      "structure": "Folders + report list + reading pane"
+    },
+    {
+      "key": "teams",
+      "name": "Team Workspace",
+      "reference": "Teams",
+      "accent": "#5b5fc7",
+      "description": "A compact app rail, report channels and a tabbed case workspace. Switch between overview, files, reports and mapping.",
+      "structure": "App rail + channels + workspace tabs"
+    },
+    {
+      "key": "desktop",
+      "name": "Fluent Desktop",
+      "reference": "Windows 11",
+      "accent": "#0067c0",
+      "description": "A calm home screen with useful shortcuts, Windows-style navigation and dedicated pages for each part of the conversion.",
+      "structure": "Navigation + home + focused pages"
+    },
+    {
+      "key": "insights",
+      "name": "Insights Desk",
+      "reference": "Power BI",
+      "accent": "#a97700",
+      "description": "Reconciliation takes the main canvas. Switch to report data while keeping the file, mapping and report panes close at hand.",
+      "structure": "Mode rail + report canvas + data pane"
+    }
+  ]
+}

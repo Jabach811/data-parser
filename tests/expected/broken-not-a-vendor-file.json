@@ -1,0 +1,5 @@
+{
+ "detected": "Select a Data Source",
+ "message": "Could not tell which vendor these file(s) came from: notes.txt. Drop a complete, unmodified vendor extract, or pick the source manually.What the file looks like:notes.txt - 3 line(s) read, first two characters were ME, CA, NO, line widths 13, 21, 23.",
+ "exportAllowed": false
+}

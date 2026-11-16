@@ -1,0 +1,350 @@
+{
+ "detected": "PRINCIPAL",
+ "message": "",
+ "exportAllowed": true,
+ "sheetOrder": [
+  "Title Page",
+  "Fund and Source Breakdown",
+  "Balance Export",
+  "CONV FILE",
+  "CIT Balances",
+  "ACCTVAL"
+ ],
+ "sheets": {
+  "Title Page": [
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "DATA CONVERSION SUMMARY",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "PLAN INFORMATION",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Plan Name",
+    "Test Plan",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Case Number",
+    "AB12345   67890",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Data Source",
+    "PRINCIPAL",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "REPORT INDEX",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Report Code",
+    "Report Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "ACCTVAL",
+    "Principal Balances",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "SUPPORTING SHEETS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Sheet Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Fund and Source Breakdown",
+    3,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Balance Export",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CONV FILE",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CIT Balances",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "EXPORT DETAILS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Input File Name",
+    "1-12345 Principal Test.xlsx",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Mapping File",
+    "No validated mapping workbook",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Export Status",
+    "No mapping uploaded - raw export only",
+    "",
+    ""
+   ]
+  ],
+  "Fund and Source Breakdown": [
+   [
+    "Case Number",
+    "Type",
+    "Code",
+    "Total",
+    "",
+    "Case Number",
+    "Type",
+    "Code",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "EE",
+    1250,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Investment A",
+    1250
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "ER",
+    750,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Investment B",
+    750
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "Source Total (2)",
+    2000,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Fund Total (2)",
+    2000
+   ]
+  ],
+  "Balance Export": [
+   [
+    "Case Number",
+    "Region",
+    "SSN",
+    "Source",
+    "Fund",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "111223333",
+    "",
+    "Investment A",
+    1250
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "111223333",
+    "",
+    "Investment B",
+    750
+   ]
+  ],
+  "CONV FILE": [
+   [
+    "Case Number",
+    "Prior Fund Code",
+    "TA Fund Code",
+    "Total",
+    "Ref Number",
+    "Source I",
+    "Re Reg"
+   ],
+   [
+    "AB12345   67890",
+    "Investment A",
+    "",
+    1250,
+    "",
+    "",
+    ""
+   ],
+   [
+    "AB12345   67890",
+    "Investment B",
+    "",
+    750,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "CIT Balances": [
+   [
+    "Case Number",
+    "SSN",
+    "Source ID",
+    "Fund ID",
+    "Amount"
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "",
+    "Investment A",
+    1250
+   ],
+   [
+    "AB12345   67890",
+    "111223333",
+    "",
+    "Investment B",
+    750
+   ]
+  ],
+  "ACCTVAL": [
+   [
+    "EE SS#",
+    "CONTRIBUTION ID",
+    "Investment",
+    "End Balance"
+   ],
+   [
+    "111223333",
+    "EE",
+    "Investment A",
+    1250
+   ],
+   [
+    "111223333",
+    "ER",
+    "Investment B",
+    750
+   ]
+  ]
+ }
+}

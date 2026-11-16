@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workbook Shapes</title>
+<style>
+:root{--ink:#233246;--navy:#274C77;--canvas:#F0F3F7;--line:#D3DCE2;--line2:#C2CED7;--soft:#E8F1F8;--head:#F3F6F9;--mute:#5F7083}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--canvas);color:var(--ink);font:13px/1.4 "Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column;padding:14px 18px;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+.top{display:flex;gap:6px}
+.top button{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:6px 14px;font-weight:600}
+.top button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.about{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.about p{margin:0;max-width:62ch}
+.about b{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.xl{flex:1;min-height:0;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+.xbar{flex:none;display:flex;gap:16px;padding:5px 12px;background:#F7F7F7;border-bottom:1px solid #E1E1E1;font-size:12px;color:#444}
+.xbar .on{color:#185C37;font-weight:600;border-bottom:2px solid #185C37}
+.fx{flex:none;display:flex;gap:8px;padding:3px 8px;border-bottom:1px solid #E1E1E1;font-size:12px;color:#666}
+.fx i{font-style:normal;width:72px;border-right:1px solid #E1E1E1}
+.status{flex:none;padding:3px 12px;background:#F7F7F7;border-top:1px solid #E1E1E1;font-size:11px;color:#666}
+.sheet{flex:1;min-height:0;overflow:auto;position:relative}
+.inner{display:grid;grid-template-columns:30px auto auto;width:max-content;min-width:100%}
+.cl{display:flex;height:22px;background:#EFEFEF;border-bottom:1px solid #D0D0D0;position:sticky;top:0;z-index:3}
+.cl span{flex:none;text-align:center;font-size:11px;line-height:22px;color:#555;border-right:1px solid #D0D0D0}
+.corner{position:sticky;left:0;top:0;z-index:6;background:#EFEFEF;border:solid #D0D0D0;border-width:0 1px 1px 0;height:22px}
+.cl.l{left:30px;z-index:5}
+.gut{position:sticky;left:0;z-index:3;background:#EFEFEF;border-right:1px solid #D0D0D0}
+.gut div{height:22px;line-height:22px;text-align:center;font-size:11px;color:#555;border-bottom:1px solid #DDD}
+.left{position:sticky;left:30px;z-index:2;display:flex;background:#fff;border-right:2px solid var(--line2)}
+.rail{width:176px;background:var(--head);border-right:1px solid var(--line);padding:0 8px 10px}
+.pin{position:sticky;top:22px;z-index:1;background:var(--head);padding:8px 2px 4px;font-weight:700;color:var(--navy)}
+.grp{font-size:11px;color:var(--mute);padding:9px 8px 2px;font-weight:600}
+.nav{display:block;width:100%;height:23px;text-align:left;border:0;background:none;border-radius:5px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav:hover{background:var(--soft)}
+.nav.on{background:var(--navy);color:#fff;font-weight:600}
+.panel{width:254px;padding:12px;display:flex;flex-direction:column;gap:7px}
+.lab{font-size:11px;color:var(--mute);font-weight:600;margin-top:3px}
+.inp{border:1px solid var(--line2);border-radius:6px;padding:4px 8px;background:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:5px 10px;font-weight:600}
+.btn.p{background:var(--navy);border-color:var(--navy);color:#fff}
+.refs{border:1px solid var(--line2);border-radius:6px;padding:4px 8px;line-height:1.55;font-variant-numeric:tabular-nums}
+.home{width:62px;background:#fff;padding:0 4px}
+.home button{position:sticky;top:26px;margin-top:4px;width:100%;border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:6px;padding:3px 0;font-weight:600}
+table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+th,td{height:22px;padding:0 8px;width:128px;min-width:128px;max-width:128px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid #E9EDF1;text-align:left;font-size:12px}
+th{position:sticky;top:22px;background:var(--navy);color:#fff;font-weight:600;font-size:11px;z-index:1}
+td.n{text-align:right}
+tr:nth-child(even) td{background:#F8FAFC}
+.note{padding:28px;color:var(--mute);width:560px}
+.form{padding:16px;display:grid;grid-template-columns:190px 300px;gap:7px 12px;align-items:center;width:560px}
+.ribbon{flex:none;display:flex;background:#fff;border-bottom:1px solid #D0D0D0;padding:6px 4px 2px;position:relative;z-index:10}
+.rg{padding:0 12px;border-right:1px solid #E1E1E1;display:flex;flex-direction:column;justify-content:space-between;gap:4px}
+.rg>small{text-align:center;color:#777;font-size:10.5px}
+.rrow{display:flex;gap:3px;align-items:stretch;min-height:50px}
+.rb{border:1px solid transparent;background:none;border-radius:3px;padding:2px 9px;font-size:12px;position:relative;white-space:nowrap}
+.rb:hover,.rb.open{background:#E8E8E8;border-color:#CFCFCF}
+.rb.cur{background:#DCE9F4;border-color:#A9C3DA}
+.drop{position:absolute;top:58px;background:#fff;border:1px solid #BDBDBD;box-shadow:0 3px 8px rgba(35,50,70,.2);padding:3px;z-index:20;min-width:190px}
+.drop button{display:block;width:100%;text-align:left;border:0;background:none;padding:4px 10px;font-size:12px}
+.drop button:hover{background:#E8E8E8}
+.caseinfo{display:flex;flex-direction:column;justify-content:center;font-size:12px;min-width:130px}
+.caseinfo span{font-variant-numeric:tabular-nums;font-weight:600}
+.page{background:var(--canvas);padding:22px 26px;flex:1;min-height:0;overflow:auto}
+.ph{font-size:21px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--mute);margin-bottom:16px}
+.cols{display:grid;grid-template-columns:repeat(5,minmax(170px,1fr));gap:14px;align-items:start}
+.colc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}
+.colc h3{margin:0 0 8px;font-size:13px}
+.tool{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:8px 2px}
+.tool:hover strong{color:var(--navy);text-decoration:underline}
+.tool strong{display:block;font-weight:600}
+.tool span{font-size:11.5px;color:var(--mute)}
+.stash{margin-top:14px;color:var(--mute);display:flex;gap:14px;align-items:center}
+.stash button{border:0;background:none;color:var(--navy);text-decoration:underline;padding:0}
+.desk{display:grid;grid-template-columns:230px 220px minmax(0,1fr);background:#fff;border:1px solid var(--line);border-radius:12px;height:calc(100% - 66px);min-height:380px;overflow:hidden}
+.desk>div{padding:14px;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:7px}
+.desk>div+div{border-left:1px solid var(--line)}
+.desk h3{margin:0;font-size:13px}
+.rep{display:flex;justify-content:space-between;gap:8px;width:100%;border:0;background:none;border-radius:5px;padding:3px 8px;font-variant-numeric:tabular-nums;flex:none}
+.rep:hover{background:var(--soft)}
+.rep.on{background:var(--navy);color:#fff;font-weight:600}
+.rep em{font-style:normal;opacity:.7}
+.results{padding:0!important}
+.rhead{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);flex:none}
+.rtable{flex:1;min-height:0;overflow:auto}
+.rtable th{top:0}
+</style>
+</head>
+<body>
+<div class="top" id="top"></div>
+<div class="about" id="about"></div>
+<div class="xl" id="xl"></div>
+<script>
+const CASE='Enter Case Number',REF='Enter Ref Numbers',COPY='COPY',CR=[CASE,REF,COPY];
+const G=[
+['Remittance',['Bill_Remit','Case_Remit','Det_Rem','Transact_Det','My Incoming Wires via Email']],
+['Financial activity',['Fin Act Pend','Fin Act Elec','Reversal']],
+['Loans',['LH Export','LS Export','Sheet1','Audit']],
+['Checks',['Adv Emp Check Day 1','NAV Check','Block Unblock']],
+['Calculators and files',['Interest Calculator','Dividend Proration','Parameter File Generator']]];
+const STASH=['MAIN PAGE','Config','Instructions'];
+const S={
+'Bill_Remit':{c:['CASE_NO','SOC_SEC_NO','TR_REF_NO','BILL_SUBM_AMT','BILL_APPLD_AMT','BILL_DT','CYC_DT','BILL_DUE_DT','CTRB_TYP_CD','DOC_NM','SRC_I','DEP_TYP_CD','SSN Formatted'],b:CR,n:116},
+'Case_Remit':{c:['CASE_NO','TR_REF_NO','REMIT_AMT','PROC_AMT','DEP_BOOK_DT','CYC_DT','DEP_EFF_DT'],b:CR,n:24},
+'Det_Rem':{c:['CASE_NO','TR_REF_NO','REPTG_1_FD_NM','REPTG_2_FD_NM','FD_DESCR_CODE','FD_CUSIP_CD','TOTAL_TRANSACTION_AMOUNT'],b:CR,n:15},
+'Transact_Det':{c:['CASE_NO','SOC_SEC_NO','TR_REF_NO','TR_AMT','TR_UNITS_AMT','CYC_DT','EFF_DT','FD_DESC_CD','MOD_TS','SRC_I','SSN Formatted'],b:CR,n:62},
+'My Incoming Wires via Email':{c:['DateTimeReceived','Amount','Ref Numer','Case Number'],b:[],n:8,noCase:1},
+'Fin Act Pend':{c:['EFF_D','CYC_D','TR_REF_NO','MOD_TS'],b:CR,n:9},
+'Fin Act Elec':{c:['ELEC_P','ELEC_A','MOD_TS','ACCOUNT_NO','SOC_SEC_NO','TR_REF_NO'],b:CR,n:11},
+'Reversal':{c:['TR_REF_NO','FD_DESC_CD','TR_REVSL_DT','Units','Difference'],b:CR,n:25},
+'LH Export':{c:['CASENUMBER','SSN','LOAN_NUMBER','INITIAL_AMOUNT','Loan Amount','REPAYMENT_AMOUNT','CYCLE_DATE','FIRST_REPAYMENT_DATE','ORIGINAL_ISSUE_DATE','FINAL_REPAYMENT_DATE','DEFAULT_DATE','REPAYMENT_FREQUENCY_CODE'],b:[CASE,'Select Source Folder',COPY],n:37,folder:1,total:1},
+'LS Export':{c:['CASE_NUMBER','LOAN_SOURCE_TOTAL','SOURCE_CODE','LOAN_NUMBER'],b:[CASE,COPY],n:37},
+'Sheet1':{c:['CASE_NO','SOC_SEC_NO','TRS_LOAN_NO','ORIGINAL_LOAN_ISSUE_DATE','ORIGINAL_LOAN_AMOUNT','LN_REPAY_FREQ_CD','LN_REPAY_AMT','TAKEOVER_BALANCE','LN_DEFAULT_DT','SRC_CD'],b:[CASE,COPY],n:7},
+'Audit':{c:['SSN','SSN Formatted','LOAN_NUM','FREQ','PMT_AMT','REMAINING_PRIN','INT_RT','DEF_DT','DEF_AMT','MATURITY_DATE','TKOVER_EFFECTIVE_DATE'],b:[],n:7,noCase:1},
+'Adv Emp Check Day 1':{c:['CASE_NO','TR_REF_NO','FD_DESCR_CODE','Total'],b:CR.concat("Enter Today's Date"),n:14,total:1},
+'NAV Check':{c:['CONT_NO','FD_NO','FD_DESC_CD','REPTG_1_FD_NM','REPTG_2_FD_NM','EFF_DT','UVAL_AMT'],b:[CASE],n:137,date:1},
+'Block Unblock':{c:['CASE_NO','SOC_SEC_NO','ACCESS_CD','PHONE_TRFR_ACC_CD','PHONE_ELCHG_ACC_CD'],b:[CASE,COPY],n:71},
+'Interest Calculator':{c:['Case Number','Regi','SSN','Source ID','Fund ID','Total','Earnings'],b:['Select File','Create File'],n:218,noCase:1},
+'Dividend Proration':{c:['Case Number','Region','SSN','Source ID','Fund ID','Conversion Balance','Proration'],b:['Select File','Create File'],n:347,noCase:1},
+'Parameter File Generator':{form:['Case Number','Effective Date','Plan Name','Mapping Effective Date','Prior Vendor','ReReg Effective Date','Test File','Source Folder'],b:['Select Source Folder','Save Parameter'],n:0,noCase:1},
+'MAIN PAGE':{note:'Your saved queries stay here, same as today.',b:['Clear Numbers','Split Numbers','Hide Queries','Show Queries'],n:0,noCase:1},
+'Config':{note:'Stashed away, same as today.',b:[],n:0,noCase:1},
+'Instructions':{note:'Stashed away, same as today.',b:[],n:0,noCase:1}};
+const FORM={'Case Number':'QK10482 00001','Effective Date':'06/30/2026','Plan Name':'Harlow Foods 401(k) Plan','Mapping Effective Date':'07/01/2026','Prior Vendor':'Sample Vendor','ReReg Effective Date':'07/15/2026','Test File':'No','Source Folder':'Conversion\\Contract\\Vendor\\Live'};
+const OPTS={
+A:['Left rail','Your tabs become a list down the left side, grouped by job. Click one to jump there. The tabs along the bottom go away.','No macro changes (macros are the recorded actions behind your buttons) on most tabs, because column A is empty and can hold the rail. The rail scrolls away on long tables, so "Menu" stays pinned to bring it back. Four tabs start their table in column A, so those tables would have to slide over first.'],
+B:['Top command bar','A new "Console" tab in Excel\'s top strip of buttons holds the navigation and the case buttons. The sheet below becomes all table.','It never scrolls away and no cell moves. It needs one small macro you paste in. The buttons will look like normal Office buttons, with no custom colors.'],
+C:['Home page','One new front page lists every tool by job. Click one to open it. Each tool has a Home button pinned in the corner.','The easiest one to build. It adds one new sheet and a link on each tab, with no macro changes. The cost is one extra click every time you switch tools.'],
+D:['One case desk','The closest to the console. Type the case number once, pick a report from the list, and see it on the same page.','The big one. The case number is already shared across all tabs, so that part is free. The hard part is showing each report on one page, because the query tables can\'t move. This page would show a live copy of the report you pick. Your existing Export stays as it is.']};
+let opt='A',cur={A:'Bill_Remit',B:'Bill_Remit',C:null,D:'Bill_Remit'},open=null;
+const FUNDS=['Stable Value Fund','Large Cap Index','Mid Cap Growth','Bond Index','Target 2045'];
+const r=(i,k)=>((i+1)*(k+7)*2654435761>>>8)%100000;
+const pad=(n,l)=>String(n).padStart(l,'0');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+function val(c,i,k){const u=c.toUpperCase();
+if(/CASE|CONT_NO/.test(u))return'QK10482 00001';
+if(/SSN|SOC_SEC/.test(u))return'900-'+pad(10+i%80,2)+'-'+pad(r(i,1)%10000,4);
+if(/REF/.test(u))return'R'+(480213+i*7);
+if(/REPTG/.test(u))return FUNDS[(i+k)%5];
+if(/FD_|FUND/.test(u))return'F'+pad(100+(i*3+k)%40,3);
+if(/LOAN_N|LOAN_NUM|TRS_LOAN/.test(u))return pad(1+i%9,3);
+if(/SRC|SOURCE_CODE|SOURCE ID/.test(u))return'S'+pad(1+i%6,2);
+if(/DATETIME|MOD_TS/.test(u))return'06/'+pad(1+i%28,2)+'/2026 9:'+pad(i%60,2);
+if(/DT|DATE|EFF_D|CYC_D/.test(u))return pad(1+(i+k)%12,2)+'/'+pad(1+i%28,2)+'/2026';
+if(/AMT|AMOUNT|TOTAL|BAL|EARN|UNITS|DIFF|PRIN|PRORATION/.test(u))return{n:(r(i,k)/7+12).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
+if(/INT_RT/.test(u))return{n:'4.25%'};
+if(/ACCOUNT/.test(u))return'A'+(70412+i);
+return['Y','N','M','A'][(i+k)%4];}
+function cell(c,i,k){const v=val(c,i,k);return v.n?`<td class="n">${v.n}</td>`:`<td>${esc(v)}</td>`;}
+function table(s){const n=Math.min(s.n,40);let h='<table><thead><tr>'+s.c.map(c=>`<th title="${esc(c)}">${esc(c)}</th>`).join('')+'</tr></thead><tbody>';
+for(let i=0;i<n;i++)h+='<tr>'+s.c.map((c,k)=>cell(c,i,k)).join('')+'</tr>';return h+'</tbody></table>';}
+function body(s){if(s.note)return`<div class="note">${s.note}</div>`;
+if(s.form)return'<div class="form">'+s.form.map(f=>`<div class="lab">${f}</div><div class="inp">${esc(FORM[f])}</div>`).join('')+'</div>';return table(s);}
+const letter=n=>{let t='';n++;while(n>0){t=String.fromCharCode(65+(n-1)%26)+t;n=Math.floor((n-1)/26)}return t};
+function panel(s){let h='';
+if(!s.noCase)h+=`<div class="lab">Case Number</div><div class="inp">QK10482 00001</div>`;
+s.b.filter(b=>b!==COPY&&b!==REF).forEach(b=>h+=`<button class="btn">${esc(b)}</button>`);
+if(s.folder)h+=`<div class="inp">...\\Conversion\\Vendor\\Live\\Loans</div>`;
+if(s.date)h+=`<div class="lab">Date</div><div class="inp">06/30/2026</div><div class="lab">Single Fund</div><div class="inp">F112</div>`;
+if(s.b.includes(REF))h+=`<div class="lab">Ref Numbers</div><div class="refs">R480213<br>R480220<br>R480227<br>R480234</div><button class="btn">${REF}</button>`;
+if(s.total)h+=`<div class="lab">Total</div><div class="inp">48,213.77</div>`;
+if(s.b.includes(COPY))h+=`<button class="btn p">COPY</button>`;
+return h;}
+function grid(s,leftHtml,widths,start){
+const rows=Math.max(s.n>40?41:s.n+1,40);let gut='';for(let i=1;i<=rows;i++)gut+=`<div>${i}</div>`;
+const lettersL=widths.map((w,i)=>`<span style="width:${w}px">${letter(i)}</span>`).join('');
+const n=s.c?s.c.length:5,w=s.c?128:112;let lettersR='';for(let i=0;i<n+6;i++)lettersR+=`<span style="width:${i<n?w:90}px">${letter(start+i)}</span>`;
+return`<div class="sheet" id="sheet"><div class="inner"><div class="corner"></div>${widths.length?`<div class="cl l">${lettersL}</div>`:'<div></div>'}<div class="cl">${lettersR}</div><div class="gut">${gut}</div>${widths.length?`<div class="left">${leftHtml}</div>`:'<div></div>'}<div>${body(s)}</div></div></div>`;}
+const chrome=(extra,active)=>`<div class="xbar">${['File','Home','Insert','Page Layout','Formulas','Data','Review','View'].map(t=>`<span>${t}</span>`).join('')}${extra?`<span class="${active?'on':''}">${extra}</span>`:''}</div>`;
+const fx=name=>`<div class="fx"><i>${name}</i><span>fx</span></div>`;
+const status=t=>`<div class="status">${t}</div>`;
+function rail(name){let h='<div class="rail"><div class="pin"><button class="nav" data-top="1" style="font-weight:700;color:var(--navy)">Menu</button></div>';
+G.forEach(([g,l])=>{h+=`<div class="grp">${g}</div>`+l.map(t=>`<button class="nav ${t===name?'on':''}" data-go="${esc(t)}" title="${esc(t)}">${esc(t)}</button>`).join('')});
+h+='<div class="grp">Stashed</div>'+STASH.map(t=>`<button class="nav ${t===name?'on':''}" data-go="${esc(t)}">${esc(t)}</button>`).join('');return h+'</div>';}
+function viewA(){const n=cur.A,s=S[n];return chrome()+fx('E1')+grid(s,rail(n)+`<div class="panel">${panel(s)}</div>`,[176,110,130,14],4)+status('Ready. No tabs along the bottom.');}
+function viewB(){const n=cur.B,s=S[n];const grp=G.map(([g,l])=>`<div style="position:relative;display:flex"><button class="rb ${l.includes(n)?'cur':''} ${open===g?'open':''}" data-menu="${esc(g)}">${esc(g)} &#9662;</button>${open===g?`<div class="drop">${l.map(t=>`<button data-go="${esc(t)}">${esc(t)}</button>`).join('')}</div>`:''}</div>`).join('');
+const acts=s.b.map(b=>`<button class="rb">${esc(b)}</button>`).join('')||'<span style="color:#888;align-self:center;padding:0 9px">None on this tab</span>';
+const st=`<div style="position:relative;display:flex"><button class="rb ${STASH.includes(n)?'cur':''} ${open==='Stashed'?'open':''}" data-menu="Stashed">Stashed &#9662;</button>${open==='Stashed'?`<div class="drop">${STASH.map(t=>`<button data-go="${esc(t)}">${t}</button>`).join('')}</div>`:''}</div>`;
+return chrome('Console',1)+`<div class="ribbon"><div class="rg"><div class="rrow">${grp}${st}</div><small>Go to</small></div><div class="rg"><div class="rrow"><div class="caseinfo">Now on<span>${esc(n)}</span>Case QK10482 00001</div></div><small>Current</small></div><div class="rg"><div class="rrow">${acts}</div><small>Actions</small></div></div>`+fx('E1')+grid(s,'',[],4)+status('Ready. No tabs along the bottom. Left panel columns are hidden.');}
+function need(s){if(s.note)return'Stashed';if(s.form)return'Fill in, save parameter';if(s.b.includes('Select File'))return'Select a file, create file';if(s.b.includes(REF))return'Case number and ref numbers';if(s.b.includes('Select Source Folder'))return'Case number and folder';if(s.b.includes(CASE))return'Case number';return'Look-up list';}
+function viewC(){const n=cur.C;if(!n)return chrome()+fx('A1')+`<div class="page"><div class="ph">Balance Queries</div><div class="sub">Pick a tool</div><div class="cols">${G.map(([g,l])=>`<div class="colc"><h3>${g}</h3>${l.map(t=>`<button class="tool" data-go="${esc(t)}"><strong>${esc(t)}</strong><span>${need(S[t])}</span></button>`).join('')}</div>`).join('')}</div><div class="stash">Stashed ${STASH.map(t=>`<button data-go="${esc(t)}">${t}</button>`).join('')}</div></div>`+status('Ready. No tabs along the bottom.');
+const s=S[n];return chrome()+fx('E1')+grid(s,`<div class="home"><button data-home="1">Home</button></div><div class="panel">${panel(s)}</div>`,[62,110,130,14],4)+status('Ready. No tabs along the bottom.');}
+function viewD(){const n=cur.D,s=S[n];const list=G.map(([g,l])=>`<div class="grp" style="padding-left:8px">${g}</div>`+l.map(t=>`<button class="rep ${t===n?'on':''}" data-go="${esc(t)}"><span>${esc(t.replace('My Incoming Wires via Email','Incoming Wires').replace('Parameter File Generator','Parameter File'))}</span><em>${S[t].n||''}</em></button>`).join('')).join('');
+const acts=s.b.filter(b=>b!==CASE&&b!==REF&&b!==COPY).map(b=>`<button class="btn">${esc(b)}</button>`).join(' ');
+return chrome()+fx('A1')+`<div class="page"><div class="ph">Balance Queries</div><div class="sub">Case workspace</div><div class="desk"><div><h3>Case</h3><div class="lab">Case Number</div><div class="inp">QK10482 00001</div><button class="btn p">${CASE}</button><div class="lab">Ref Numbers</div><div class="refs">R480213<br>R480220<br>R480227<br>R480234</div><button class="btn">${REF}</button><div class="lab">Output</div><button class="btn">Export</button></div><div><h3>Reports</h3>${list}</div><div class="results"><div class="rhead"><h3>${esc(n)}</h3><div>${acts}</div></div><div class="rtable">${body(s)}</div></div></div></div>`+status('Ready. One sheet. All other tabs run behind it.');}
+const V={A:viewA,B:viewB,C:viewC,D:viewD};
+function render(){document.getElementById('top').innerHTML=Object.keys(OPTS).map(k=>`<button class="${k===opt?'on':''}" data-opt="${k}">${k}. ${OPTS[k][0]}</button>`).join('');
+document.getElementById('about').innerHTML=`<p><b>What it is</b>${OPTS[opt][1]}</p><p><b>What it takes in Excel</b>${OPTS[opt][2]}</p>`;
+document.getElementById('xl').innerHTML=V[opt]();}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b){if(open){open=null;render()}return}const d=b.dataset;
+if(d.opt){opt=d.opt;open=null}else if(d.go){cur[opt]=d.go;open=null}else if(d.home){cur.C=null}else if(d.menu){open=open===d.menu?null:d.menu}else if(d.top){document.getElementById('sheet').scrollTop=0;return}else return;render();});
+render();
+</script>
+</body>
+</html>

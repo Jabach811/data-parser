@@ -1,0 +1,61 @@
+{
+  "sample": "Test Samples\\Vendor Files\\fidelity\\FIDELITY_special_rollover_mock.txt",
+  "sampleSha256": "78b56f6d94851f4e4f185202a012a15f75f5e2828e492ea573ac0218f9c4c934",
+  "expected": {
+    "participants": 4,
+    "reports": 8,
+    "grandTotal": "27,560.85"
+  },
+  "concepts": [
+    {
+      "key": "workbook",
+      "name": "Workbook Studio",
+      "reference": "Excel",
+      "accent": "#107c41",
+      "description": "A familiar ribbon, a spacious worksheet and report tabs along the bottom. Files and checks live in a task pane.",
+      "structure": "Ribbon + worksheet + task pane",
+      "file": "Data Parser - Workbook Studio - Demo.html",
+      "originalSha256": "0bed8a43231636794fd63f735effeb67d5ec6cd6543affebf205b6c1582077b3"
+    },
+    {
+      "key": "inbox",
+      "name": "Review Inbox",
+      "reference": "Outlook",
+      "accent": "#0f6cbd",
+      "description": "Move through reports like an inbox. Folder navigation, a searchable report list and a large reading pane sit side by side.",
+      "structure": "Folders + report list + reading pane",
+      "file": "Data Parser - Review Inbox - Demo.html",
+      "originalSha256": "4d411bc4c85c15bce0dcd0c6bafd5f3977276ef048d0d16e2171ebdb21662585"
+    },
+    {
+      "key": "teams",
+      "name": "Team Workspace",
+      "reference": "Teams",
+      "accent": "#5b5fc7",
+      "description": "A compact app rail, report channels and a tabbed case workspace. Switch between overview, files, reports and mapping.",
+      "structure": "App rail + channels + workspace tabs",
+      "file": "Data Parser - Team Workspace - Demo.html",
+      "originalSha256": "b91c28e7680b5bc02123bed42c725990d9a7f18c17c288e78e426d70c8f9406f"
+    },
+    {
+      "key": "desktop",
+      "name": "Fluent Desktop",
+      "reference": "Windows 11",
+      "accent": "#0067c0",
+      "description": "A calm home screen with useful shortcuts, Windows-style navigation and dedicated pages for each part of the conversion.",
+      "structure": "Navigation + home + focused pages",
+      "file": "Data Parser - Fluent Desktop - Demo.html",
+      "originalSha256": "b1d82cfe17e46e43477f98050e52b11213f4c2fbdc49e0ee7a07a2c777d88369"
+    },
+    {
+      "key": "insights",
+      "name": "Insights Desk",
+      "reference": "Power BI",
+      "accent": "#a97700",
+      "description": "Reconciliation takes the main canvas. Switch to report data while keeping the file, mapping and report panes close at hand.",
+      "structure": "Mode rail + report canvas + data pane",
+      "file": "Data Parser - Insights Desk - Demo.html",
+      "originalSha256": "c87c6392fde4e29fb9425d1e66a72efe7a73465713967143ce2c1a1d182a9bde"
+    }
+  ]
+}

@@ -1,0 +1,1293 @@
+{
+ "detected": "AMERITAS",
+ "message": "",
+ "exportAllowed": true,
+ "sheetOrder": [
+  "Title Page",
+  "Fund and Source Breakdown",
+  "Balance Export",
+  "CONV FILE",
+  "Loan Header",
+  "Deferrals",
+  "CIT Balances",
+  "CIT Elections",
+  "CENSUS",
+  "BAL",
+  "FUNDBAL",
+  "SRCBAL",
+  "VEST",
+  "DISB",
+  "LOANRPT",
+  "LOAN_HEADER",
+  "LOANSRC",
+  "ALLOCBASE"
+ ],
+ "sheets": {
+  "Title Page": [
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "DATA CONVERSION SUMMARY",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "PLAN INFORMATION",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Plan Name",
+    "Test Plan",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Case Number",
+    "AB12345   67890",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Data Source",
+    "AMERITAS",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "REPORT INDEX",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Report Code",
+    "Report Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "CENSUS",
+    "Ameritas Participant Census",
+    2,
+    ""
+   ],
+   [
+    "",
+    "BAL",
+    "Ameritas Balances by Fund and Source",
+    6,
+    ""
+   ],
+   [
+    "",
+    "FUNDBAL",
+    "Ameritas Balances by Fund",
+    3,
+    ""
+   ],
+   [
+    "",
+    "SRCBAL",
+    "Ameritas Balances by Source",
+    4,
+    ""
+   ],
+   [
+    "",
+    "VEST",
+    "Ameritas Vesting Information",
+    7,
+    ""
+   ],
+   [
+    "",
+    "DISB",
+    "Ameritas Disbursement Worksheet",
+    5,
+    ""
+   ],
+   [
+    "",
+    "LOANRPT",
+    "Ameritas Loan Report",
+    3,
+    ""
+   ],
+   [
+    "",
+    "LOAN_HEADER",
+    "Loan Header",
+    3,
+    ""
+   ],
+   [
+    "",
+    "LOANSRC",
+    "Ameritas Loan Source Balances",
+    2,
+    ""
+   ],
+   [
+    "",
+    "ALLOCBASE",
+    "Ameritas Participant Allocation Base",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "SUPPORTING SHEETS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Sheet Name",
+    "Record Count",
+    ""
+   ],
+   [
+    "",
+    "",
+    "Fund and Source Breakdown",
+    4,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Balance Export",
+    6,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CONV FILE",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Loan Header",
+    3,
+    ""
+   ],
+   [
+    "",
+    "",
+    "Deferrals",
+    2,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CIT Balances",
+    6,
+    ""
+   ],
+   [
+    "",
+    "",
+    "CIT Elections",
+    6,
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "EXPORT DETAILS",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Input File Name",
+    "4 files selected",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Mapping File",
+    "No validated mapping workbook",
+    "",
+    ""
+   ],
+   [
+    "",
+    "Export Status",
+    "No mapping uploaded - raw export only",
+    "",
+    ""
+   ]
+  ],
+  "Fund and Source Breakdown": [
+   [
+    "Case Number",
+    "Type",
+    "Code",
+    "Total",
+    "",
+    "Case Number",
+    "Type",
+    "Code",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "B",
+    28082.36,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "BU",
+    28903.03
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "9",
+    1412.37,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "90",
+    699.39
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "V",
+    107.69,
+    "",
+    "AB12345   67890",
+    "Fund",
+    "Fund Total (2)",
+    29602.42
+   ],
+   [
+    "AB12345   67890",
+    "Source",
+    "Source Total (3)",
+    29602.42,
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Balance Export": [
+   [
+    "Case Number",
+    "Region",
+    "SSN",
+    "Source",
+    "Fund",
+    "Total"
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "900110001",
+    "B",
+    "BU",
+    107.69
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "900110001",
+    "V",
+    "BU",
+    107.69
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "900110002",
+    "9",
+    "90",
+    61.37
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "900110002",
+    "B",
+    "90",
+    638.02
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "900110002",
+    "9",
+    "BU",
+    1351
+   ],
+   [
+    "AB12345   67890",
+    "CORP",
+    "900110002",
+    "B",
+    "BU",
+    27336.65
+   ]
+  ],
+  "CONV FILE": [
+   [
+    "Case Number",
+    "Prior Fund Code",
+    "TA Fund Code",
+    "Total",
+    "Ref Number",
+    "Source I",
+    "Re Reg"
+   ],
+   [
+    "AB12345   67890",
+    "BU",
+    "",
+    28903.030000000002,
+    "",
+    "",
+    ""
+   ],
+   [
+    "AB12345   67890",
+    "90",
+    "",
+    699.39,
+    "",
+    "",
+    ""
+   ]
+  ],
+  "Loan Header": [
+   [
+    "Social Security Number",
+    "Loan Index",
+    "Loan Amount",
+    "Loan Start Date",
+    "Loan Frequency",
+    "Payment",
+    "Outstanding Loan Balance",
+    "Status",
+    "Default Date",
+    "Deemed Amount",
+    "Interest Rate",
+    "Final Payoff Date"
+   ],
+   [
+    "900110002",
+    1,
+    2500,
+    43980,
+    "Weekly",
+    17.09,
+    0,
+    "",
+    "",
+    0,
+    0.0425,
+    45078
+   ],
+   [
+    "900110002",
+    2,
+    10416.43,
+    44700,
+    "Weekly",
+    45.31,
+    699.39,
+    "",
+    "",
+    0,
+    0.05,
+    46521
+   ],
+   [
+    "900110001",
+    3,
+    2000,
+    43526,
+    "Weekly",
+    25,
+    512.4,
+    "Defaulted",
+    44057,
+    512.4,
+    0.065,
+    45353
+   ]
+  ],
+  "Deferrals": [
+   [
+    "Case Number",
+    "Social Security Number",
+    "Amount Deferred"
+   ],
+   [
+    "AB12345   67890",
+    "900110001",
+    "0.00"
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "0.00"
+   ]
+  ],
+  "CIT Balances": [
+   [
+    "Case Number",
+    "SSN",
+    "Source ID",
+    "Fund ID",
+    "Amount"
+   ],
+   [
+    "AB12345   67890",
+    "900110001",
+    "B",
+    "BU",
+    107.69
+   ],
+   [
+    "AB12345   67890",
+    "900110001",
+    "V",
+    "BU",
+    107.69
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "9",
+    "90",
+    61.37
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "B",
+    "90",
+    638.02
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "9",
+    "BU",
+    1351
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "B",
+    "BU",
+    27336.65
+   ]
+  ],
+  "CIT Elections": [
+   [
+    "Case Number",
+    "SSN",
+    "Source ID",
+    "Fund ID",
+    "Percent",
+    "Default"
+   ],
+   [
+    "AB12345   67890",
+    "900110001",
+    "B",
+    "BU",
+    100,
+    "N"
+   ],
+   [
+    "AB12345   67890",
+    "900110001",
+    "V",
+    "BU",
+    100,
+    "N"
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "9",
+    "90",
+    0,
+    "N"
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "B",
+    "90",
+    0,
+    "N"
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "9",
+    "BU",
+    100,
+    "N"
+   ],
+   [
+    "AB12345   67890",
+    "900110002",
+    "B",
+    "BU",
+    100,
+    "N"
+   ]
+  ],
+  "CENSUS": [
+   [
+    "SSN",
+    "Last Name",
+    "First Name",
+    "Address",
+    "City",
+    "State",
+    "Zip",
+    "Status",
+    "Location",
+    "Birth",
+    "Hire",
+    "Entry",
+    "Vest",
+    "Cntb",
+    "Term",
+    "Trnf",
+    "401K EE Comp",
+    "Total Vested Balance"
+   ],
+   [
+    "900-11-0001",
+    "SAMPLE",
+    "ALPHA",
+    "1 TEST DRIVE",
+    "FAKETOWN",
+    "NY",
+    "11111",
+    "TERM",
+    "",
+    "05/05/1972",
+    "12/24/2018",
+    "01/01/2020",
+    "01/01/2019",
+    "02/05/2021",
+    "09/30/2021",
+    "05/02/2025",
+    "76.51",
+    "215.38"
+   ],
+   [
+    "900-11-0002",
+    "SAMPLE",
+    "BRAVO J",
+    "2 TEST ROAD",
+    "MOCKVILLE",
+    "NY",
+    "22222",
+    "ACTIVE",
+    "",
+    "05/05/1972",
+    "12/24/2018",
+    "01/01/2020",
+    "01/01/2019",
+    "02/05/2021",
+    "09/30/2021",
+    "05/02/2025",
+    "19267.55",
+    "57368.04"
+   ]
+  ],
+  "BAL": [
+   [
+    "SSN",
+    "Description",
+    "ID",
+    "Fund Code",
+    "Fund Name",
+    "Source Code",
+    "Source Name",
+    "Alloc Pcnt",
+    "Beg Bal",
+    "Contrib",
+    "Earnings",
+    "Payments",
+    "Loans",
+    "Other",
+    "End Bal"
+   ],
+   [
+    "900110001",
+    "HAND EE ROTH",
+    "BUB",
+    "BU",
+    "HAND BEN TR",
+    "B",
+    "ROTH DEFERRAL",
+    "100.00",
+    "99.83",
+    "0.00",
+    "7.88",
+    "0.00",
+    "0.00",
+    ".02-A",
+    "107.69"
+   ],
+   [
+    "900110001",
+    "HAND ER SAFE HARB",
+    "BUV",
+    "BU",
+    "HAND BEN TR",
+    "V",
+    "EMPLOYER SAFE HAR",
+    "100.00",
+    "99.84",
+    "0.00",
+    "7.88",
+    "0.00",
+    "0.00",
+    ".03-A",
+    "107.69"
+   ],
+   [
+    "900110002",
+    "LOAN QUAL ROLL",
+    "909",
+    "90",
+    "LOAN FUND",
+    "9",
+    "QUALIFIED ROLLOVE",
+    "0.00",
+    "152.21",
+    "0.00",
+    "4.78",
+    "0.00",
+    "0.00",
+    "95.62-X",
+    "61.37"
+   ],
+   [
+    "900110002",
+    "LOAN EE ROTH",
+    "90B",
+    "90",
+    "LOAN FUND",
+    "B",
+    "ROTH DEFERRAL",
+    "0.00",
+    "1582.36",
+    "0.00",
+    "49.58",
+    "0.00",
+    "0.00",
+    "993.92-X",
+    "638.02"
+   ],
+   [
+    "900110002",
+    "HAND QUAL ROLL",
+    "BU9",
+    "BU",
+    "HAND BEN TR",
+    "9",
+    "QUALIFIED ROLLOVE",
+    "100.00",
+    "1162.59",
+    "0.00",
+    "93.61",
+    "0.00",
+    "95.62",
+    ".82-A",
+    "1351.00"
+   ],
+   [
+    "900110002",
+    "HAND EE ROTH",
+    "BUB",
+    "BU",
+    "HAND BEN TR",
+    "B",
+    "ROTH DEFERRAL",
+    "100.00",
+    "24412.84",
+    "0.00",
+    "1946.76",
+    "0.00",
+    "993.92",
+    "16.87-A",
+    "27336.65"
+   ]
+  ],
+  "FUNDBAL": [
+   [
+    "SSN",
+    "Fund Name",
+    "Fund Code",
+    "Alloc Pcnt",
+    "Beg Bal",
+    "Contrib",
+    "Earnings",
+    "Payments",
+    "Loans",
+    "Other",
+    "End Bal"
+   ],
+   [
+    "900110001",
+    "HAND BEN TR",
+    "BU",
+    "100.00",
+    "199.67",
+    "0.00",
+    "15.76",
+    "0.00",
+    "0.00",
+    ".05-A",
+    "215.38"
+   ],
+   [
+    "900110002",
+    "LOAN FUND",
+    "90",
+    "0.00",
+    "152.21",
+    "0.00",
+    "4.78",
+    "0.00",
+    "0.00",
+    "95.62-X",
+    "61.37"
+   ],
+   [
+    "900110002",
+    "HAND BEN TR",
+    "BU",
+    "100.00",
+    "25575.43",
+    "0.00",
+    "2040.37",
+    "0.00",
+    "1089.54",
+    "17.69-A",
+    "28687.65"
+   ]
+  ],
+  "SRCBAL": [
+   [
+    "SSN",
+    "Source Name",
+    "Source Code",
+    "Beg Bal",
+    "Contrib",
+    "Earnings",
+    "Payments",
+    "Loans",
+    "Other",
+    "End Bal"
+   ],
+   [
+    "900110001",
+    "ROTH DEFERRAL",
+    "B",
+    "99.83",
+    "0.00",
+    "7.88",
+    "0.00",
+    "0.00",
+    ".02-A",
+    "107.69"
+   ],
+   [
+    "900110001",
+    "EMPLOYER SAFE HAR",
+    "V",
+    "99.84",
+    "0.00",
+    "7.88",
+    "0.00",
+    "0.00",
+    ".03-A",
+    "107.69"
+   ],
+   [
+    "900110002",
+    "QUALIFIED ROLLOVE",
+    "9",
+    "1314.80",
+    "0.00",
+    "98.39",
+    "0.00",
+    "95.62",
+    "95.62-X; .82-A",
+    "1412.37"
+   ],
+   [
+    "900110002",
+    "ROTH DEFERRAL",
+    "B",
+    "24412.84",
+    "0.00",
+    "1946.76",
+    "0.00",
+    "993.92",
+    "16.87-A",
+    "27336.65"
+   ]
+  ],
+  "VEST": [
+   [
+    "SSN",
+    "Source Name",
+    "Source Code",
+    "Vested Pct",
+    "Vested Amt"
+   ],
+   [
+    "900110001",
+    "EMPLOYEE SAL",
+    "A",
+    "100.00",
+    "0.00"
+   ],
+   [
+    "900110001",
+    "ROTH DEFERRA",
+    "B",
+    "100.00",
+    "107.69"
+   ],
+   [
+    "900110001",
+    "EMPLOYER SAF",
+    "V",
+    "100.00",
+    "107.69"
+   ],
+   [
+    "900110002",
+    "QUALIFIED RO",
+    "9",
+    "100.00",
+    "1412.37"
+   ],
+   [
+    "900110002",
+    "EMPLOYEE SAL",
+    "A",
+    "100.00",
+    "0.00"
+   ],
+   [
+    "900110002",
+    "ROTH DEFERRA",
+    "B",
+    "100.00",
+    "27974.67"
+   ],
+   [
+    "900110002",
+    "EMPLOYER SAF",
+    "V",
+    "100.00",
+    "27981.00"
+   ]
+  ],
+  "DISB": [
+   [
+    "SSN",
+    "Name",
+    "ID",
+    "Fund Code",
+    "Fund Name",
+    "Source Code",
+    "Source Name",
+    "Account Value",
+    "Amount Forfeited",
+    "Amount Due Participant",
+    "Payment Amount",
+    "Payment Type",
+    "Amount Deferred",
+    "Value Of Shares Distr",
+    "Shares Distrib",
+    "Shares Sold Forf",
+    "Cost Basis"
+   ],
+   [
+    "900110001",
+    "SAMPLE, ALPHA",
+    "BEA",
+    "BE",
+    "",
+    "A",
+    "",
+    "0.00",
+    "0.00",
+    "0.00",
+    "0.00",
+    "C",
+    "0.00",
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "900110001",
+    "SAMPLE, ALPHA",
+    "BUB",
+    "BU",
+    "HAND BEN TR",
+    "B",
+    "ROTH DEFERRAL",
+    "107.69",
+    "0.00",
+    "107.69",
+    "107.69",
+    "C",
+    "0.00",
+    "",
+    "",
+    "8.6829",
+    "86.80"
+   ],
+   [
+    "900110001",
+    "SAMPLE, ALPHA",
+    "BUV",
+    "BU",
+    "HAND BEN TR",
+    "V",
+    "EMPLOYER SAFE HAR",
+    "107.69",
+    "0.00",
+    "107.69",
+    "107.69",
+    "C",
+    "0.00",
+    "",
+    "",
+    "8.6830",
+    "86.80"
+   ],
+   [
+    "900110002",
+    "SAMPLE, BRAVO J",
+    "B1A",
+    "B1",
+    "",
+    "A",
+    "",
+    "18523.95",
+    "0.00",
+    "18523.95",
+    "18523.95",
+    "C",
+    "0.00",
+    "",
+    "",
+    "1454.3671",
+    "15426.99"
+   ],
+   [
+    "900110002",
+    "SAMPLE, BRAVO J",
+    "B1V",
+    "B1",
+    "",
+    "V",
+    "EMPLOYER SAFE HAR",
+    "18380.43",
+    "0.00",
+    "18380.43",
+    "18380.43",
+    "C",
+    "0.00",
+    "",
+    "",
+    "1443.0990",
+    "15309.07"
+   ]
+  ],
+  "LOANRPT": [
+   [
+    "Part Id",
+    "Loan Number",
+    "Inact. Reason",
+    "Issue Date",
+    "Next Payment Date",
+    "Prev Payment Date",
+    "Original Amt.",
+    "Current Bal.",
+    "Interest Rate",
+    "Payment Amt.",
+    "Payment Freq.",
+    "Payoff Date"
+   ],
+   [
+    "900-11-0002",
+    "1",
+    "1 Normal Payoff",
+    "05/29/2020",
+    "",
+    "05/17/2022",
+    "2500",
+    "0",
+    "0.0425",
+    "17.09",
+    "7 Weekly",
+    "06/01/2023"
+   ],
+   [
+    "900-11-0002",
+    "2",
+    "",
+    "05/19/2022",
+    "10/23/2026",
+    "10/19/2026",
+    "10416.43",
+    "699.39",
+    "0.05",
+    "45.31",
+    "7 Weekly",
+    "05/14/2027"
+   ],
+   [
+    "900-11-0001",
+    "1",
+    "3 Defaulted",
+    "03/02/2019",
+    "",
+    "08/14/2020",
+    "2000",
+    "512.40",
+    "0.065",
+    "25.00",
+    "7 Weekly",
+    "03/02/2024"
+   ]
+  ],
+  "LOAN_HEADER": [
+   [
+    "Social Security Number",
+    "Participant Name",
+    "Loan Number",
+    "Loan Amount",
+    "Loan Start Date",
+    "Loan Frequency",
+    "Payment",
+    "Outstanding Loan Balance",
+    "Status",
+    "Default Date",
+    "Deemed Amount",
+    "Interest Rate",
+    "Final Payoff Date"
+   ],
+   [
+    "900110002",
+    "SAMPLE, BRAVO J",
+    "1",
+    2500,
+    43980,
+    "Weekly",
+    17.09,
+    0,
+    "",
+    "",
+    0,
+    0.0425,
+    45078
+   ],
+   [
+    "900110002",
+    "SAMPLE, BRAVO J",
+    "2",
+    10416.43,
+    44700,
+    "Weekly",
+    45.31,
+    699.39,
+    "",
+    "",
+    0,
+    0.05,
+    46521
+   ],
+   [
+    "900110001",
+    "SAMPLE, ALPHA",
+    "1",
+    2000,
+    43526,
+    "Weekly",
+    25,
+    512.4,
+    "Defaulted",
+    44057,
+    512.4,
+    0.065,
+    45353
+   ]
+  ],
+  "LOANSRC": [
+   [
+    "SSN",
+    "Name",
+    "Loan Number",
+    "Fund Code",
+    "Source Code",
+    "Source Name",
+    "Loan Balance",
+    "Note"
+   ],
+   [
+    "900110002",
+    "SAMPLE, BRAVO J",
+    "2",
+    "90",
+    "9",
+    "QUALIFIED ROLLOVE",
+    "61.37",
+    ""
+   ],
+   [
+    "900110002",
+    "SAMPLE, BRAVO J",
+    "2",
+    "90",
+    "B",
+    "ROTH DEFERRAL",
+    "638.02",
+    ""
+   ]
+  ],
+  "ALLOCBASE": [
+   [
+    "SSN",
+    "Name",
+    "Fund ID",
+    "Fund Code",
+    "Fund Name",
+    "Trans Code",
+    "Base Amount",
+    "Allocation Amount",
+    "Total Base Amount",
+    "Total Allocation Amount"
+   ],
+   [
+    "900110001",
+    "SAMPLE, ALPHA",
+    "BU*",
+    "BU",
+    "HAND BEN TR",
+    "247",
+    "181002.01",
+    "14462.05",
+    "181002.01",
+    "14462.05"
+   ],
+   [
+    "900110002",
+    "SAMPLE, BRAVO J",
+    "BU*",
+    "BU",
+    "HAND BEN TR",
+    "247",
+    "3855.86",
+    "308.09",
+    "3855.86",
+    "308.09"
+   ]
+  ]
+ }
+}
