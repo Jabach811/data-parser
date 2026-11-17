@@ -6,6 +6,13 @@
 - `Workbook Studio - Demo.html` is the training copy with a fictional Fidelity case preloaded. Never edit it by hand. After any change to the app, rebuild it with `node tools/build-demo.cjs`.
 - `Archive/` holds the retired main app (`Data Parser App.html`), the old Workbook Studio build pieces and the old design concepts. Don't edit or rebuild anything in there.
 
+## Update log
+The app keeps two update logs, both shown in the app under What's new:
+- `CHANGELOG.md` is the technical one, in standard Keep a Changelog form. Every change gets an entry under [Unreleased], sorted into Added, Changed, Fixed or Removed, with the specifics a developer would want.
+- `WHATS-NEW.md` is the plain-language one for the team. Every change gets a short, general line under "Newest changes", sorted into New, Better or Fixed. No jargon.
+
+After editing either log, run `node tools/build-update-log.cjs` to copy both into the app, then rebuild the demo. When Joel calls a release, turn the unreleased section of both logs into a numbered, dated version.
+
 ## Check every change
 After changing the app, run the vendor checks from the `tests` folder: `npm test`. Each vendor sample in `Test Samples/Vendor Files` is run through the app, and every exported sheet is compared with its saved known-good copy in `tests/expected`. Any difference fails the check.
 

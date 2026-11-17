@@ -2255,6 +2255,20 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
 .mc-diag{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px}
 .mc-diag p{margin:0}
 .mc-diag pre{margin:0;padding:12px;width:100%;box-sizing:border-box;overflow:auto;border-radius:4px;background:var(--surface-2);font:12px/1.5 var(--font-mono,Consolas,monospace);white-space:pre-wrap}
+
+/* What's new: the plain and technical update logs, copied in by tools/build-update-log.cjs. */
+.ws-whats-new+#settingsBtn{margin-left:4px}
+.wn-dialog{width:min(820px,calc(100vw - 32px));height:calc(100vh - 48px)}
+.wn-dialog .mc-tabs{margin:14px 24px 0}
+.wn-body{flex:1;min-height:0;overflow:auto;padding:0 24px 32px;line-height:1.55}
+.wn-body h3{margin:28px 0 2px;font:600 17px/1.3 var(--font-ui)}
+.wn-body h4{margin:16px 0 4px;font:600 13px/1.3 var(--font-ui);color:var(--ink-3)}
+.wn-body p{margin:6px 0;max-width:72ch}
+.wn-body h3+p{margin-top:2px;color:var(--ink-2)}
+.wn-body ul{margin:4px 0;padding-left:20px;max-width:72ch}
+.wn-body li{margin:5px 0}
+.wn-body li.wn-sub{margin-left:20px;list-style:circle}
+.wn-body code{padding:1px 4px;border-radius:3px;background:var(--surface-2);font:12.5px var(--font-mono,Consolas,monospace)}
 </style>
 </head>
 <body class="pal-navy app-edition ms-app" data-concept="workbook">
@@ -17785,6 +17799,11 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
      Merger Comparison Document (a signed PDF). They are reduced to the handful of
      tables a de-conversion consultant actually works from rather than dumped whole. */
   var PLANDOCS_LAYOUTS = {
+    DCSUMMARY: [
+      { header: "Topic", type: "text" }, { header: "Field", type: "text" },
+      { header: "Answer", type: "text" }, { header: "Cite", type: "text" },
+      { header: "Requested Changes / Confirmed", type: "text" }
+    ],
     PLANFACTS: [
       { header: "Document", type: "text" }, { header: "Tab", type: "text" },
       { header: "Row", type: "text" }, { header: "Item", type: "text" },
@@ -17822,6 +17841,7 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
   };
 
   var PLANDOCS_REPORT_NAMES = {
+    DCSUMMARY: "DC Summary",
     PLANFACTS: "Plan Facts and Conversion Details",
     SRCMAP: "Source Mapping",
     PROVISIONS: "Plan Provisions",
@@ -17843,7 +17863,7 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
       layouts: {},
       customFolderParser: parsePlanDocuments
     };
-    var order = ["PLANFACTS", "SRCMAP", "PROVISIONS", "MERGERCMP", "CHECKLIST", "SUBPACK"];
+    var order = ["DCSUMMARY", "PLANFACTS", "SRCMAP","PROVISIONS", "MERGERCMP", "CHECKLIST", "SUBPACK"];
     for (var i = 0; i < order.length; i += 1) {
       config.reports.push(order[i]);
       config.reportNames[order[i]] = PLANDOCS_REPORT_NAMES[order[i]];
@@ -26155,19 +26175,25 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
       }
     }
     if (header < 0) { return false; }
+    // The table runs Source | box | Active or Frozen twice side by side, so each
+    // ticked box takes its name from the left and its status from the right.
+    var picked = [];
     for (var i = header + 1; i < rows.length; i += 1) {
-      var name = planDocsCellText(rows[i], 0);
-      if (!name) { continue; }
-      var ticked = false;
       for (var k = 1; k < rows[i].length; k += 1) {
-        var lines = rows[i][k].lines;
-        for (var n = 0; n < lines.length; n += 1) {
-          if (lines[n].box === "X") { ticked = true; }
-        }
+        var ticked = rows[i][k].lines.some(function (line) { return line.box === "X"; });
+        if (!ticked) { continue; }
+        var name = "";
+        for (var left = k - 1; left >= 0 && !name; left -= 1) { name = planDocsCellText(rows[i], left); }
+        var status = planDocsCellText(rows[i], k + 1);
+        if (!/^(?:active|frozen)/i.test(status)) { status = ""; }
+        name = name.replace(/:$/, "");
+        state.rows.PLANFACTS.push(["Plan Review Document", "Contribution Types", "", name, status, "", ""]);
+        state.accepted += 1;
+        picked.push(name + (status ? " (" + status + ")" : ""));
       }
-      if (!ticked) { continue; }
-      state.rows.PLANFACTS.push(["Plan Review Document", "Contribution Types", "",
-        name.replace(/:$/, ""), planDocsCellText(rows[i], rows[i].length - 1), "", ""]);
+    }
+    if (picked.length) {
+      state.rows.DCSUMMARY.push(["Sources", "Contribution types in the plan", picked.join("; "), "", ""]);
       state.accepted += 1;
     }
     return true;
@@ -26178,7 +26204,7 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
   function planDocsPrdAccountFacts(tables, state) {
     var wanted = [
       { label: /^account number/i, name: "Account Number" },
-      { label: /^effective date$/i, name: "Effective Date" }
+      { label: /^effective date(?: with transamerica)?:?$/i, name: "Effective Date" }
     ];
     var taken = {};
     for (var t = 0; t < tables.length; t += 1) {
@@ -26186,8 +26212,22 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
         var cells = tables[t][r];
         for (var c = 0; c < cells.length; c += 1) {
           var text = planDocsCellText(cells, c);
+          var cellLines = cells[c].lines;
           for (var w = 0; w < wanted.length; w += 1) {
-            if (taken[wanted[w].name] || !wanted[w].label.test(text)) { continue; }
+            if (taken[wanted[w].name]) { continue; }
+            // Some PRDs put the value on the next line of the label's own cell.
+            if (cellLines.length > 1 && wanted[w].label.test(cellLines[0].text)) {
+              var below = [];
+              for (var b = 1; b < cellLines.length; b += 1) { if (cellLines[b].text) { below.push(cellLines[b].text); } }
+              if (below.length) {
+                taken[wanted[w].name] = true;
+                state.rows.PLANFACTS.push(["Plan Review Document", "Account Information", "",
+                  wanted[w].name, below.join(" "), "", ""]);
+                state.accepted += 1;
+                continue;
+              }
+            }
+            if (!wanted[w].label.test(text)) { continue; }
             for (var v = c + 1; v < cells.length; v += 1) {
               var value = planDocsCellText(cells, v);
               if (!value || /^account information$/i.test(value)) { continue; }
@@ -26206,12 +26246,343 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
     }
   }
 
+  /* ---------- DC SUMMARY (Plan Review Document) ----------
+     One table of what a data consultant sets the plan up from, for when the
+     system is not built yet: plan basics, eligibility, service, vesting,
+     compensation, deferrals and auto enroll, loans. Each provision is a bold
+     title in the first column followed by its choices; it becomes one row with
+     the ticked choices (and any typed fill-ins) as the answer. Highlighted
+     questions and confirmations from the Requested Changes column ride along. */
+
+  var PLANDOCS_DC_TOPICS = [
+    { test: /account information|plan information/i, topic: "Plan" },
+    { test: /eligibilit/i, topic: "Eligibility" },
+    { test: /service crediting/i, topic: "Service" },
+    { test: /vesting/i, topic: "Vesting" },
+    { test: /compensation/i, topic: "Compensation" },
+    { test: /employee contributions|elective deferral/i, topic: "Deferrals" },
+    { test: /loan/i, topic: "Loans" }
+  ];
+
+  function planDocsDcTopic(numeral, heading) {
+    for (var i = 0; i < PLANDOCS_DC_TOPICS.length; i += 1) {
+      if (PLANDOCS_DC_TOPICS[i].test.test(heading)) { return PLANDOCS_DC_TOPICS[i].topic; }
+    }
+    return numeral === "I" ? "Plan" : null;
+  }
+
+  // Splits Word XML into loose stretches and top-level tables. Tables can sit
+  // inside table cells, so tags are counted by depth instead of split naively.
+  function planDocsSplitTables(xml) {
+    var parts = [];
+    var regex = /<w:tbl[\s>]|<\/w:tbl>|<w:tr[\s>]|<\/w:tr>|<w:tc[\s>]|<\/w:tc>/g;
+    var depth = 0;
+    var at = 0;
+    var rows = null;
+    var row = null;
+    var cellStart = 0;
+    var match;
+    while ((match = regex.exec(xml)) !== null) {
+      var tag = match[0];
+      if (tag.indexOf("<w:tbl") === 0) {
+        if (depth === 0) {
+          if (match.index > at) { parts.push({ table: false, xml: xml.slice(at, match.index) }); }
+          rows = [];
+        }
+        depth += 1;
+      } else if (tag === "</w:tbl>") {
+        depth -= 1;
+        if (depth === 0) { parts.push({ table: true, rows: rows }); at = match.index + tag.length; }
+      } else if (depth !== 1) {
+        continue;
+      } else if (tag.indexOf("<w:tr") === 0) {
+        row = [];
+      } else if (tag === "</w:tr>") {
+        if (row) { rows.push(row); }
+        row = null;
+      } else if (tag.indexOf("<w:tc") === 0) {
+        cellStart = xml.indexOf(">", match.index) + 1;
+      } else if (row) {
+        row.push(xml.slice(cellStart, match.index));
+      }
+    }
+    if (at < xml.length) { parts.push({ table: false, xml: xml.slice(at) }); }
+    return parts;
+  }
+
+  var PLANDOCS_DC_SYM_ON = /^F0(?:FE|FD|78)$/i;
+  var PLANDOCS_DC_SYM_OFF = /^F0(?:6F|A8|A1|71)$/i;
+
+  /* One paragraph -> one line: its text with fill-ins inline, the text before
+     the first tick box ("lead"), each tick box with the label after it, and
+     whether it is bold (a provision title) or highlighted (a question/answer). */
+  function planDocsDcLine(pXml) {
+    var tokens = [];
+    var runRegex = /<w:r(?:\s[^>]*)?>([\s\S]*?)<\/w:r>/g;
+    var pieceRegex = /<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>|<w:tab\s*\/>|<w:sym\b[^>]*\/>/g;
+    var pendingText = false;
+    var capturing = null;
+    var run;
+    while ((run = runRegex.exec(pXml)) !== null) {
+      var body = run[1];
+      var props = (/<w:rPr>([\s\S]*?)<\/w:rPr>/.exec(body) || ["", ""])[1];
+      var bold = /<w:b(?:\s+w:val="(?:1|true|on)")?\s*\/>/.test(props);
+      var marked = /<w:highlight\s+w:val="(?!none")/.test(props) ||
+        /<w:shd\b[^>]*w:fill="(?!auto"|FFFFFF")[0-9A-F]{6}"/i.test(props);
+      var ff = /<w:ffData>[\s\S]*?<\/w:ffData>/.exec(body);
+      if (ff) {
+        if (/<w:checkBox>/.test(ff[0])) { tokens.push({ kind: "check", on: planDocsSubPackTicked(ff[0]) }); }
+        else if (/<w:textInput/.test(ff[0])) { pendingText = true; }
+        continue;
+      }
+      if (/w:fldCharType="separate"/.test(body)) {
+        if (pendingText) { capturing = { kind: "typed", raw: "", bold: false, marked: false }; pendingText = false; }
+        continue;
+      }
+      if (/w:fldCharType="end"/.test(body)) {
+        if (capturing) { tokens.push(capturing); capturing = null; }
+        continue;
+      }
+      if (/<w:instrText/.test(body)) { continue; }
+      var piece;
+      pieceRegex.lastIndex = 0;
+      while ((piece = pieceRegex.exec(body)) !== null) {
+        var raw = "";
+        if (piece[0].indexOf("<w:tab") === 0) { raw = "\t"; }
+        else if (piece[0].indexOf("<w:sym") === 0) {
+          var code = (/w:char="([0-9A-F]+)"/i.exec(piece[0]) || ["", ""])[1];
+          if (PLANDOCS_DC_SYM_ON.test(code) || PLANDOCS_DC_SYM_OFF.test(code)) {
+            tokens.push({ kind: "check", on: PLANDOCS_DC_SYM_ON.test(code) });
+          }
+          continue;
+        } else { raw = xmlDecode(piece[1]); }
+        if (capturing) {
+          capturing.raw += raw;
+          capturing.bold = capturing.bold || bold;
+          capturing.marked = capturing.marked || marked;
+          continue;
+        }
+        var bits = raw.split(/([☐☑☒])/);
+        for (var b = 0; b < bits.length; b += 1) {
+          if (/^[☐☑☒]$/.test(bits[b])) { tokens.push({ kind: "check", on: bits[b] !== "☐" }); }
+          else if (bits[b]) { tokens.push({ kind: "text", raw: bits[b], bold: bold, marked: marked }); }
+        }
+      }
+    }
+    var line = { raw: "", lead: "", options: [], typed: [], bold: null, marked: false };
+    for (var t = 0; t < tokens.length; t += 1) {
+      var token = tokens[t];
+      if (token.kind === "check") { line.options.push({ on: token.on, label: "" }); continue; }
+      var shown = planDocsClean(token.raw);
+      if (shown) {
+        if (line.bold === null) { line.bold = token.bold; }
+        if (token.marked) { line.marked = true; }
+      }
+      if (token.kind === "typed") {
+        if (shown) { line.typed.push(shown); }
+        token.raw = shown;
+      }
+      line.raw += token.raw;
+      if (line.options.length) { line.options[line.options.length - 1].label += token.raw; }
+      else { line.lead += token.raw; }
+    }
+    line.text = planDocsDcTidy(line.raw);
+    line.lead = planDocsDcTidy(line.lead);
+    line.bold = !!line.bold;
+    line.cells = line.raw.split("\t").map(planDocsDcTidy);
+    for (var o = 0; o < line.options.length; o += 1) { line.options[o].label = planDocsDcTidy(line.options[o].label); }
+    return line;
+  }
+
+  function planDocsDcTidy(value) {
+    return planDocsClean(value).replace(/(\d)\s+%/g, "$1%").replace(/\$\s+(\d)/g, "$$$1");
+  }
+
+  // A cell -> its lines. A table nested in the cell becomes one line per row,
+  // with its cells tab-separated like a tabbed grid.
+  function planDocsDcCellLines(cellXml) {
+    var lines = [];
+    function addParagraphs(xml) {
+      xml = xml.replace(/<w:(?:br|cr)(?:\s+w:type="textWrapping")?\s*\/>/g, "</w:r></w:p><w:p><w:r>");
+      var regex = /<w:p(?:\s[^>]*)?>([\s\S]*?)<\/w:p>/g;
+      var found;
+      while ((found = regex.exec(xml)) !== null) {
+        var line = planDocsDcLine(found[1]);
+        if (line.text || line.options.length) { lines.push(line); }
+      }
+    }
+    var parts = planDocsSplitTables(cellXml);
+    for (var p = 0; p < parts.length; p += 1) {
+      if (!parts[p].table) { addParagraphs(parts[p].xml); continue; }
+      for (var r = 0; r < parts[p].rows.length; r += 1) {
+        var joined = parts[p].rows[r].map(function (cell) {
+          return cell.replace(/<w:pPr>[\s\S]*?<\/w:pPr>/g, "")
+            .replace(/<\/w:p>\s*<w:p(?:\s[^>]*)?>/g, "<w:r><w:tab/></w:r>")
+            .replace(/<\/?w:p(?:\s[^>]*)?>/g, "");
+        }).join("<w:r><w:tab/></w:r>");
+        addParagraphs("<w:p>" + joined + "</w:p>");
+      }
+    }
+    return lines;
+  }
+
+  // A line read as an answer: "Lead: picked" when it has tick boxes, else its text.
+  function planDocsDcLineAnswer(line) {
+    if (!line.options.length) { return line.text; }
+    var picked = [];
+    for (var o = 0; o < line.options.length; o += 1) {
+      if (line.options[o].on && line.options[o].label) { picked.push(line.options[o].label); }
+    }
+    if (!picked.length) { return ""; }
+    return line.lead ? line.lead.replace(/:?$/, ":") + " " + picked.join(", ") : picked.join(", ");
+  }
+
+  function planDocsDcField(text) {
+    return text.replace(/\s*\([^)]{25,}\)\s*/g, " ").replace(/\s*:\s*$/, "").trim();
+  }
+
+  // The vesting grid lists schedules by option number; each contribution type
+  // then names an option. Read both so every row says the actual schedule.
+  function planDocsDcVesting(block) {
+    var schedules = {};
+    var rows = [];
+    var i;
+    for (i = 0; i < block.lines.length; i += 1) {
+      var grid = /^(\d+)\.$/.exec(block.lines[i].cells[0]) || /^(\d+)\.\s+(.+)$/.exec(block.lines[i].cells[0]);
+      if (!grid) { continue; }
+      var steps = (grid[2] ? [grid[2]] : []).concat(block.lines[i].cells.slice(1));
+      steps = steps.filter(function (step) { return step && step !== "%"; });
+      if (steps.length) { schedules[grid[1]] = steps.join(" / "); }
+    }
+    for (i = 0; i < block.lines.length; i += 1) {
+      var line = block.lines[i];
+      if (/^\d+\./.test(line.cells[0]) || !line.typed.length) { continue; }
+      var option = line.typed[line.typed.length - 1];
+      if (!/^\d+$/.test(option)) { continue; }
+      var name = planDocsDcField(line.cells[0].replace(/\s*\(i\.e\.[^)]*\)/i, ""));
+      rows.push(["Vesting schedule - " + name,
+        "Option " + option + (schedules[option] ? ": " + schedules[option] : "")]);
+    }
+    return rows;
+  }
+
+  function planDocsDcBlockRows(block) {
+    var title = block.title;
+    var field = "";
+    var parts = [];
+    var anyBox = false;
+    if (title) {
+      if (title.options.length) {
+        anyBox = true;
+        field = planDocsDcField(title.lead);
+        var own = planDocsDcLineAnswer(title);
+        if (own) { parts.push(own.slice(title.lead ? title.lead.replace(/:?$/, ":").length + 1 : 0)); }
+      } else {
+        var colon = title.text.indexOf(":");
+        if (colon > 0 && colon < title.text.length - 1) {
+          field = planDocsDcField(title.text.slice(0, colon));
+          parts.push(title.text.slice(colon + 1).trim());
+        } else {
+          field = planDocsDcField(title.text);
+        }
+      }
+    }
+    if (/^vesting schedules?$/i.test(field)) {
+      var vesting = planDocsDcVesting(block);
+      if (vesting.length) { return vesting; }
+    }
+    for (var i = 0; i < block.lines.length; i += 1) {
+      if (block.lines[i].options.length) { anyBox = true; }
+    }
+    for (var k = 0; k < block.lines.length; k += 1) {
+      var line = block.lines[k];
+      if (line.options.length) {
+        var answer = planDocsDcLineAnswer(line);
+        if (answer) { parts.push(answer); }
+      } else if (!anyBox || ((line.typed.length || /\d/.test(line.text)) && !/^\(/.test(line.text))) {
+        parts.push(line.text);
+      }
+    }
+    if (!parts.length) { return []; }
+    return [[field, parts.join("; ")]];
+  }
+
+  // Lines from the Comments / Requested Changes columns worth carrying: anything
+  // highlighted, ticked or typed in.
+  function planDocsDcNotes(cellXml, everything) {
+    if (!cellXml) { return []; }
+    var lines = planDocsDcCellLines(cellXml);
+    var notes = [];
+    for (var i = 0; i < lines.length; i += 1) {
+      var line = lines[i];
+      var ticked = line.options.some(function (option) { return option.on; });
+      if (!line.marked && !(everything && (ticked || line.typed.length))) { continue; }
+      var text = planDocsDcLineAnswer(line);
+      if (text) { notes.push(text); }
+    }
+    return notes;
+  }
+
+  function planDocsReadDcSummary(xml, state) {
+    var parts = planDocsSplitTables(String(xml || ""));
+    var topic = null;
+    for (var p = 0; p < parts.length; p += 1) {
+      if (!parts[p].table) { continue; }
+      var rows = parts[p].rows;
+      for (var r = 0; r < rows.length; r += 1) {
+        var cells = rows[r];
+        if (!cells.length || cells.length > 5) { continue; }
+        var lines = planDocsDcCellLines(cells[0]);
+        if (lines.length && /^current plan provisions/i.test(lines[0].text)) { continue; }
+        var blocks = [];
+        var current = null;
+        for (var i = 0; i < lines.length; i += 1) {
+          var line = lines[i];
+          var roman = /^([IVXL]+)\.\s+(\S.*)$/.exec(line.text);
+          if (roman && !line.options.length) {
+            topic = planDocsDcTopic(roman[1], roman[2]);
+            current = null;
+            continue;
+          }
+          if (!topic || /^note\b/i.test(line.text)) { continue; }
+          if (!current || (line.bold && (!line.options.length || !line.options[0].label || line.lead))) {
+            current = { topic: topic, title: line.bold || !line.options.length ? line : null, lines: [] };
+            if (!current.title) { current.lines.push(line); }
+            blocks.push(current);
+          } else {
+            current.lines.push(line);
+          }
+        }
+        if (!blocks.length) { continue; }
+        var cite = cells.length > 1 ? planDocsDcTidy(planDocsDcCellLines(cells[1]).map(function (l) { return l.text; }).join(" ")) : "";
+        var notes = planDocsDcNotes(cells[2], false).concat(planDocsDcNotes(cells[3], true)).join(" | ");
+        var emitted = 0;
+        for (var b = 0; b < blocks.length; b += 1) {
+          var found = planDocsDcBlockRows(blocks[b]);
+          for (var f = 0; f < found.length; f += 1) {
+            var shownTopic = blocks[b].topic;
+            if (shownTopic === "Deferrals" && /automatic|escalat|\bq?e?aca\b/i.test(found[f][0])) { shownTopic = "Auto Enroll"; }
+            state.rows.DCSUMMARY.push([shownTopic, found[f][0], found[f][1], cite, emitted ? "" : notes]);
+            state.accepted += 1;
+            emitted += 1;
+          }
+        }
+        if (!emitted && notes) {
+          var heading = blocks[0].title ? planDocsDcField(blocks[0].title.text) : "";
+          state.rows.DCSUMMARY.push([blocks[0].topic, heading, "", cite, notes]);
+          state.accepted += 1;
+        }
+      }
+    }
+  }
+
   async function planDocsReadPrd(file, state) {
     var entries = await readZipEntries(await readFileAsArrayBuffer(file));
     var xml = decodeZipText(entries["word/document.xml"]);
     if (!xml) { throw new Error(file.name + ": no document body was found inside the file."); }
     var tables = planDocsDocxTables(xml);
     planDocsPrdAccountFacts(tables, state);
+    planDocsReadDcSummary(xml, state);
     var section = "";
     var sectionSpec = null;
     var part = "";
@@ -26715,7 +27086,7 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
 
   async function parsePlanDocuments(source, files, runId) {
     var state = {
-      rows: { PLANFACTS: [], SRCMAP: [], PROVISIONS: [], MERGERCMP: [], CHECKLIST: [], SUBPACK: [] },
+      rows: { DCSUMMARY: [], PLANFACTS: [], SRCMAP: [], PROVISIONS: [], MERGERCMP: [], CHECKLIST: [], SUBPACK: [] },
       notes: [],
       total: 0,
       accepted: 0
@@ -32790,7 +33161,7 @@ body.studio-ribbon .ws-settings :is(button,input):focus-visible{outline:2px soli
     { key: "ALIGHT", patterns: [/(?:^|[ _.-])(?:12LN|BELC|CDF|CDH|CRED|CTEL|CTSR|CVBL|DEDS|EEOR|EEST|ELEC|ESVC|FVBL|HHRT|HINC|IVEL|LOAN|OVER|PDLV|PINC|PPAT|PPCT|PPST|PRAD|PRDP|PRLT|PROP|PRQE|PRSN|PTNS|PYRT|PYSC|RCON|SBHS|WTHL|YTDC|SBAL|LN12)(?:[ _.-][^\/]*)?\.(?:txt|text|dat)$/, /(?:^|[ _-])Records\.(?:txt|text|dat)$/i, /Data[ _-]*Dictionary[^\/]*\.(?:xlsx|xlsm)$/i] },
     { key: "ALERUS", patterns: [/^(?:SERVICETERM|SERVTERM|SERVTRM)(?:BALALLOC|CONTRIB|DISBSC|DISB|LOANPMT|LPMT|HILN|LOAN|LN|PT)\b.*\.(?:csv|xlsx|xlsm)$/i, /^Participant[ _-]*Valuation[ _-]*Summary.*\.pdf$/i] },
     { key: "AMERITAS", patterns: [/^(?!\d{6}_Valuation_\d{8}\.txt$).*(?:^|[ _-])Valuation[^\/]*\.txt$/i, /^Roth[^\/]*\.txt$/i, /(?:^|[ _-])Disburse\w*[^\/]*\.txt$/i, /Check[ _-]*Register[^\/]*\.txt$/i, /^Loan[ _-]*Distribution[^\/]*\.txt$/i, /^Loan[ _-]*Report[^\/]*\.(?:xlsx|xlsm|xls|csv)$/i, /^Investments?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /^Sources?[^\/]*\.(?:xlsx|xlsm|xls|csv|txt)$/i, /Allocation[ _-]*Base[^\/]*\.txt$/i] },
-    { key: "PLANDOCS", patterns: [/Onboarding[ _-]*Package.*\.(?:xlsx|xlsm)$/i, /(?:^|[ _-])PRD(?:[ _-]|\.).*\.docx$/i, /Plan[ _-]*Review[ _-]*Document.*\.docx$/i, /Merger[ _-]*Compar\w*.*\.pdf$/i, /merger[^\/]*\.pdf$/i, /Sub(?:mission)?[ _-]*Pack\w*.*\.docx$/i, /(?:^|[ _-])spac\d*\.docx$/i] },
+    { key: "PLANDOCS", patterns: [/Onboarding[ _-]*Package.*\.(?:xlsx|xlsm)$/i, /\.docx$/i, /Merger[ _-]*Compar\w*.*\.pdf$/i, /merger[^\/]*\.pdf$/i] },
     { key: "BASEREMIT", patterns: [/base[ _-]*data.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /remit\w*.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /payroll.*\.(?:txt|text|dat|csv|xlsx|xlsm)$/i, /^\d{8}\d*[ _-]?[A-Z]{2}[\d_-]{5,}\.(?:xlsx|xls|csv|txt|text|dat)$/i] },
     { key: "MILLIMAN", patterns: [/^EXPORT\.\d{8}\.\d+(?:\.(?:txt|text|dat))?$/i, /milliman[^\/]*\.(?:txt|text|dat)$/i] },
     { key: "AMERICANFUNDS", patterns: [/^ZTR051/i] },
@@ -34944,6 +35315,410 @@ SOFTWARE.
   }
 })();
 
+</script>
+<script type="text/markdown" id="update-log-plain">
+# What's new
+
+A plain-language history of the app, newest first. Each update has a version number. A bigger first number means a bigger change.
+
+## Newest changes
+
+These are in the app now and haven't been given a version number yet.
+
+### New
+- **DC Summary from the Plan Review Document.** Load a Plan Review Document and get one clean table of how the plan is set up: eligibility, vesting, contributions, loans and more. Useful when the plan isn't built in the system yet.
+- **What's new.** This page. The app now keeps a running history of every update.
+- **Updated training video** showing all of version 1.0.
+
+## Version 1.0 — November 16, 2026
+**Workbook Studio becomes the official team app.**
+
+### New
+- **One app for everyone.** Workbook Studio is now the single app the team uses.
+- **Practice copy** with a made-up case already loaded, for training and demos.
+- **Merger compare.** Turn a merger compare PDF into a spreadsheet in one step. The file never leaves your computer.
+- **Plan documents.** Drop in a plan document and the app pulls out the key plan details for you.
+- **OneAmerica FINAL workbooks** can now be read, with a warning if the loan numbers don't add up.
+- **How it's read.** See exactly where each column comes from in the vendor's file.
+
+### Better
+- **Every update is now checked automatically** against sample files for every vendor, so a fix for one vendor can't quietly break another.
+
+## Version 0.11 — November 16, 2026
+**More control over exports.**
+
+### New
+- **Save sheets as separate files.** Each supporting sheet can save as its own file, next to the full workbook.
+- **Pick your save folder.** Choose where exports go, and the app remembers it.
+- **Loan reports for Alerus and Ameritas.**
+
+## Version 0.10 — November 9, 2026
+**Alerus is added.**
+
+### New
+- **Alerus files** can now be read, with the clean-up done for you (leading zeros, blank dates, code descriptions).
+
+### Fixed
+- Alight files sent one per record type now read correctly.
+- Roth basis numbers are corrected for vendors that send their own.
+
+## Version 0.9 — November 6, 2026
+**Prior-year totals.**
+
+### New
+- **957 Prior Year.** Read the 957 valuation PDF and get each person's yearly totals, checked against the plan total.
+- **Roth rollover split** in the Roth Basis sheet.
+
+## Version 0.8 — November 2, 2026
+**Smoother loading and a fuller preview.**
+
+### New
+- **Empower Roth Basis.**
+- **Add more files any time** without losing the ones already loaded.
+- **The preview shows everything** that will be in the export.
+
+### Better
+- Fund codes now match across every sheet.
+- The breakdown shows sources and funds side by side.
+- Paychex loans are listed once per person and loan.
+
+## Version 0.7 — October 29, 2026
+**Smarter mapping checks.**
+
+### New
+- **Conversion type.** Export asks whether it's Cash, Mapping, Transfer in kind, or a mix, and builds the right sheets.
+- **Split funds.** A fund going to several new funds is divided correctly, down to the penny.
+- **Older Excel mapping files** (.xls) are accepted.
+
+### Better
+- **Mapping checks look at the actual data,** not just the headings, and explain what's wrong.
+- **A fund missing from the mapping now stops you** instead of quietly going to cash.
+- The fund picker is clearer about what still needs attention.
+
+## Version 0.6 — October 23, 2026
+**Alight is added.**
+
+### New
+- **Alight files** can be read, with names filled in from Alight's data dictionary and a count check.
+
+## Version 0.5 — October 17–19, 2026
+**The Data Parser App.**
+
+### New
+- **A Title Page** listing everything in the workbook.
+
+### Better
+- **Case number and plan name are required** before export, and case numbers follow the house format.
+- **Skipped lines are explained,** so you know what was set aside and why.
+
+### Fixed
+- Title Page headings no longer get cut off in Excel.
+
+## Version 0.4 — October 16, 2026
+**Roth basis and rollovers.**
+
+### New
+- **Roth Basis sheet** for Ascensus.
+- **Special Rollover Breakout** for Fidelity.
+
+## Version 0.3 — August 14–16, 2026
+**Five more vendors and more complete files.**
+
+### New
+- **American Funds, Voya, TIAA, John Hancock and Principal** can be read.
+
+### Fixed
+- **Empower, ADP and Nationwide were missing columns.** Every column is now read, and ADP negative balances show correctly.
+
+### Better
+- A cleaner look across the app.
+
+## Version 0.2 — July 7, 2026
+**Version history begins.** From here on, every change is saved and tracked.
+
+## Version 0.1 — June 2026
+**The first builds.**
+
+### New
+- Export into the Transamerica workbook.
+- Mapping file checks.
+- Summary tabs for Fidelity, Newport, Empower and ADP.
+- Drop a vendor's whole set of files at once.
+</script>
+<script type="text/markdown" id="update-log-technical">
+# Changelog
+
+All notable changes to Workbook Studio (formerly Vendor Data Parser, Workbook Console, Data Parser Console and Data Parser App) are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Versions below 1.0.0 are pre-release builds reconstructed from version control history. A plain-language version of this log is in `WHATS-NEW.md`.
+
+## [Unreleased]
+
+### Added
+- Plan documents: `DCSUMMARY` ("DC Summary") output for the Plan Review Document (.docx). Parses provisions under Account/Plan Information, Eligibility, Service Crediting, Vesting, Compensation, Employee Contributions/Elective Deferrals and Loans into one row per provision, with ticked options (`w:checkBox` form fields and Wingdings `F0FE`/`F0FD`/`F078` symbols) and typed fill-ins as the answer.
+- DC Summary carries highlighted questions and confirmations from the Requested Changes / Confirmed column.
+- DC Summary reads vesting schedule tables and nested Word tables (`planDocsSplitTables`).
+- `PLANFACTS` now includes Contribution Types and Account Information rows from the Plan Review Document.
+- `Test Samples/Plan Review Documents/Practice PRD.docx`, a fictional Plan Review Document, and its generator `make-practice-prd.py`.
+- `CHANGELOG.md` and `WHATS-NEW.md`, shown in the app under What's new.
+
+### Documentation
+- Walkthrough video re-cut to 5:09 with vendor additions, How it's read, export folder and separate-files options, and Merger compare. Phone encode at CRF 30.
+
+## [1.0.0] - 2026-11-16
+
+Workbook Studio becomes the single supported app. Commit `189a226`.
+
+### Added
+- Merger compare reader (reader v1): toolbar button and drop handler for merger compare PDFs. Text extracted client-side with pdf.js 3.11.174 (cdnjs, unpkg fallback); no upload. Tabs: Summary, Source mapping, All checked items, Check these, Check this file (diagnostic report with no plan data). Excel export with Plan Provisions, Source Mapping, All Checked Items and Check These sheets.
+- Plan documents source (`PLAN DOCUMENTS`): reads the Onboarding Package (.xlsx), Plan Review Document (.docx), Submission Package and Merger Comparison PDF. Outputs `PLANFACTS`, `SRCMAP`, `PROVISIONS`, `MERGERCMP`, `CHECKLIST` and `SUBPACK`.
+- OneAmerica `G#####.FINAL.xlsx` workbook support: Part Header, Contract Term, Loan Header and Loan Fund tabs. Warning when loan fund source balances do not sum to the Loan Header balance.
+- Report layout view: How it's read / Show data toggle per report, listing start position, length and an example value for every field.
+- `Workbook Studio - Demo.html`, built by `tools/build-demo.cjs` with the fictional Fidelity special rollover sample preloaded.
+- `tests/`: Playwright vendor regression suite. Runs every fictional sample in `Test Samples/Vendor Files` through the app and diffs each exported sheet against `tests/expected`. `npm test` to run, `npm run test:update` to re-baseline.
+- `.gitattributes` disables line-ending conversion so fixed-width samples stay byte-exact.
+
+### Changed
+- `Workbook Studio.html` at the project root is the only app. Changes are made there directly; `sync-from-app.cjs` is retired.
+
+### Removed
+- `Data Parser App.html` and the Workbook Studio build pieces (`Microsoft Concepts/`, Focus variants) moved to `Archive/`.
+
+## [0.11.0] - 2026-11-16
+
+Commits `4485c09`, `8a2e320`.
+
+### Added
+- Export option to save each app-built sheet (breakdown, Balance Export, CONV FILE, basis, elections, loan reports) as its own workbook alongside the full workbook. Default on.
+- Export to a chosen folder via the File System Access API. The folder handle is remembered between sessions; falls back to Downloads.
+- Alerus Loan Header and Loan Source reports.
+- Ameritas Loan Header and Loan Source reports; Ameritas allocation file parsing.
+- Workbook Studio (Microsoft-style ribbon concept) with Demo and Focus variants, and `sync-from-app.cjs` to rebuild all four from `Data Parser App.html`.
+
+## [0.10.0] - 2026-11-09
+
+Commit `c6576f7`.
+
+### Added
+- Alerus service termination CSVs, including SERVTERM, LOAN and LOANPMT file names. Skips the title row, parses comma-grouped amounts as numbers, restores leading zeros on SSN and ZIP, blanks `00/00/00` dates, adds code descriptions from the vendor legend, and drops the SSN 1 placeholder account.
+
+### Fixed
+- Alight individual per-record files.
+- Roth basis for vendors that supply their own basis figures.
+
+## [0.9.0] - 2026-11-06
+
+Commit `1c0660c`.
+
+### Added
+- Vendor-neutral `957 PRIOR YEAR` source: reads the RPT-957 Participant Valuation Summary PDF, one row per participant with year totals, auto-detected from the PDF, with a plan-total tie-out check.
+- 957 parser captures NET ROTH.
+- Roth rollover split in Roth Basis.
+- Per-source opt-out of auto-added summary tabs.
+
+### Changed
+- Roth Basis part 1 and Fund and Source Breakdown layout.
+
+## [0.8.0] - 2026-11-02
+
+Commits `93694e4`, `2c08019`, `2adbdd9` (2026-11-03).
+
+### Added
+- Empower Roth Basis output.
+- Multi-file vendors keep earlier files when more are added; the file card accepts dropped files.
+- Preview includes export-only sheets (breakdown, Balance Export, CONV FILE, basis, elections) and refreshes after a mapping upload.
+
+### Changed
+- Empower BALANC and ALLOC fund codes drop the appended qual digit (`IA55R61` to `IA55R6`). The summary code cleaner strips only a space-separated qual, so the s- file, Balance Export, CONV and breakdown share codes.
+- Fund and Source Breakdown shows source and fund side by side; transfer-in-kind funds get their own table.
+- Paychex loan report deduplicated per participant and loan number. Loan Source dollars come from the loan report, split by LOAN-line proportions. LOAN excluded from the wire total.
+- Report tabs restored and wrap; breakdown section open by default; taller fund list in the CONV dialog.
+
+### Removed
+- Retired Console app and per-vendor parser files.
+
+## [0.7.0] - 2026-10-29
+
+Commits `a9584a4` (2026-10-28), `9cb13e1`, `b1b973e`, `24a9eef`, `fa82028`.
+
+### Added
+- Conversion type prompt on export: Cash, Mapping, Transfer in kind, or mixed. Mixed adds per-type Balance Export and CONV FILE tabs; TIK sets Re-Reg to Y.
+- Split funds: one CONV row per Fund Mapping row. Amount is fund total times split percent, with rounding remainder on the last row. TA code and Re Reg taken per row.
+- `.xls` mapping workbooks, including the Accounting-format check.
+- TR Ref No (Fund Mapping column G) validated as `YYYYMMDD` plus 6 alphanumerics and copied into the CONV Ref Number column.
+- Source I read from the Rollover row of the optional `SOURCE_I` table on the source mapping tab, with warnings when missing, ambiguous or non-numeric.
+- Principal NQ outputs and tab-name detection; John Hancock CIT Elections tabs kept.
+
+### Changed
+- Mapping tabs matched case- and spacing-insensitively (Source Map/Mapping, Fund Map/Mapping).
+- Mapping validation checks data, not headers. Header mismatches are warnings. Only uppercase `CIT` rows count; dashes are blanks.
+- Source rules: K numeric only, M 1 to 8. Fund rules: C splits sum to 1 per fund, D Y/N follows C, E sums to F, G flagged in Accounting format, T is Y/N/Yes/No.
+- Fund Mapping tab selection prefers the plain tab (or main/original/full/master/all) over variants such as "Fund Mapping TIK"; ties go to the tab with the most rows; the chosen tab is reported.
+- Fund Mapping rows count whenever a prior fund code is present. A dash prior fund code marks a new fund and is skipped.
+- A fund missing from Fund Mapping fails reconciliation instead of defaulting to cash.
+- Select funds lists TIK funds first, flags unmapped funds, and disables Continue until every fund is picked.
+- Split funds no longer reported as duplicates or ambiguous.
+
+### Fixed
+- Paychex 957 detail labels: first two characters Fund ID, last character Source ID.
+- Voya, Ameritas, Alight and Paychex parsing fixes.
+
+## [0.6.0] - 2026-10-23
+
+Commit `94e72ab`.
+
+### Added
+- Alight deconversion text files (per record type or a combined `Records.txt`) with the Data Dictionary workbook. Lines sorted by embedded record tag; codes named from the dictionary; signed amounts and implied decimals decoded; filler dates blank; repeating slots expanded to rows; Dictionary Check tab compares expected counts.
+
+## [0.5.1] - 2026-10-19
+
+Commits `3c5daa6`, `df69819`.
+
+### Changed
+- Fidelity lists unknown record codes with file and line numbers. Paychex and OneAmerica name skipped files and describe the non-data lines.
+
+### Fixed
+- Title Page blank cells were written as empty strings, which blocked headings from overflowing into the next column in Excel.
+
+## [0.5.0] - 2026-10-17
+
+Commits `a231778`, `4bfa5af`, `0a1adcb`.
+
+### Added
+- Data Parser App with a Title Page contents tab and formatted reports.
+- Fidelity PS86 summary by source beside the totals.
+
+### Changed
+- Case number and plan name required to export.
+- Case number format: T plans 6 digits + 2 spaces, others 5 digits + 3 spaces; case numbers starting with 67 accepted (6 digits, 4 spaces, 5 digits).
+- Export file name keeps case spacing and drops the "- RAW" tag; export preview shows the file name once.
+
+## [0.4.0] - 2026-10-16
+
+Commits `3959bf8` (2026-10-15), `006a9b2`, `fde41bd`.
+
+### Added
+- Data Parser Console app files.
+- Ascensus derived ROTH report and Roth Basis export sheet: SSN, Roth Tax-Free Contribution Basis and Roth Hardship Basis (ROTH Ctbns less Withdrawals), Pre-Tax Hardship Available Amount, first Roth contribution year. Plug SSNs and all-zero participants skipped.
+- Fidelity Special Rollover Breakout tab (SSN, Non-Roth, Roth, First Roth Year, Basis) when the balance file holds PS86; the source holding PS86 is treated as Roth.
+- Mock Fidelity file covering the rollover cases.
+
+### Changed
+- Fidelity fund PS86 excluded from balance totals, Fund and Source Breakdown, CONV FILE and Balance Export.
+- Roth Basis shows only the first Roth contribution year.
+- Special Rollover Breakout basis column uses Roth Gross.
+- Auto Deferrals sheet ignores "Hardship Available" columns.
+
+## [0.3.1] - 2026-08-16
+
+Commit `c66ce9d`.
+
+### Changed
+- v2/v3 UI polish passes (steel theme cleanup); vendor layout screenshots and standalone mocks added as references.
+
+## [0.3.0] - 2026-08-14
+
+Commits `38da0da`, `b0464ee`, `6204eea`, `3f1230b`.
+
+### Added
+- American Funds on the shared ZTR051 transmission spec: all nine 750-byte records, implied 2-decimal numerics with overpunch signs, `YYYYMMDD` dates, derived Calculated Hardship Basis column. Plan Service Termination summary PDF via the participant summary parser with a money-type label map.
+- T985 report; Voya/OMNI package with cross-drop file accumulation; TIAA's seven DCNV CSVs; John Hancock discontinuance workbook and its ten per-report CSV delivery.
+- Principal dual-flavor workbook parser: RIS Contract Terms ePackage (15 participant tabs) and nonqualified De-conversion file (5 core tabs), flavor detected from tab names.
+- Field guide page.
+
+### Changed
+- Main file renamed to `Vendor Data Parser.html`.
+- Empower loan record key renamed `LOANS` to `LOAN`.
+
+### Fixed
+- Fixed-width layouts rebuilt from vendor spec sheets so every vendor covers its full record width.
+  - Empower: 18 reports / 433 fields, LONBAL and VEST added, PARTS 9 to 47 fields, four lengths corrected.
+  - ADP: PH 24 to 90 fields, PF 10 to 14, IN 13 to 28, LH 15 to 24, LF 8 to 11. Sign columns kept, so negative balances no longer read as positive.
+  - Nationwide: 18 fields added to PT, 3 loan flags to LN, 1 field to PR, one MT length corrected. Newport verified unchanged.
+- Ascensus header aliases so "Social Security Number" anchors tabs.
+- Ascensus filename rule tightened so "Deconversion File" no longer matches Principal.
+
+## [0.2.0] - 2026-07-07
+
+Commits `3a34c42`, `1586478`.
+
+### Added
+- Workbook Console workspace under version control.
+
+### Removed
+- Manual app-version snapshots (preserved in the initial commit).
+
+## [0.1.0] - 2026-06
+
+Reconstructed from the `archive/app-versions` snapshots in the initial commit. Each entry is the change a "before-..." snapshot was taken for. Dates are approximate.
+
+### Added
+- Export template shape and XML workbook format (2026-06-10).
+- Mapping template validator, source mapping surface validation, and `.xlsm` mapping files (2026-06-10).
+- Fidelity summary tabs, one row per SSN (2026-06-18).
+- Loan source record lines and loan source SSN (2026-06-18).
+- Newport, Empower and ADP summary additions; vendor summary tabs (2026-06-19).
+- Vendor file picker mode (2026-06-19).
+
+### Changed
+- Report row layout and report width autofit (2026-06-10).
+- Export uses the current plan name; mapping upload made optional in the UI (2026-06-10).
+
+### Fixed
+- Fidelity record resolver regression (2026-06-10).
+</script>
+<script>
+/* What's new: shows WHATS-NEW.md (plain) and CHANGELOG.md (technical). */
+(function(){
+  'use strict';
+  const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
+  const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const inline=s=>esc(s).replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+
+  function render(md){
+    const out=[];let para=[],inList=false;
+    const endPara=()=>{if(para.length)out.push('<p>'+inline(para.join(' '))+'</p>');para=[];};
+    const endList=()=>{if(inList)out.push('</ul>');inList=false;};
+    for(const line of md.split('\n')){
+      const item=/^(\s*)- (.*)$/.exec(line);
+      if(item){endPara();if(!inList)out.push('<ul>');inList=true;out.push('<li'+(item[1]?' class="wn-sub"':'')+'>'+inline(item[2])+'</li>');continue;}
+      endList();
+      if(/^# /.test(line)){endPara();}
+      else if(/^## /.test(line)){endPara();out.push('<h3>'+inline(line.slice(3).replace(/^\[([^\]]+)\]/,'$1'))+'</h3>');}
+      else if(/^### /.test(line)){endPara();out.push('<h4>'+inline(line.slice(4))+'</h4>');}
+      else if(!line.trim())endPara();
+      else para.push(line.trim());
+    }
+    endPara();endList();
+    return out.join('');
+  }
+
+  const logs=[['Plain English','update-log-plain'],['Technical','update-log-technical']];
+  const dialog=make('dialog','mc-dialog wn-dialog');dialog.setAttribute('aria-labelledby','wn-title');
+  const head=make('header','mc-head'),title=make('h2','',"What's new"),close=make('button','mc-close','Close');
+  title.id='wn-title';close.type='button';close.addEventListener('click',()=>dialog.close());
+  head.append(title,close);
+  const tabs=make('div','mc-tabs'),body=make('div','wn-body');
+  tabs.setAttribute('role','tablist');
+  const buttons=logs.map(([label,id])=>{
+    const b=make('button','mc-tab',label);b.type='button';b.setAttribute('role','tab');
+    b.addEventListener('click',()=>{
+      buttons.forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+      body.innerHTML=render(document.getElementById(id).textContent);body.scrollTop=0;
+    });
+    return b;
+  });
+  tabs.append(...buttons);dialog.append(head,tabs,body);document.body.append(dialog);
+
+  const settings=document.getElementById('settingsBtn');
+  if(settings){
+    const b=make('button','settings-link ws-whats-new');b.type='button';
+    b.innerHTML='<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 3.5V8h4.5"/><path d="M12 7.5V12l3 2"/></svg>';
+    b.append("What's new");
+    b.addEventListener('click',()=>{buttons[0].click();dialog.showModal();});
+    settings.before(b);
+  }
+})();
 </script>
 </body>
 </html>
