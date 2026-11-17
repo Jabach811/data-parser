@@ -11,3 +11,4 @@ const html=app.replace(title,()=>'<title>Data Parser | Workbook Studio Demo</tit
 const close=html.lastIndexOf('</body>');
 fs.writeFileSync(path.join(root,'Workbook Studio - Demo.html'),html.slice(0,close)+`<script id="loaded-demo-runtime">\nconst DEMO_SAMPLE_TEXT=${json};\n${runtime}\n</script>\n`+html.slice(close));
 console.log('Built Workbook Studio - Demo.html');
+require('./build-send-folder.cjs');

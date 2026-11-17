@@ -4,6 +4,7 @@
 `Workbook Studio.html` is the team app. Make every change there, directly. Nothing else gets updated.
 
 - `Workbook Studio - Demo.html` is the training copy with a fictional Fidelity case preloaded. Never edit it by hand. After any change to the app, rebuild it with `node tools/build-demo.cjs`.
+- `Send to Work/` holds copies of everything Joel emails to work. Never edit it; `build-demo.cjs` refreshes it. When a new file needs to go to work, add it to the list in `tools/build-send-folder.cjs`.
 - `Archive/` holds the retired main app (`Data Parser App.html`), the old Workbook Studio build pieces and the old design concepts. Don't edit or rebuild anything in there.
 
 ## Update log

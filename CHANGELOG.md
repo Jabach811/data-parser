@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `PLANFACTS` now includes Contribution Types and Account Information rows from the Plan Review Document.
 - `Test Samples/Plan Review Documents/Practice PRD.docx`, a fictional Plan Review Document, and its generator `make-practice-prd.py`.
 - `CHANGELOG.md` and `WHATS-NEW.md`, shown in the app under What's new.
+- `Send to Work/` (git-ignored): copies of the app, practice copy, phone walkthrough, practice files and Excel macros under plain names. Refreshed by `tools/build-send-folder.cjs`, which `build-demo.cjs` now runs.
+
+### Changed
+- Retired training files (the Data Parser App walkthroughs and the Main File operator guide) moved to `Archive/Old Training`.
 
 ### Documentation
 - Walkthrough video re-cut to 5:09 with vendor additions, How it's read, export folder and separate-files options, and Merger compare. Phone encode at CRF 30.
